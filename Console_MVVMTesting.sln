@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.32106.194
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp4", "ConsoleApp3\ConsoleApp4.csproj", "{66AD3FB6-BC65-4842-B578-63934F6B8281}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Console_MVVMTesting", "Console_MVVMTesting\Console_MVVMTesting.csproj", "{66AD3FB6-BC65-4842-B578-63934F6B8281}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

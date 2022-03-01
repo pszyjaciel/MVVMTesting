@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "y8XhtT6hkukECnIRXbfUahvpgCktV6XI4PkisLZxdee4N4QzxxtmKtdbj9FYgIbRPY6mWd9ifKhDPuLhIGMoUw==",
+  "dgSpecHash": "g8ipx4t+Stse+rI91n8pWQRaGK8IjlU+6+UDEaNg6apj/53fjtAE1iGYcnqGkIj3SG3w+X+Y2cjO+9+XXeeaBg==",
   "success": true,
-  "projectFilePath": "c:\\Users\\pkr\\source\\repos\\Console_MVVMTesting\\ConsoleApp3\\ConsoleApp4.csproj",
+  "projectFilePath": "c:\\Users\\pkr\\source\\repos\\Console_MVVMTesting\\Console_MVVMTesting\\Console_MVVMTesting.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\pkr\\.nuget\\packages\\envdte100\\17.1.32210.191\\envdte100.17.1.32210.191.nupkg.sha512",
     "C:\\Users\\pkr\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\6.0.0\\microsoft.extensions.dependencyinjection.6.0.0.nupkg.sha512",
