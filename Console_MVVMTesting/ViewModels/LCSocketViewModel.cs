@@ -17,6 +17,7 @@ using static PInvoke.User32;
 
 
 // Way-Way is observing me!
+// Way-Way is observing me even more!
 
 // (!)messages: https://social.technet.microsoft.com/wiki/contents/articles/30939.wpf-change-tracking.aspx
 
