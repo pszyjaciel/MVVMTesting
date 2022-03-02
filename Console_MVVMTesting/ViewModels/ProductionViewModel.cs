@@ -36,6 +36,7 @@ namespace Console_MVVMTesting.ViewModels
             _loggingService.Log($"ProductionViewModel::ProductionViewModel(): InitLCMessage()  ({GetHashCode():x8})");
 
 
+            Task.WaitAll();
             _loggingService.Log(consoleColor, $"ProductionViewModel::ProductionViewModel(): End of constructor  ({this.GetHashCode():x8})");
         }
         #endregion

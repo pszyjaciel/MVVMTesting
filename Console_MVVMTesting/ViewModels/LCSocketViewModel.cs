@@ -35,9 +35,9 @@ namespace Console_MVVMTesting.ViewModels
         private ConcurrentQueue<string> commandQueue;
 
         private Socket _terminalSocket = null;
-        private Socket _terminalSocket1 = null;
-        private Socket _terminalSocket2 = null;
-        private Socket _terminalSocket3 = null;
+        //private Socket _terminalSocket1 = null;
+        //private Socket _terminalSocket2 = null;
+        //private Socket _terminalSocket3 = null;
 
         private IPAddress _ipAddress = null;
         private byte[] _receiveBuffer = null;
@@ -60,11 +60,11 @@ namespace Console_MVVMTesting.ViewModels
 
         public bool IsConnected()
         {
-            _log.Log($"LCSocketViewModel::IsConnected(): ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
+            _log.Log(consoleColor, $"LCSocketViewModel::IsConnected(): ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
 
             if (_terminalSocket is null)
             {
-                _log.Log($"LCSocketViewModel::IsConnected(): _terminalSocket is null");
+                _log.Log(consoleColor, $"LCSocketViewModel::IsConnected(): _terminalSocket is null");
                 return false;
             }
 
@@ -80,7 +80,7 @@ namespace Console_MVVMTesting.ViewModels
                 //_dispatcherQueue.TryEnqueue(() => { XamlBtnConnectSocketBackground = new SolidColorBrush(Colors.LightPink); });
             }
 
-            _log.Log($"LCSocketViewModel::IsConnected(): Socket status: {connected}");
+            _log.Log(consoleColor, $"LCSocketViewModel::IsConnected(): Socket status: {connected}");
             return connected;
         }
 
@@ -98,7 +98,7 @@ namespace Console_MVVMTesting.ViewModels
         /// works in a new first-level Thread
         private bool IsHostnameValid(string hostname)
         {
-            _log.Log($"LCSocketViewModel::IsHostnameValid(): ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
+            _log.Log(consoleColor, $"LCSocketViewModel::IsHostnameValid(): ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
 
             bool valid = true;
 
@@ -124,7 +124,7 @@ namespace Console_MVVMTesting.ViewModels
         #region ResolveIp
         private IPAddress ResolveIp(string host)
         {
-            _log.Log($"LCSocketViewModel::ResolveIp(): ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
+            _log.Log(consoleColor, $"LCSocketViewModel::ResolveIp(): ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
             IPAddress ip = null;
 
             if (IsHostnameValid(host))
@@ -162,7 +162,7 @@ namespace Console_MVVMTesting.ViewModels
         /// </summary>
         private string ParseResponseData(String data)
         {
-            _log.Log($"LCSocketViewModel::ParseResponseData()");
+            _log.Log(consoleColor, $"LCSocketViewModel::ParseResponseData()");
             //_log.Log( $"LCSocketViewModel::ParseResponseData(): data: {data}");
             //MyUtils.DisplayStringInBytes(data);
 
@@ -189,7 +189,7 @@ namespace Console_MVVMTesting.ViewModels
             //while (parsedData != tmp);
 
             // this @ (0x40) can be treated as a heartbeat
-            //_log.Log($"SocketViewModel::ParseResponseData(): parsedData:\n{parsedData}\n");
+            //_log.Log(consoleColor, $"SocketViewModel::ParseResponseData(): parsedData:\n{parsedData}\n");
             //MyUtils.DisplayStringInBytes(parsedData);
             return parsedData;
         }
@@ -201,7 +201,7 @@ namespace Console_MVVMTesting.ViewModels
         #region Socket Callbacks
         private void ReceiveCallBack(IAsyncResult ar)
         {
-            _log.Log($"LCSocketViewModel::ReceiveCallBack1(): ThreadId: {Thread.CurrentThread.ManagedThreadId}");
+            _log.Log(consoleColor, $"LCSocketViewModel::ReceiveCallBack1(): ThreadId: {Thread.CurrentThread.ManagedThreadId}");
 
             if (_closingDown)
                 return;
@@ -211,8 +211,8 @@ namespace Console_MVVMTesting.ViewModels
                 StateObject state = (StateObject)ar.AsyncState;
                 //Socket client = state.terminalSocket; // wywala
 
-                int receivedBytes = _terminalSocket1.EndReceive(ar); //   Ends a pending asynchronous read.
-                _log.Log($"LCSocketViewModel::ReceiveCallBack1(): receivedBytes: {receivedBytes }");
+                int receivedBytes = _terminalSocket.EndReceive(ar); //   Ends a pending asynchronous read.
+                _log.Log(consoleColor, $"LCSocketViewModel::ReceiveCallBack1(): receivedBytes: {receivedBytes }");
                 if (receivedBytes == 0)
                 {
                     string dt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
@@ -231,31 +231,31 @@ namespace Console_MVVMTesting.ViewModels
                 //MyUtils.DisplayStringInBytes(text);
 
                 text = ParseResponseData(text);
-        
+
                 if (!String.IsNullOrEmpty(text))
                 {
                     _composedResponse += "\r\n\r\n" + text;
                     ResponseReceivedEvent.Set();
                 }
-                Array.Resize(ref _receiveBuffer, _terminalSocket1.ReceiveBufferSize);
+                Array.Resize(ref _receiveBuffer, _terminalSocket.ReceiveBufferSize);
 
                 // Get ready to receive new data (obs. callback is recursive function)
-                _terminalSocket1.BeginReceive(_receiveBuffer, 0, _receiveBuffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallBack), null);
+                _terminalSocket.BeginReceive(_receiveBuffer, 0, _receiveBuffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallBack), null);
             }
             catch (SocketException se)
             {
-                _log.Log($"LCSocketViewModel::ReceiveCallBack1(): {se.Message}");
+                _log.Log(consoleColor, $"LCSocketViewModel::ReceiveCallBack1(): {se.Message}");
             }
             catch (ObjectDisposedException ode)
             {
                 String msg = String.Format("{0}", ode.Message);
-                _log.Log($"LCSocketViewModel::ReceiveCallBack1(): {ode.Message}");
+                _log.Log(consoleColor, $"LCSocketViewModel::ReceiveCallBack1(): {ode.Message}");
             }
             catch (Exception ex)
             {
-                _log.Log($"LCSocketViewModel::ReceiveCallBack1(): {ex.Message}");
+                _log.Log(consoleColor, $"LCSocketViewModel::ReceiveCallBack1(): {ex.Message}");
             }
-            _log.Log($"LCSocketViewModel::ReceiveCallBack1(): end of method.");
+            _log.Log(consoleColor, $"LCSocketViewModel::ReceiveCallBack1(): end of method.");
         }
 
 
@@ -264,15 +264,15 @@ namespace Console_MVVMTesting.ViewModels
             _log.Log("LCSocketViewModel::SendCallBack()");
             try
             {
-                int bytesSend = _terminalSocket1.EndSend(ar);
+                int bytesSend = _terminalSocket.EndSend(ar);
             }
             catch (SocketException se)
             {
-                _log.Log($"LCSocketViewModel::SendCallBack: {se.Message}");
+                _log.Log(consoleColor, $"LCSocketViewModel::SendCallBack: {se.Message}");
             }
             catch (Exception ex)
             {
-                _log.Log($"LCSocketViewModel::SendCallBack: {ex.Message}");
+                _log.Log(consoleColor, $"LCSocketViewModel::SendCallBack: {ex.Message}");
             }
         }
         #endregion Socket Callbacks
@@ -282,19 +282,19 @@ namespace Console_MVVMTesting.ViewModels
         // works in a second level new Thread!
         public void SendToSocket(string text)   // hujowata nazwa
         {
-            _log.Log($"LCSocketViewModel::SendToSocket(): ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
+            _log.Log(consoleColor, $"LCSocketViewModel::SendToSocket(): ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
             try
             {
-                if (_terminalSocket1 is not null)
+                if (_terminalSocket is not null)
                 {
                     byte[] buffer = Encoding.ASCII.GetBytes(text);
-                    _terminalSocket1.BeginSend(buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback(SendCallBack), null);
+                    _terminalSocket.BeginSend(buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback(SendCallBack), null);
                 }
             }
             catch (SocketException se)
             {
-                _log.Log($"LCSocketViewModel::SendToSocket(): {se.SocketErrorCode}");
-                _log.Log($"LCSocketViewModel::SendToSocket(): {se.Message}");
+                _log.Log(consoleColor, $"LCSocketViewModel::SendToSocket(): {se.SocketErrorCode}");
+                _log.Log(consoleColor, $"LCSocketViewModel::SendToSocket(): {se.Message}");
             }
         }
 
@@ -326,7 +326,7 @@ namespace Console_MVVMTesting.ViewModels
         /// works in a second level new Thread!
         public async Task MessageHandler()
         {
-            _log.Log($"LCSocketViewModel::MessageHandler(): ThreadId: {Thread.CurrentThread.ManagedThreadId}");
+            _log.Log(consoleColor, $"LCSocketViewModel::MessageHandler(): ThreadId: {Thread.CurrentThread.ManagedThreadId}");
 
             CancellationToken ct = _cancellationTokenSource.Token;
             bool raiseCmdAndResp = true;
@@ -334,7 +334,7 @@ namespace Console_MVVMTesting.ViewModels
 
             AutoResetEvent myWait = new AutoResetEvent(false);
 
-            _log.Log($"LCSocketViewModel::MessageHandler(): ct.IsCancellationRequested: {ct.IsCancellationRequested} ");
+            _log.Log(consoleColor, $"LCSocketViewModel::MessageHandler(): ct.IsCancellationRequested: {ct.IsCancellationRequested} ");
             while (ct.IsCancellationRequested == false)
             {
                 if (commandQueue.IsEmpty && (fullCommand.StartsWith(@"R/") || fullCommand.StartsWith(@"C/")))
@@ -356,7 +356,7 @@ namespace Console_MVVMTesting.ViewModels
                         //_dispatcherQueue.TryEnqueue(() => { XAMLtbReceiveSocketBox += $"{e.Message} \n"; });    // wywala
 
                         //XAMLtbReceiveSocketBox += $"{e.Message} \n";
-                        _log.Log($"LCSocketViewModel::MessageHandler: {e.Message}");
+                        _log.Log(consoleColor, $"LCSocketViewModel::MessageHandler: {e.Message}");
                     }
 
                     while (commandQueue.TryDequeue(out string cmdItem))
@@ -411,33 +411,35 @@ namespace Console_MVVMTesting.ViewModels
                 }
             } // end while (ct.IsCancellationRequested == false)
             MessageHandlerTerminatedEvent.Set();
-            _log.Log($"LCSocketViewModel::MessageHandler(): ThreadId: {Thread.CurrentThread.ManagedThreadId}: end of method");
+            _log.Log(consoleColor, $"LCSocketViewModel::MessageHandler(): ThreadId: {Thread.CurrentThread.ManagedThreadId}: end of method");
         }
         #endregion MessageHandler
 
 
 
         // still a new Thread
-        private void ConnectCallback(IAsyncResult ar)
+        private void ConnectCallback(IAsyncResult ar)       // nie wraca
         {
-            _log.Log($"LCSocketViewModel::ConnectCallback(): ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
+            string consoleColor = "LGREEN";
+            _log.Log(consoleColor, $"LCSocketViewModel::ConnectCallback(): ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
             try
             {
-                //_log.Log($"LCSocketViewModel::ConnectCallback(): 1");
+                _log.Log(consoleColor, $"LCSocketViewModel::ConnectCallback()");
 
                 //_terminalSocket = (Socket)ar.AsyncState;
                 //if (_terminalSocket == null)
                 //{
-                //    _log.Log($"LCSocketViewModel::ConnectCallback(): _terminalSocket == null");
+                //    _log.Log(consoleColor, $"LCSocketViewModel::ConnectCallback(): _terminalSocket == null");
                 //    return;
                 //}
 
                 // Ends a pending asynchronous connection request.
                 _terminalSocket.EndConnect(ar); // throws an exception if connecting fails
                                                 // Exception thrown: 'System.Net.Internals.SocketExceptionFactory.ExtendedSocketException' in System.Private.CoreLib.dll
+                                                // a mi daje rze _terminalSocket jest nulem
 
                 _connectionItem.ConnectTime = DateTime.Now;
-                _log.Log($"LCSocketViewModel::ConnectCallback(): Connected to {_ipAddress.ToString()}:{_connectionItem.Port} {_connectionItem.ConnectTime}");
+                _log.Log(consoleColor, $"LCSocketViewModel::ConnectCallback(): Connected to {_ipAddress.ToString()}:{_connectionItem.Port} {_connectionItem.ConnectTime}");
 
                 //_messenger.Send(new LCSocketStateMessage(LCSocketStatus.Connected));
 
@@ -455,15 +457,15 @@ namespace Console_MVVMTesting.ViewModels
             }
             catch (InvalidOperationException ioe)
             {
-                _log.Log($"LCSocketViewModel::ConnectCallback1(): {ioe.Message}");
+                _log.Log(consoleColor, $"LCSocketViewModel::ConnectCallback1(): {ioe.Message}");
             }
             catch (SocketException se)
             {
-                _log.Log($"LCSocketViewModel::ConnectCallback1(): {se.Message}");
+                _log.Log(consoleColor, $"LCSocketViewModel::ConnectCallback1(): {se.Message}");
             }
             catch (Exception ex)
             {
-                _log.Log($"LCSocketViewModel::ConnectCallback1(): {ex.Message}");
+                _log.Log(consoleColor, $"LCSocketViewModel::ConnectCallback1(): {ex.Message}");
             }
 
             // Exception thrown: 'System.Runtime.InteropServices.COMException' in WinRT.Runtime.dll
@@ -473,7 +475,7 @@ namespace Console_MVVMTesting.ViewModels
             // jest jeszcze drugi error, pacz _terminalSocket.EndConnect(ar);
             // Exception thrown: 'System.Runtime.InteropServices.COMException' in System.Private.CoreLib.dll
 
-            _log.Log($"LCSocketViewModel::ConnectCallback1(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : end of method");
+            _log.Log(consoleColor, $"LCSocketViewModel::ConnectCallback1(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : end of method");
         }
 
 
@@ -500,8 +502,8 @@ namespace Console_MVVMTesting.ViewModels
             {
                 try
                 {
-                    _terminalSocket1.Shutdown(SocketShutdown.Both);    // Close the socket
-                    _terminalSocket1.Close();
+                    _terminalSocket.Shutdown(SocketShutdown.Both);    // Close the socket
+                    _terminalSocket.Close();
                 }
                 catch (SocketException se)
                 {
@@ -534,41 +536,41 @@ namespace Console_MVVMTesting.ViewModels
         // still a new Thread
         private void BeginConnect_old()
         {
-            _log.Log($"LCSocketViewModel::BeginConnect(): ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
+            _log.Log(consoleColor, $"LCSocketViewModel::BeginConnect(): ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
             if (IsConnected() == true)
             {
                 _log.Log("LCSocketViewModel::BeginConnect(): IsConnected() == true");
                 Close();
             }
             _ipAddress = ResolveIp(_connectionItem.Host);
-            _terminalSocket1 = new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            _terminalSocket = new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
 
 
-            _log.Log($"LCSocketViewModel::BeginConnect(): _ipAddress: {_ipAddress}");
+            _log.Log(consoleColor, $"LCSocketViewModel::BeginConnect(): _ipAddress: {_ipAddress}");
             byte[] myAddressBytes = _ipAddress.GetAddressBytes();
-            _log.Log($"LCSocketViewModel::BeginConnect(): {myAddressBytes[0]}:{myAddressBytes[1]}:{myAddressBytes[2]}:{myAddressBytes[3]}");
-            _log.Log($"LCSocketViewModel::BeginConnect(): _ipAddress.AddressFamily: {_ipAddress.AddressFamily}");
+            _log.Log(consoleColor, $"LCSocketViewModel::BeginConnect(): {myAddressBytes[0]}:{myAddressBytes[1]}:{myAddressBytes[2]}:{myAddressBytes[3]}");
+            _log.Log(consoleColor, $"LCSocketViewModel::BeginConnect(): _ipAddress.AddressFamily: {_ipAddress.AddressFamily}");
 
-            _terminalSocket1.ReceiveTimeout = 2000;
-            _receiveBuffer = new byte[_terminalSocket1.ReceiveBufferSize];
+            _terminalSocket.ReceiveTimeout = 2000;
+            _receiveBuffer = new byte[_terminalSocket.ReceiveBufferSize];
 
-            IAsyncResult result = _terminalSocket1.BeginConnect(new IPEndPoint(_ipAddress, _connectionItem.Port), new AsyncCallback(ConnectCallback), null);
+            IAsyncResult result = _terminalSocket.BeginConnect(new IPEndPoint(_ipAddress, _connectionItem.Port), new AsyncCallback(ConnectCallback), null);
 
 
-            //_log.Log($"LCSocketViewModel::BeginConnect(): _terminalSocket: {_terminalSocket}");
-            _log.Log($"LCSocketViewModel::BeginConnect(): _terminalSocket.RemoteEndPoint: {_terminalSocket1.RemoteEndPoint}");
-            //_log.Log($"LCSocketViewModel::BeginConnect(): _terminalSocket.Handle: {_terminalSocket.Handle}");
-            _log.Log($"LCSocketViewModel::BeginConnect(): _terminalSocket.LocalEndPoint: {_terminalSocket1.LocalEndPoint}");
-            //_log.Log($"LCSocketViewModel::BeginConnect(): _terminalSocket.SocketType: {_terminalSocket.SocketType}");
-            //_log.Log($"LCSocketViewModel::BeginConnect(): _terminalSocket.ProtocolType: {_terminalSocket.ProtocolType}");
-            //_log.Log($"LCSocketViewModel::BeginConnect(): _terminalSocket.Available: {_terminalSocket.Available}");
+            //_log.Log(consoleColor, $"LCSocketViewModel::BeginConnect(): _terminalSocket: {_terminalSocket}");
+            _log.Log(consoleColor, $"LCSocketViewModel::BeginConnect(): _terminalSocket.RemoteEndPoint: {_terminalSocket.RemoteEndPoint}");
+            //_log.Log(consoleColor, $"LCSocketViewModel::BeginConnect(): _terminalSocket.Handle: {_terminalSocket.Handle}");
+            _log.Log(consoleColor, $"LCSocketViewModel::BeginConnect(): _terminalSocket.LocalEndPoint: {_terminalSocket.LocalEndPoint}");
+            //_log.Log(consoleColor, $"LCSocketViewModel::BeginConnect(): _terminalSocket.SocketType: {_terminalSocket.SocketType}");
+            //_log.Log(consoleColor, $"LCSocketViewModel::BeginConnect(): _terminalSocket.ProtocolType: {_terminalSocket.ProtocolType}");
+            //_log.Log(consoleColor, $"LCSocketViewModel::BeginConnect(): _terminalSocket.Available: {_terminalSocket.Available}");
 
-            _log.Log($"LCSocketViewModel::BeginConnect(): result: {result}");
-            //_log.Log($"LCSocketViewModel::BeginConnect(): result.AsyncState: {result.AsyncState}");
-            //_log.Log($"LCSocketViewModel::BeginConnect(): result.CompletedSynchronously: {result.CompletedSynchronously}");
-            //_log.Log($"LCSocketViewModel::BeginConnect(): result.AsyncWaitHandle: {result.AsyncWaitHandle}");
-            //_log.Log($"LCSocketViewModel::BeginConnect(): result.IsCompleted: {result.IsCompleted}");
+            _log.Log(consoleColor, $"LCSocketViewModel::BeginConnect(): result: {result}");
+            //_log.Log(consoleColor, $"LCSocketViewModel::BeginConnect(): result.AsyncState: {result.AsyncState}");
+            //_log.Log(consoleColor, $"LCSocketViewModel::BeginConnect(): result.CompletedSynchronously: {result.CompletedSynchronously}");
+            //_log.Log(consoleColor, $"LCSocketViewModel::BeginConnect(): result.AsyncWaitHandle: {result.AsyncWaitHandle}");
+            //_log.Log(consoleColor, $"LCSocketViewModel::BeginConnect(): result.IsCompleted: {result.IsCompleted}");
 
             if (result.IsCompleted)
             {
@@ -582,38 +584,42 @@ namespace Console_MVVMTesting.ViewModels
 
             //_terminalSocket2 = new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             //result = _terminalSocket2.BeginConnect(new IPEndPoint(_ipAddress, _connectionItem.Port), new AsyncCallback(ConnectCallback2), null);
-            //_log.Log($"LCSocketViewModel::BeginConnect(): _terminalSocket.RemoteEndPoint: {_terminalSocket2.RemoteEndPoint}");
-            //_log.Log($"LCSocketViewModel::BeginConnect(): _terminalSocket.LocalEndPoint: {_terminalSocket2.LocalEndPoint}");
-            //_log.Log($"LCSocketViewModel::BeginConnect(): result: {result}");
+            //_log.Log(consoleColor, $"LCSocketViewModel::BeginConnect(): _terminalSocket.RemoteEndPoint: {_terminalSocket2.RemoteEndPoint}");
+            //_log.Log(consoleColor, $"LCSocketViewModel::BeginConnect(): _terminalSocket.LocalEndPoint: {_terminalSocket2.LocalEndPoint}");
+            //_log.Log(consoleColor, $"LCSocketViewModel::BeginConnect(): result: {result}");
 
             //_terminalSocket3 = new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             //result = _terminalSocket3.BeginConnect(new IPEndPoint(_ipAddress, _connectionItem.Port), new AsyncCallback(ConnectCallback3), null);
-            //_log.Log($"LCSocketViewModel::BeginConnect(): _terminalSocket.RemoteEndPoint: {_terminalSocket2.RemoteEndPoint}");
-            //_log.Log($"LCSocketViewModel::BeginConnect(): _terminalSocket.LocalEndPoint: {_terminalSocket2.LocalEndPoint}");
-            //_log.Log($"LCSocketViewModel::BeginConnect(): result: {result}");
+            //_log.Log(consoleColor, $"LCSocketViewModel::BeginConnect(): _terminalSocket.RemoteEndPoint: {_terminalSocket2.RemoteEndPoint}");
+            //_log.Log(consoleColor, $"LCSocketViewModel::BeginConnect(): _terminalSocket.LocalEndPoint: {_terminalSocket2.LocalEndPoint}");
+            //_log.Log(consoleColor, $"LCSocketViewModel::BeginConnect(): result: {result}");
 
 
-            _log.Log($"LCSocketViewModel::BeginConnect(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : end of method.");
+            _log.Log(consoleColor, $"LCSocketViewModel::BeginConnect(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : End of method.");
         }
 
 
-        private void BeginConnectAsync()
+        private async Task BeginConnectAsync()
         {
-            _log.Log($"LCSocketViewModel::BeginConnectAsync(): ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
+            _log.Log(consoleColor, $"LCSocketViewModel::BeginConnectAsync(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : Start of method.");
             if (IsConnected() == true)
             {
                 Close();
             }
+
+            await Task.Yield();
+
             _ipAddress = ResolveIp(_connectionItem.Host);
-            _terminalSocket1 = new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            _terminalSocket = new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            _log.Log(consoleColor, $"LCSocketViewModel::BeginConnectAsync(): _terminalSocket(): {_terminalSocket}");
 
-            _terminalSocket1.ReceiveTimeout = 2000;
-            _receiveBuffer = new byte[_terminalSocket1.ReceiveBufferSize];
+            _terminalSocket.ReceiveTimeout = 2000;
+            _receiveBuffer = new byte[_terminalSocket.ReceiveBufferSize];
 
-            IAsyncResult result = _terminalSocket1.BeginConnect(new IPEndPoint(_ipAddress, _connectionItem.Port), new AsyncCallback(ConnectCallback), null);
+            IAsyncResult result = _terminalSocket.BeginConnect(new IPEndPoint(_ipAddress, _connectionItem.Port), new AsyncCallback(ConnectCallback), null);
 
 
-            _log.Log($"LCSocketViewModel::BeginConnectAsync(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : end of method.");
+            _log.Log(consoleColor, $"LCSocketViewModel::BeginConnectAsync(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : End of method.");
         }
 
 
@@ -627,30 +633,33 @@ namespace Console_MVVMTesting.ViewModels
         /// ConnectHandlerAsync works in a new Thread!!
         private async Task ConnectHandlerAsync(CancellationToken ct)
         {
-            _log.Log($"LCSocketViewModel::ConnectHandlerAsync(): ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
+            _log.Log(consoleColor, $"LCSocketViewModel::ConnectHandlerAsync(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : Start of method.");
+
+            int connectTry = 3;
 
             // the difference CancellationTokenSource vs CancellationToken ??
             ct = _cancellationTokenSource.Token;
 
-            _log.Log($"LCSocketViewModel::ConnectHandlerAsync(): ct.IsCancellationRequested: {ct.IsCancellationRequested}");
-            _log.Log($"LCSocketViewModel::ConnectHandlerAsync(): IsConnected(): {IsConnected()}");
+            _log.Log(consoleColor, $"LCSocketViewModel::ConnectHandlerAsync(): ct.IsCancellationRequested: {ct.IsCancellationRequested}");
+            _log.Log(consoleColor, $"LCSocketViewModel::ConnectHandlerAsync(): IsConnected(): {IsConnected()}");
 
             // nie wyjdzie stont, dopuki sie nie pouonczy
-            while ((ct.IsCancellationRequested == false) && (IsConnected() == false))
+            while ((ct.IsCancellationRequested == false) && (IsConnected() == false) && (connectTry > 0))
             {
-                _log.Log($"LCSocketViewModel::ConnectHandlerAsync(): in while loop: before");
+                _log.Log(consoleColor, $"LCSocketViewModel::ConnectHandlerAsync(): in while loop: before");
 
-                this.BeginConnectAsync();
+                await this.BeginConnectAsync();     // does not return
                 ConnectedEvent.WaitOne();
 
                 if (IsConnected() == false)
                 {
-                    await Task.Delay(10000);
+                    await Task.Delay(3000);
+                    connectTry--;
                 }
 
-                _log.Log($"LCSocketViewModel::ConnectHandlerAsync(): in while loop: after");
+                _log.Log(consoleColor, $"LCSocketViewModel::ConnectHandlerAsync(): in while loop: after");
             }
-            _log.Log($"LCSocketViewModel::ConnectHandlerAsync(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : end of method.");
+            _log.Log(consoleColor, $"LCSocketViewModel::ConnectHandlerAsync(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : End of method.");
         }
         #endregion ConnectHandler
 
@@ -659,7 +668,7 @@ namespace Console_MVVMTesting.ViewModels
         #region Connect
         public void Connect()
         {
-            _log.Log($"LCSocketViewModel::Connect(): ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
+            _log.Log(consoleColor, $"LCSocketViewModel::Connect(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : Start of method.");
 
             if ((_cancellationTokenSource is null) || _ctsDisposed == true)
             {
@@ -672,36 +681,23 @@ namespace Console_MVVMTesting.ViewModels
                 await ConnectHandlerAsync(_cancellationTokenSource.Token);
             });
 
-            _log.Log($"LCSocketViewModel::Connect(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : end of method");
+            MyTask.Wait();
+
+            _log.Log(consoleColor, $"LCSocketViewModel::Connect(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : End of method");
         }
         #endregion Connect
 
 
-        //private void RunInitLCCommandMessage()
-        //{
-        //    // to ma byc w LCVM!
-        //    //_messenger.Register<InitLCMessage>(this, (r, m) => { RunInitLCCommandMessage(); });
-
-        //    _loggingService.Log(consoleColor, $"ProductionViewModel::RunInitCommandMessage()  ({this.GetHashCode():x8})");
-        //    Task myOpenPortTask = Task.Run(() =>
-        //    {
-        //        this.MyInitTaskAsync();
-        //    });
-
-        //}
-
-
-
         private void RunInitCommandMessage()
         {
-            _log.Log("LCSocketViewModel::RunInitCommandMessage(): Start of method");
+            _log.Log(consoleColor, "LCSocketViewModel::RunInitCommandMessage(): Start of method");
 
             if (!IsConnected())
             {
                 this.Connect();
             }
 
-            _log.Log("LCSocketViewModel::RunInitCommandMessage(): End of method");
+            _log.Log(consoleColor, "LCSocketViewModel::RunInitCommandMessage(): End of method");
         }
 
 
@@ -722,10 +718,10 @@ namespace Console_MVVMTesting.ViewModels
             commandQueue = new ConcurrentQueue<string>();
 
 
-
+            // listen for the command in ProductionViewModel
             _messenger.Register<InitLCMessage>(this, (r, m) => { RunInitCommandMessage(); });
 
-            //_log.Log($"LCSocketViewModel::LCSocketViewModel() XamlLCSocketViewModel.GetHashCode(): {XamlLCSocketViewModel.GetHashCode()}");
+            //_log.Log(consoleColor, $"LCSocketViewModel::LCSocketViewModel() XamlLCSocketViewModel.GetHashCode(): {XamlLCSocketViewModel.GetHashCode()}");
             _log.Log(consoleColor, $"LCSocketViewModel::LCSocketViewModel() etvm.GetHashCode(): {etvm.GetHashCode()}");
             _log.Log(consoleColor, $"LCSocketViewModel::LCSocketViewModel() etvm.IsBusy(): {etvm.IsBusy}");
             _log.Log(consoleColor, $"LCSocketViewModel::LCSocketViewModel() etvm.IsDateTime(): {etvm.IsDateTime}");
@@ -735,14 +731,6 @@ namespace Console_MVVMTesting.ViewModels
 
             _log.Log(consoleColor, $"LCSocketViewModel::LCSocketViewModel(): end of constructor  ({this.GetHashCode():x8})");
         }
-
-        
-    
-        private void RunOperationMessage2()
-        {
-            _log.Log(consoleColor, $"LCSocketViewModel::RunOperationMessage2()  ({this.GetHashCode():x8})");
-        }
-
 
 
     }
