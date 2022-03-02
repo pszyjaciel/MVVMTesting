@@ -44,6 +44,7 @@ namespace Console_MVVMTesting.Helpers
             {
                 Console.WriteLine(_defaultColor + myString + _defaultColor + _defaultBackgroundColor);
             }
+            System.Diagnostics.Debug.WriteLine(myString);   // [VS] write to immediate window
         }
 
 
