@@ -67,6 +67,9 @@ namespace Console_MVVMTesting
             services.AddTransient<ShellPage>();
             services.AddTransient<ShellViewModel>();
 
+            services.AddTransient<ProductionPage>();
+            services.AddSingleton<ProductionViewModel>();
+
             services.AddTransient<UserReceiverPage>();
             services.AddSingleton<UserReceiverViewModel>();
 

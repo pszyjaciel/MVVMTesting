@@ -677,6 +677,20 @@ namespace Console_MVVMTesting.ViewModels
         #endregion Connect
 
 
+        //private void RunInitLCCommandMessage()
+        //{
+        //    // to ma byc w LCVM!
+        //    //_messenger.Register<InitLCMessage>(this, (r, m) => { RunInitLCCommandMessage(); });
+
+        //    _loggingService.Log(consoleColor, $"ProductionViewModel::RunInitCommandMessage()  ({this.GetHashCode():x8})");
+        //    Task myOpenPortTask = Task.Run(() =>
+        //    {
+        //        this.MyInitTaskAsync();
+        //    });
+
+        //}
+
+
 
         private void RunInitCommandMessage()
         {

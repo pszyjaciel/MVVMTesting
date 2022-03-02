@@ -16,7 +16,9 @@ namespace Console_MVVMTesting.Services
         public PageService()
         {
             mu.MyConsoleWriteLine($"PageService::PageService()");
-            
+
+            Configure<ProductionViewModel, ProductionPage>();
+
             Configure<UserReceiverViewModel, UserReceiverPage>();
             Configure<UserSenderViewModel, UserSenderPage>();
             Configure<UserReceiver2ViewModel, UserReceiver2Page>();
