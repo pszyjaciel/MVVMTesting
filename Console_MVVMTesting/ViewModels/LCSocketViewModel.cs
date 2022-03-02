@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 using static PInvoke.User32;
 
 
-
+// Way-Way is observing me!
 
 // (!)messages: https://social.technet.microsoft.com/wiki/contents/articles/30939.wpf-change-tracking.aspx
 

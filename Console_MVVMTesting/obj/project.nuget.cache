@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "ZAawGtT47zGw/fnB5C4CqGiO9PWQq1Wkxk/poeTUa+4wsnkcJipdvs2SPtBrC2HEtebRTcXXzp9iftQPL4iXXQ==",
+  "dgSpecHash": "mOdFZHjtDGqIGF/zJol2QirBYRP+XAr1JzaeKB4TIno3aza2I2PJ81whTyDXmmwwEVVNI1S7H72wqeXnIvd6UQ==",
   "success": true,
-  "projectFilePath": "C:\\Users\\pak\\Source\\Repos\\MVVMTesting\\Console_MVVMTesting\\Console_MVVMTesting.csproj",
+  "projectFilePath": "c:\\Users\\pak\\Source\\Repos\\MVVMTesting\\Console_MVVMTesting\\Console_MVVMTesting.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\pak\\.nuget\\packages\\envdte100\\17.1.32210.191\\envdte100.17.1.32210.191.nupkg.sha512",
     "C:\\Users\\pak\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\6.0.0\\microsoft.extensions.dependencyinjection.6.0.0.nupkg.sha512",
