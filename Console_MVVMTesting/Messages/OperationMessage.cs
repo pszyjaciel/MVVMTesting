@@ -14,16 +14,16 @@ namespace Console_MVVMTesting.Messages
 
         public OperationMessage()
         {
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
-                $"OperationMessage::OperationMessage(1) " +
-                $"({this.GetHashCode():x8})");
+            //mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            //    $"OperationMessage::OperationMessage(1) " +
+            //    $"({this.GetHashCode():x8})");
         }
 
         public OperationMessage(bool majBul)
         {
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
-                $"OperationMessage::OperationMessage(2) " +
-                $"({this.GetHashCode():x8})");
+            //mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            //    $"OperationMessage::OperationMessage(2) " +
+            //    $"({this.GetHashCode():x8})");
         }
 
         //public OperationMessage(object operation)

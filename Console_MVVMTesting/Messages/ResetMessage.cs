@@ -10,15 +10,15 @@ namespace Console_MVVMTesting.Messages
 
         public ResetMessage()
         {
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
-               $"ResetMessage::ResetMessage(1) ({this.GetHashCode():x8})");
+            //mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            //   $"ResetMessage::ResetMessage(1) ({this.GetHashCode():x8})");
         }
 
 
         public ResetMessage(bool MajWjenkszyBul)
         {
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
-               $"ResetMessage::ResetMessage(2) ({this.GetHashCode():x8})");
+            //mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            //   $"ResetMessage::ResetMessage(2) ({this.GetHashCode():x8})");
         }
 
 

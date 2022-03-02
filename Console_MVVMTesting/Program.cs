@@ -23,6 +23,8 @@ namespace Console_MVVMTesting
         public static UserSenderPage Content5 { get; internal set; }
         public static UserReceiver2Page Content6 { get; internal set; }
         public static UserSender2Page Content7 { get; internal set; }
+        public static ProductionPage Content8 { get; internal set; }
+
 
         private static MyUtils mu;
 

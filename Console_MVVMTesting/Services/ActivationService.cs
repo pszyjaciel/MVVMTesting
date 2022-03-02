@@ -10,9 +10,9 @@ namespace Console_MVVMTesting.Services
 {
     internal class ActivationService : IActivationService
     {
-        private ShellPage _shell = null;
-        private EastTesterPage _eastTester = null;
-        private LCSocketPage _lcSocket= null;
+        private ShellPage _shellPage = null;
+        private EastTesterPage _eastTesterPage = null;
+        private LCSocketPage _lcSocketPage = null;
 
         private MyUtils mu;
 
@@ -20,6 +20,8 @@ namespace Console_MVVMTesting.Services
         private UserSenderPage _userSenderPage = null;
         private UserReceiver2Page _userReceiver2Page = null;
         private UserSender2Page _userSender2Page = null;
+        private ProductionPage _productionPage = null;
+
 
         private readonly IEnumerable<IActivationHandler> _activationHandlers;
         private readonly ActivationHandler<LaunchActivatedEventArgs> _defaultHandler;
@@ -42,14 +44,14 @@ namespace Console_MVVMTesting.Services
             // take into account that the splash screen is shown while this code runs.
             InitializeAsync();
 
-            _shell = Ioc.Default.GetService<ShellPage>();   
-            Program.Content1 = _shell ?? new ShellPage();
+            _shellPage = Ioc.Default.GetService<ShellPage>();
+            Program.Content1 = _shellPage ?? new ShellPage();
 
-            _eastTester = Ioc.Default.GetService<EastTesterPage>();
-            Program.Content2 = _eastTester ?? new EastTesterPage();
+            _eastTesterPage = Ioc.Default.GetService<EastTesterPage>();
+            Program.Content2 = _eastTesterPage ?? new EastTesterPage();
 
-            _lcSocket = Ioc.Default.GetService<LCSocketPage>();
-            Program.Content3 = _lcSocket ?? new LCSocketPage();
+            _lcSocketPage = Ioc.Default.GetService<LCSocketPage>();
+            Program.Content3 = _lcSocketPage ?? new LCSocketPage();
 
             _userReceiverPage = Ioc.Default.GetService<UserReceiverPage>();
             Program.Content4 = _userReceiverPage ?? new UserReceiverPage();
@@ -63,6 +65,8 @@ namespace Console_MVVMTesting.Services
             _userSender2Page = Ioc.Default.GetService<UserSender2Page>();
             Program.Content7 = _userSender2Page ?? new UserSender2Page();
 
+            _productionPage = Ioc.Default.GetService<ProductionPage>();
+            Program.Content8 = _productionPage ?? new ProductionPage();
 
             // Depending on activationArgs one of ActivationHandlers or DefaultActivationHandler will navigate to the first page
             HandleActivationAsync(activationArgs);
@@ -91,7 +95,7 @@ namespace Console_MVVMTesting.Services
             }
         }
 
-        
+
         private void InitializeAsync()
         {
             mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] ActivationService::InitializeAsync() ({this.GetHashCode()})");

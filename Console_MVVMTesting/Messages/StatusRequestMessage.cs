@@ -17,8 +17,8 @@ namespace Console_MVVMTesting.Messages
         {
             mu = new MyUtils();
 
-            mu.MyConsoleWriteLine(consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
-              $"StatusRequestMessage::StatusRequestMessage()  ({this.GetHashCode():x8})");
+            //mu.MyConsoleWriteLine(consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            //  $"StatusRequestMessage::StatusRequestMessage()  ({this.GetHashCode():x8})");
         }
     }
 }

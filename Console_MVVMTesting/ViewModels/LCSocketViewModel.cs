@@ -597,9 +597,9 @@ namespace Console_MVVMTesting.ViewModels
         }
 
 
-        private void BeginConnect()
+        private void BeginConnectAsync()
         {
-            _log.Log($"LCSocketViewModel::BeginConnect(): ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
+            _log.Log($"LCSocketViewModel::BeginConnectAsync(): ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
             if (IsConnected() == true)
             {
                 Close();
@@ -613,7 +613,7 @@ namespace Console_MVVMTesting.ViewModels
             IAsyncResult result = _terminalSocket1.BeginConnect(new IPEndPoint(_ipAddress, _connectionItem.Port), new AsyncCallback(ConnectCallback), null);
 
 
-            _log.Log($"LCSocketViewModel::BeginConnect(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : end of method.");
+            _log.Log($"LCSocketViewModel::BeginConnectAsync(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : end of method.");
         }
 
 
@@ -625,22 +625,22 @@ namespace Console_MVVMTesting.ViewModels
         /// </summary>
         /// 
         /// ConnectHandlerAsync works in a new Thread!!
-        private async Task ConnectHandlerAsync(object obj)
+        private async Task ConnectHandlerAsync(CancellationToken ct)
         {
-            _log.Log($"LCSocketViewModel::ConnectHandler(): ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
+            _log.Log($"LCSocketViewModel::ConnectHandlerAsync(): ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
 
             // the difference CancellationTokenSource vs CancellationToken ??
-            CancellationToken ct = _cancellationTokenSource.Token;
+            ct = _cancellationTokenSource.Token;
 
-            _log.Log($"LCSocketViewModel::ConnectHandler(): ct.IsCancellationRequested: {ct.IsCancellationRequested}");
-            _log.Log($"LCSocketViewModel::ConnectHandler(): IsConnected(): {IsConnected()}");
+            _log.Log($"LCSocketViewModel::ConnectHandlerAsync(): ct.IsCancellationRequested: {ct.IsCancellationRequested}");
+            _log.Log($"LCSocketViewModel::ConnectHandlerAsync(): IsConnected(): {IsConnected()}");
 
             // nie wyjdzie stont, dopuki sie nie pouonczy
             while ((ct.IsCancellationRequested == false) && (IsConnected() == false))
             {
-                _log.Log($"LCSocketViewModel::ConnectHandler(): in while loop: before");
+                _log.Log($"LCSocketViewModel::ConnectHandlerAsync(): in while loop: before");
 
-                this.BeginConnect_old();
+                this.BeginConnectAsync();
                 ConnectedEvent.WaitOne();
 
                 if (IsConnected() == false)
@@ -648,9 +648,9 @@ namespace Console_MVVMTesting.ViewModels
                     await Task.Delay(10000);
                 }
 
-                _log.Log($"LCSocketViewModel::ConnectHandler(): in while loop: after");
+                _log.Log($"LCSocketViewModel::ConnectHandlerAsync(): in while loop: after");
             }
-            _log.Log($"LCSocketViewModel::ConnectHandler(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : end of method.");
+            _log.Log($"LCSocketViewModel::ConnectHandlerAsync(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : end of method.");
         }
         #endregion ConnectHandler
 
