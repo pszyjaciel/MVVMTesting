@@ -10,9 +10,9 @@ namespace Console_MVVMTesting.Messages
 
         public UsernameChangedMessage(string value) : base(value)
         {
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
-               $"UsernameChangedMessage::UsernameChangedMessage() " +
-               $"({this.GetHashCode():x8})");
+            //mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            //   $"UsernameChangedMessage::UsernameChangedMessage() " +
+            //   $"({this.GetHashCode():x8})");
         }
     }
 }

@@ -18,7 +18,7 @@ namespace Console_MVVMTesting.ViewModels
     {
         private readonly ILoggingService _log;
         private readonly IMessenger _messenger;
-        private const string consoleColor = "ORANGE";
+        private const string consoleColor = "LCYAN";
 
         private string _username = "";
 
@@ -109,7 +109,6 @@ namespace Console_MVVMTesting.ViewModels
 
 
 
-
             // szukac Messenger.Register<CasualtyMessage, string>(this, "blanket", m => { OnCasualtyMessageReceived(); });
             // tutej https://xamlbrewer.wordpress.com/category/mvvm/
 
@@ -132,13 +131,13 @@ namespace Console_MVVMTesting.ViewModels
 
         private void RunGrzypki()
         {
-            _log.Log(consoleColor, $"UserReceiverViewModel::RunGrzypki() ({this.GetHashCode():x8})");
+            //_log.Log(consoleColor, $"UserReceiverViewModel::RunGrzypki() ({this.GetHashCode():x8})");
             _userReceiverStatus = false;
         }
 
         private void RunBlanket()
         {
-            _log.Log(consoleColor, $"UserReceiverViewModel::RunBlanket() ({this.GetHashCode():x8})");
+            //_log.Log(consoleColor, $"UserReceiverViewModel::RunBlanket() ({this.GetHashCode():x8})");
             _userReceiverStatus = false;
             //Reaction = _reactions[rnd.Next(0, 5)];
 
@@ -148,14 +147,14 @@ namespace Console_MVVMTesting.ViewModels
 
         private void RunPillow()
         {
-            _log.Log(consoleColor, $"UserReceiverViewModel::RunPillow() ({this.GetHashCode():x8})");
+            //_log.Log(consoleColor, $"UserReceiverViewModel::RunPillow() ({this.GetHashCode():x8})");
             Reaction = _reactions[rnd.Next(0, 5)];
             _userReceiverStatus = true;
         }
 
         private void RunSomething()
         {
-            _log.Log(consoleColor, $"UserReceiverViewModel::RunSomething() ({this.GetHashCode():x8})");
+            //_log.Log(consoleColor, $"UserReceiverViewModel::RunSomething() ({this.GetHashCode():x8})");
             Reaction = _reactions[rnd.Next(0, 5)];
             _userReceiverStatus = true;
         }
@@ -284,7 +283,7 @@ namespace Console_MVVMTesting.ViewModels
 
         private void StatusMessageHandler(UserReceiverViewModel recipient, StatusRequestMessage message)
         {
-            _log.Log(consoleColor, $"UserReceiverViewModel::ReturnStatusMessageHandler() ({this.GetHashCode():x8})");
+            //_log.Log(consoleColor, $"UserReceiverViewModel::ReturnStatusMessageHandler() ({this.GetHashCode():x8})");
             message.Reply(recipient._userReceiverStatus);
         }
 

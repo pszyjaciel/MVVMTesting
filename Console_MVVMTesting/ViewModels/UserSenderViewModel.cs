@@ -73,7 +73,7 @@ namespace Console_MVVMTesting.ViewModels
 
             /////////// StatusRequestMessage : RequestMessage<bool> ///////////
             StatusRequestMessage srm = _messenger.Send(new StatusRequestMessage());
-            _log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(1).request: {srm.Response}");
+            //_log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(1).request: {srm.Response}");
 
 
             ///////// UsernameChangedMessage : ValueChangedMessage<string> /////////
@@ -81,16 +81,14 @@ namespace Console_MVVMTesting.ViewModels
             _messenger.Send(new UsernameChangedMessage(Username));
 
             srm = _messenger.Send(new StatusRequestMessage());
-            _log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(2).request: {srm.Response}");
-
+            //_log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(2).request: {srm.Response}");
 
 
             _username = "BIANCA";
             _messenger.Send(new UsernameChangedMessage(_username));     // raczej totu
 
             srm = _messenger.Send(new StatusRequestMessage());
-            _log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(3).request: {srm.Response}");
-
+            //_log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(3).request: {srm.Response}");
 
 
 
@@ -98,34 +96,32 @@ namespace Console_MVVMTesting.ViewModels
             _messenger.Send(new UsernameChangedMessage(_username));
 
             srm = _messenger.Send(new StatusRequestMessage());
-            _log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(4).request: {srm.Response}");
-
-
+            //_log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(4).request: {srm.Response}");
 
 
             _username = "Matka";
             _messenger.Send(new UsernameChangedMessage(_username));
 
             srm = _messenger.Send(new StatusRequestMessage());
-            _log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(5).request: {srm.Response}");
+            //_log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(5).request: {srm.Response}");
 
 
             _messenger.Send<CasualtyMessage, string>(new CasualtyMessage(), "grzypki");
             srm = _messenger.Send(new StatusRequestMessage());
-            _log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(6).request: {srm.Response}");
+            //_log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(6).request: {srm.Response}");
 
             _messenger.Send<CasualtyMessage, string>(new CasualtyMessage(), "blanket");
             srm = _messenger.Send(new StatusRequestMessage());
-            _log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(7).request: {srm.Response}");
+            //_log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(7).request: {srm.Response}");
 
 
             _messenger.Send<CasualtyMessage, string>(new CasualtyMessage(), "pillow");
             srm = _messenger.Send(new StatusRequestMessage());
-            _log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(8).request: {srm.Response}");
+            //_log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(8).request: {srm.Response}");
 
             _messenger.Send<CasualtyMessage, string>(new CasualtyMessage(), "something");
             srm = _messenger.Send(new StatusRequestMessage());
-            _log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(9).request: {srm.Response}");
+            //_log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(9).request: {srm.Response}");
 
 
             ///////// PropertyChangedPostMessage : PropertyChangedMessage<Post> /////////
