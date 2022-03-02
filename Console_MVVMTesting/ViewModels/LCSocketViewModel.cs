@@ -209,7 +209,8 @@ namespace Console_MVVMTesting.ViewModels
             try
             {
                 StateObject state = (StateObject)ar.AsyncState;
-                //Socket client = state.terminalSocket;
+                //Socket client = state.terminalSocket; // wywala
+
                 int receivedBytes = _terminalSocket1.EndReceive(ar); //   Ends a pending asynchronous read.
                 _log.Log($"LCSocketViewModel::ReceiveCallBack1(): receivedBytes: {receivedBytes }");
                 if (receivedBytes == 0)
@@ -531,7 +532,7 @@ namespace Console_MVVMTesting.ViewModels
 
 
         // still a new Thread
-        private void BeginConnect()
+        private void BeginConnect_old()
         {
             _log.Log($"LCSocketViewModel::BeginConnect(): ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
             if (IsConnected() == true)
@@ -596,15 +597,35 @@ namespace Console_MVVMTesting.ViewModels
         }
 
 
+        private void BeginConnect()
+        {
+            _log.Log($"LCSocketViewModel::BeginConnect(): ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
+            if (IsConnected() == true)
+            {
+                Close();
+            }
+            _ipAddress = ResolveIp(_connectionItem.Host);
+            _terminalSocket1 = new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
-        #region ConnectHandler
+            _terminalSocket1.ReceiveTimeout = 2000;
+            _receiveBuffer = new byte[_terminalSocket1.ReceiveBufferSize];
+
+            IAsyncResult result = _terminalSocket1.BeginConnect(new IPEndPoint(_ipAddress, _connectionItem.Port), new AsyncCallback(ConnectCallback), null);
+
+
+            _log.Log($"LCSocketViewModel::BeginConnect(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : end of method.");
+        }
+
+
+        #region ConnectHandlerAsync
         /// <summary>
-        /// ConnectHandler establishes a IP connection. 
+        /// ConnectHandlerAsync establishes a IP connection. 
         /// This handler pings the host to ensure it is active. If the ping is replyed, a connection attempt is tryed.
         /// IMPORTANT NOTE: You should NOT call this directly, instead use the public Connect() method.
         /// </summary>
-        /// Works in a new Thread!
-        private async Task ConnectHandler(object obj)
+        /// 
+        /// ConnectHandlerAsync works in a new Thread!!
+        private async Task ConnectHandlerAsync(object obj)
         {
             _log.Log($"LCSocketViewModel::ConnectHandler(): ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
 
@@ -619,7 +640,7 @@ namespace Console_MVVMTesting.ViewModels
             {
                 _log.Log($"LCSocketViewModel::ConnectHandler(): in while loop: before");
 
-                BeginConnect();
+                this.BeginConnect_old();
                 ConnectedEvent.WaitOne();
 
                 if (IsConnected() == false)
@@ -648,7 +669,7 @@ namespace Console_MVVMTesting.ViewModels
 
             Task MyTask = Task.Run(async () =>
             {
-                await ConnectHandler(_cancellationTokenSource.Token);
+                await ConnectHandlerAsync(_cancellationTokenSource.Token);
             });
 
             _log.Log($"LCSocketViewModel::Connect(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : end of method");
