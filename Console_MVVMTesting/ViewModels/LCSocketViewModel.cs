@@ -53,7 +53,7 @@ namespace Console_MVVMTesting.ViewModels
         private bool _lastComposedCommand = false;
         private bool _composedCommand = false;
 
-        private CancellationTokenSource _cancellationTokenSource1;
+        //private CancellationTokenSource _cancellationTokenSource1;
         private bool _ctsDisposed1 = false;
         private bool _closingDown = false;
 
@@ -81,14 +81,14 @@ namespace Console_MVVMTesting.ViewModels
         /// Close method should be called when the Terminal connection is terminated.
         /// It closes the socket, and breaks out of the MessageHandler task.
         /// </summary>
-        public void Close(Socket terminalSocket)    // pacz na _cancellationTokenSource1
+        public void Close(Socket terminalSocket, CancellationTokenSource myCancellationTokenSource)    // pacz na _cancellationTokenSource1
         {
             _log.Log(consoleColor, $"LCSocketViewModel::Close(): ThreadId: {Thread.CurrentThread.ManagedThreadId}  Start of method.");
 
             _closingDown = true;
-            if (_cancellationTokenSource1 is not null)
+            if (myCancellationTokenSource is not null)
             {
-                _cancellationTokenSource1.Cancel();              // Tell MessageHandler to cancel operation
+                myCancellationTokenSource.Cancel();              // Tell MessageHandler to cancel operation
             }
             CommandInQueueEvent.Set();    // MessageHandler may wait
             ResponseReceivedEvent.Set();  // for one of these events
@@ -116,7 +116,7 @@ namespace Console_MVVMTesting.ViewModels
                 }
                 finally
                 {
-                    _cancellationTokenSource1.Dispose();
+                    myCancellationTokenSource.Dispose();
                     _ctsDisposed1 = true;
                 }
             }
@@ -376,11 +376,11 @@ namespace Console_MVVMTesting.ViewModels
         /// 
         /// </summary>
         /// works in a second level new Thread!
-        public async Task MessageHandler(Socket terminalSocket)
+        public async Task MessageHandler(Socket terminalSocket, CancellationTokenSource myCancellationTokenSource)
         {
             _log.Log(consoleColor, $"LCSocketViewModel::MessageHandler(): ThreadId: {Thread.CurrentThread.ManagedThreadId}: Start of method");
 
-            CancellationToken ct = _cancellationTokenSource1.Token;
+            CancellationToken ct = myCancellationTokenSource.Token;
             bool raiseCmdAndResp = true;
             string fullCommand = "";
 
@@ -453,9 +453,9 @@ namespace Console_MVVMTesting.ViewModels
                             //     a signal, using a 32-bit signed integer to specify the time interval in milliseconds.
                             ResponseReceivedEvent.WaitOne(2500);
                         }
-                        catch (Exception e)
+                        catch (Exception ex)
                         {
-                            //XAMLtbReceiveSocketBox += $"{e.Message} \n";
+                            _log.Log(consoleColor, $"LCSocketViewModel::MessageHandler(): {ex.Message}");
                         }
 
                         await Task.Delay(1000);
@@ -584,62 +584,43 @@ namespace Console_MVVMTesting.ViewModels
         }
 
 
-        #region ConnectHandlerAsync
-        /// <summary>
-        /// ConnectHandlerAsync establishes a IP connection. 
-        /// This handler pings the host to ensure it is active. If the ping is replyed, a connection attempt is tryed.
-        /// IMPORTANT NOTE: You should NOT call this directly, instead use the public Connect() method.
-        /// </summary>
-        /// 
-        /// ConnectHandlerAsync works in a new Thread!!
-        private async Task MyConnectHandlerAsync(Socket terminalSocket, CancellationToken ct)
-        {
-            _log.Log(consoleColor, $"LCSocketViewModel::ConnectHandlerAsync(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : Start of method  ({this.GetHashCode():x8})");
-
-            int connectTry = 3;    // how many try to connect?
-            ct = _cancellationTokenSource1.Token;
-
-            _ipAddress = ResolveIp(_connectionItem.Host);
-            EndPoint remoteEP = new IPEndPoint(_ipAddress, _connectionItem.Port);
-            //_terminalSocket = new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-
-            _log.Log(consoleColor, $"LCSocketViewModel::ConnectHandlerAsync(): connectTry: {connectTry}");
-            while ((ct.IsCancellationRequested == false) && (IsConnected(terminalSocket) == false) && (connectTry > 0))
-            {
-                await this.MyConnectAsync(remoteEP, terminalSocket);
-                connectDone.WaitOne();
-                
-                _log.Log(consoleColor, $"LCSocketViewModel::MyConnectHandlerAsync(): terminalSocket.RemoteEndPoint: {terminalSocket.RemoteEndPoint}");
-                _log.Log(consoleColor, $"LCSocketViewModel::MyConnectHandlerAsync(): terminalSocket.LocalEndPoint: {terminalSocket.LocalEndPoint}");
-
-                await Task.Delay(1500);
-                connectTry--;
-            }
-
-            _log.Log(consoleColor, $"LCSocketViewModel::ConnectHandlerAsync(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : End of method.");
-        }
-        #endregion ConnectHandler
-
-
 
         #region ConnectToSocket
-        public void ConnectToSocket(Socket terminalSocket)
+        public void ConnectToSocket(Socket terminalSocket, CancellationTokenSource cts)
         {
-            _log.Log(consoleColor, $"LCSocketViewModel::Connect(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : Start of method  ({this.GetHashCode():x8})");
+            _log.Log(consoleColor, $"LCSocketViewModel::ConnectToSocket(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : Start of method  ({this.GetHashCode():x8})");
 
-            if ((_cancellationTokenSource1 is null) || _ctsDisposed1 == true)
+            if ((cts is null) || _ctsDisposed1 == true)
             {
-                _cancellationTokenSource1 = new CancellationTokenSource();
+                cts = new CancellationTokenSource();
                 _ctsDisposed1 = false;
             }
 
             Task MyTask = Task.Run(async () =>
             {
-                await MyConnectHandlerAsync(terminalSocket, _cancellationTokenSource1.Token);
+                int connectTry = 3;    // how many try to connect?
+
+                _ipAddress = ResolveIp(_connectionItem.Host);
+                EndPoint remoteEP = new IPEndPoint(_ipAddress, _connectionItem.Port);
+                do
+                {
+                    await this.MyConnectAsync(remoteEP, terminalSocket);
+                    connectDone.WaitOne();
+
+                    if (IsConnected(terminalSocket) == false)
+                    {
+                        await Task.Delay(500);
+                        connectTry--;
+                    }
+                } while ((cts.IsCancellationRequested == false) && (IsConnected(terminalSocket) == false) && (connectTry > 0));
+
+                _log.Log(consoleColor, $"LCSocketViewModel::ConnectToSocket(): terminalSocket.RemoteEndPoint: {terminalSocket.RemoteEndPoint}");
+                _log.Log(consoleColor, $"LCSocketViewModel::ConnectToSocket(): terminalSocket.LocalEndPoint: {terminalSocket.LocalEndPoint}");
+
             });
             MyTask.Wait();
 
-            _log.Log(consoleColor, $"LCSocketViewModel::Connect(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : End of method");
+            _log.Log(consoleColor, $"LCSocketViewModel::ConnectToSocket(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : End of method");
 
         }
         #endregion ConnectToSocket
@@ -649,51 +630,85 @@ namespace Console_MVVMTesting.ViewModels
         {
             _log.Log(consoleColor, $"LCSocketViewModel::RunInitCommandMessage(): Start of method  ({this.GetHashCode():x8})");
 
+            CancellationTokenSource myCancellationTokenSource1 = new CancellationTokenSource();
+            CancellationTokenSource myCancellationTokenSource2 = new CancellationTokenSource();
+            CancellationTokenSource myCancellationTokenSource3 = new CancellationTokenSource();
+            CancellationTokenSource myCancellationTokenSource4 = new CancellationTokenSource();
+
+            Task MyTask;
+
             Socket terminalSocket1 = new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             if (!IsConnected(terminalSocket1))
             {
-                this.ConnectToSocket(terminalSocket1);
+                this.ConnectToSocket(terminalSocket1, myCancellationTokenSource1);
+                MyTask = Task.Delay(250);
+                MyTask.Wait();
             }
 
             Socket terminalSocket2 = new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             if (!IsConnected(terminalSocket2))
             {
-                this.ConnectToSocket(terminalSocket2);
+                this.ConnectToSocket(terminalSocket2, myCancellationTokenSource2);
+                MyTask = Task.Delay(250);
+                MyTask.Wait();
             }
 
             Socket terminalSocket3 = new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             if (!IsConnected(terminalSocket3))
             {
-                this.ConnectToSocket(terminalSocket3);
+                this.ConnectToSocket(terminalSocket3, myCancellationTokenSource3);
+                MyTask = Task.Delay(250);
+                MyTask.Wait();
             }
 
-            Task MyTask = Task.Run(async () =>
+            Socket terminalSocket4 = new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            if (!IsConnected(terminalSocket4))
             {
-                for (int i = 0; i < 8; i++)
-                {
-                    await Task.Delay(250);
-                    _log.Log(consoleColor, $"LCSocketViewModel::RunInitCommandMessage(): waiting for the socket {terminalSocket1} before we close it..");
-                }
-                this.Close(terminalSocket1);
-
-                for (int i = 0; i < 8; i++)
-                {
-                    await Task.Delay(250);
-                    _log.Log(consoleColor, $"LCSocketViewModel::RunInitCommandMessage(): waiting for the socket {terminalSocket2} before we close it..");
-                }
-                this.Close(terminalSocket2);
-
-                for (int i = 0; i < 8; i++)
-                {
-                    await Task.Delay(250);
-                    _log.Log(consoleColor, $"LCSocketViewModel::RunInitCommandMessage(): waiting for the socket {terminalSocket3} before we close it..");
-                }
-                this.Close(terminalSocket3);
-            });
-            MyTask.Wait();
+                this.ConnectToSocket(terminalSocket4, myCancellationTokenSource4);
+                MyTask = Task.Delay(250);
+                MyTask.Wait();
+            }
 
 
-            
+            // teraz zamykanie
+            Task MyClosingTask = Task.Run(() =>
+               {
+                   Task MyTask;
+                   for (int i = 0; i < 4; i++)
+                   {
+                       MyTask = Task.Delay(250);
+                       _log.Log(consoleColor, $"LCSocketViewModel::RunInitCommandMessage(): waiting for the socket {terminalSocket1.LocalEndPoint} before we close it..");
+                       MyTask.Wait();
+                   }
+                   this.Close(terminalSocket1, myCancellationTokenSource1);
+
+                   for (int i = 0; i < 4; i++)
+                   {
+                       MyTask = Task.Delay(250);
+                       _log.Log(consoleColor, $"LCSocketViewModel::RunInitCommandMessage(): waiting for the socket {terminalSocket2.LocalEndPoint} before we close it..");
+                       MyTask.Wait();
+                   }
+                   this.Close(terminalSocket2, myCancellationTokenSource2);
+
+                   for (int i = 0; i < 4; i++)
+                   {
+                       MyTask = Task.Delay(250);
+                       _log.Log(consoleColor, $"LCSocketViewModel::RunInitCommandMessage(): waiting for the socket {terminalSocket3.LocalEndPoint} before we close it..");
+                       MyTask.Wait();
+                   }
+                   this.Close(terminalSocket3, myCancellationTokenSource3);
+
+                   for (int i = 0; i < 4; i++)
+                   {
+                       MyTask = Task.Delay(250);
+                       _log.Log(consoleColor, $"LCSocketViewModel::RunInitCommandMessage(): waiting for the socket {terminalSocket4.LocalEndPoint} before we close it..");
+                       MyTask.Wait();
+                   }
+                   this.Close(terminalSocket4, myCancellationTokenSource4);
+               });
+
+            MyClosingTask.Wait();
+
 
             _log.Log(consoleColor, $"LCSocketViewModel::RunInitCommandMessage(): End of method.");
         }

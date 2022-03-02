@@ -401,9 +401,9 @@ namespace Console_MVVMTesting.ViewModels
                             //     a signal, using a 32-bit signed integer to specify the time interval in milliseconds.
                             ResponseReceivedEvent.WaitOne(2500);
                         }
-                        catch (Exception e)
+                        catch (Exception ex)
                         {
-                            //XAMLtbReceiveSocketBox += $"{e.Message} \n";
+                            _log.Log(consoleColor, $"LCSocketViewModel::MessageHandler(): {ex.Message}.");
                         }
 
                         await Task.Delay(1000);
@@ -507,15 +507,15 @@ namespace Console_MVVMTesting.ViewModels
                 }
                 catch (SocketException se)
                 {
-                    //XAMLtbReceiveSocketBox += $"{se.SocketErrorCode}: {se.Message} \n";
+                    _log.Log(consoleColor, $"LCSocketViewModel::Close(): {se.Message}");
                 }
                 catch (ObjectDisposedException ode)
                 {
-                    //XAMLtbReceiveSocketBox += $"{ode.ObjectName}: {ode.Message} \n";
+                    _log.Log(consoleColor, $"LCSocketViewModel::Close(): {ode.ObjectName}: {ode.Message}");
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    //XAMLtbReceiveSocketBox += $"{e.Message} \n";
+                    _log.Log(consoleColor, $"LCSocketViewModel::Close(): {ex.Message}");
                 }
                 finally
                 {

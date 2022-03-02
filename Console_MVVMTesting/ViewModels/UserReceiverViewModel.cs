@@ -312,6 +312,8 @@ namespace Console_MVVMTesting.ViewModels
 
         private async Task LoadPostsAsync()
         {
+
+            await Task.Yield();
             //using (await LoadingLock.LockAsync())
             //{
             //    try
