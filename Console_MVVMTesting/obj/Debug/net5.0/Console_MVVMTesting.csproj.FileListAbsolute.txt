@@ -69,4 +69,3 @@ C:\Users\pak\Source\Repos\MVVMTesting\Console_MVVMTesting\obj\Debug\net5.0\Conso
 C:\Users\pak\Source\Repos\MVVMTesting\Console_MVVMTesting\obj\Debug\net5.0\ref\Console_MVVMTesting.dll
 C:\Users\pak\Source\Repos\MVVMTesting\Console_MVVMTesting\obj\Debug\net5.0\Console_MVVMTesting.pdb
 C:\Users\pak\Source\Repos\MVVMTesting\Console_MVVMTesting\obj\Debug\net5.0\Console_MVVMTesting.genruntimeconfig.cache
-C:\Users\pak\Source\Repos\MVVMTesting\Console_MVVMTesting\obj\Debug\net5.0\Console_MVVMTesting.csproj.AssemblyReference.cache
