@@ -135,9 +135,6 @@ namespace Console_MVVMTesting.Helpers
         }
 
 
-
-
-
  
 
         internal void DisplayStringInBytes(string myString)
@@ -145,15 +142,16 @@ namespace Console_MVVMTesting.Helpers
             if (myString.Length == 0) return;
             //MyConsoleWriteLine("LWHITE", $"{myString.Length}");
 
-            int value;
+            int myValue, myIndex = 0;
             char[] chars = myString.ToCharArray();
-            foreach (var myChar in chars)
+            foreach (char myChar in chars)
             {
-                value = Convert.ToInt32(myChar);
-                MyConsoleWriteLine("LWHITE", $"{value:X2} : {myChar}");
+                myValue = Convert.ToInt32(myChar);
+                MyConsoleWriteLine("DWHITE", $"[{myIndex:D4}] : [{myValue:X2}] : {myChar}");
                 //XAMLtbRX += $"{value:X2} ";
+                myIndex++;
             }
-            Console.WriteLine();
+            //Console.WriteLine();
         }
 
 

@@ -196,67 +196,6 @@ namespace Console_MVVMTesting.ViewModels
         #endregion ParseResponseData
 
 
-        // https://docs.microsoft.com/en-us/dotnet/framework/network-programming/using-an-asynchronous-client-socket
-        // still a new Thread
-        #region Socket Callbacks
-        private void ReceiveCallBack(IAsyncResult ar)
-        {
-            _log.Log(consoleColor, $"LCSocketViewModel::ReceiveCallBack1(): ThreadId: {Thread.CurrentThread.ManagedThreadId}");
-
-            if (_closingDown)
-                return;
-
-            try
-            {
-                StateObject state = (StateObject)ar.AsyncState;
-                //Socket client = state.terminalSocket; // wywala
-
-                int receivedBytes = _terminalSocket.EndReceive(ar); //   Ends a pending asynchronous read.
-                _log.Log(consoleColor, $"LCSocketViewModel::ReceiveCallBack1(): receivedBytes: {receivedBytes }");
-                if (receivedBytes == 0)
-                {
-                    string dt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
-                    //Connect();
-                    return; // disconnected?!?
-                }
-
-                // Handle received data
-                Array.Resize(ref _receiveBuffer, receivedBytes);
-                string text = Encoding.ASCII.GetString(_receiveBuffer);
-
-                //Exception thrown: 'System.Runtime.InteropServices.COMException' in WinRT.Runtime.dll
-                //LCSocketViewModel::ReceiveCallBack(): The application called an interface that was marshalled for a different thread. (0x8001010E (RPC_E_WRONG_THREAD))     
-
-                //_dispatcherQueue.TryEnqueue(() => { XAMLtbReceiveSocketBox += text; });
-                //MyUtils.DisplayStringInBytes(text);
-
-                text = ParseResponseData(text);
-
-                if (!String.IsNullOrEmpty(text))
-                {
-                    _composedResponse += "\r\n\r\n" + text;
-                    ResponseReceivedEvent.Set();
-                }
-                Array.Resize(ref _receiveBuffer, _terminalSocket.ReceiveBufferSize);
-
-                // Get ready to receive new data (obs. callback is recursive function)
-                _terminalSocket.BeginReceive(_receiveBuffer, 0, _receiveBuffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallBack), null);
-            }
-            catch (SocketException se)
-            {
-                _log.Log(consoleColor, $"LCSocketViewModel::ReceiveCallBack1(): {se.Message}");
-            }
-            catch (ObjectDisposedException ode)
-            {
-                String msg = String.Format("{0}", ode.Message);
-                _log.Log(consoleColor, $"LCSocketViewModel::ReceiveCallBack1(): {ode.Message}");
-            }
-            catch (Exception ex)
-            {
-                _log.Log(consoleColor, $"LCSocketViewModel::ReceiveCallBack1(): {ex.Message}");
-            }
-            _log.Log(consoleColor, $"LCSocketViewModel::ReceiveCallBack1(): end of method.");
-        }
 
 
         private void SendCallBack(IAsyncResult ar)
@@ -275,7 +214,6 @@ namespace Console_MVVMTesting.ViewModels
                 _log.Log(consoleColor, $"LCSocketViewModel::SendCallBack: {ex.Message}");
             }
         }
-        #endregion Socket Callbacks
 
 
         // BeginSend() Sends data asynchronously to a connected System.Net.Sockets.Socket.
@@ -417,6 +355,72 @@ namespace Console_MVVMTesting.ViewModels
 
 
 
+
+        // https://docs.microsoft.com/en-us/dotnet/framework/network-programming/using-an-asynchronous-client-socket
+        // still a new Thread
+        #region ReceiveCallBack
+        private void ReceiveCallBack(IAsyncResult ar)
+        {
+            _log.Log(consoleColor, $"LCSocketViewModel::ReceiveCallBack1(): ThreadId: {Thread.CurrentThread.ManagedThreadId}");
+
+            if (_closingDown)
+                return;
+
+            try
+            {
+                StateObject state = (StateObject)ar.AsyncState;
+                //Socket client = state.terminalSocket; // wywala
+
+                int receivedBytes = _terminalSocket.EndReceive(ar); //   Ends a pending asynchronous read.
+                _log.Log(consoleColor, $"LCSocketViewModel::ReceiveCallBack1(): receivedBytes: {receivedBytes }");
+                if (receivedBytes == 0)
+                {
+                    string dt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+                    //Connect();
+                    return; // disconnected?!?
+                }
+
+                // Handle received data
+                Array.Resize(ref _receiveBuffer, receivedBytes);
+                string text = Encoding.ASCII.GetString(_receiveBuffer);
+
+                //Exception thrown: 'System.Runtime.InteropServices.COMException' in WinRT.Runtime.dll
+                //LCSocketViewModel::ReceiveCallBack(): The application called an interface that was marshalled for a different thread. (0x8001010E (RPC_E_WRONG_THREAD))     
+
+                //_dispatcherQueue.TryEnqueue(() => { XAMLtbReceiveSocketBox += text; });
+                //MyUtils.DisplayStringInBytes(text);
+
+                text = ParseResponseData(text);
+
+                if (!String.IsNullOrEmpty(text))
+                {
+                    _composedResponse += "\r\n\r\n" + text;
+                    ResponseReceivedEvent.Set();
+                }
+                Array.Resize(ref _receiveBuffer, _terminalSocket.ReceiveBufferSize);
+
+                // Get ready to receive new data (obs. callback is recursive function)
+                _terminalSocket.BeginReceive(_receiveBuffer, 0, _receiveBuffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallBack), null);
+            }
+            catch (SocketException se)
+            {
+                _log.Log(consoleColor, $"LCSocketViewModel::ReceiveCallBack1(): {se.Message}");
+            }
+            catch (ObjectDisposedException ode)
+            {
+                String msg = String.Format("{0}", ode.Message);
+                _log.Log(consoleColor, $"LCSocketViewModel::ReceiveCallBack1(): {ode.Message}");
+            }
+            catch (Exception ex)
+            {
+                _log.Log(consoleColor, $"LCSocketViewModel::ReceiveCallBack1(): {ex.Message}");
+            }
+            _log.Log(consoleColor, $"LCSocketViewModel::ReceiveCallBack1(): end of method.");
+        }
+        #endregion ReceiveCallBack
+
+
+
         // still a new Thread
         private void ConnectCallback(IAsyncResult ar)       // nie wraca
         {
@@ -531,6 +535,7 @@ namespace Console_MVVMTesting.ViewModels
             _log.Log("LCSocketViewModel::Close(): end of method");
         }
         #endregion Close
+
 
 
         // still a new Thread
