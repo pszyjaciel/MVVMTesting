@@ -27,5 +27,6 @@ obj/
 _ReSharper*/
 [Tt]est[Rr]esult*
 .vs/
+.vs/v16/
 #Nuget packages folder
 packages/
