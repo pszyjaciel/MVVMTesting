@@ -20,11 +20,13 @@ using static PInvoke.User32;
 // Way-Way is observing me even more!
 
 // (!)messages: https://social.technet.microsoft.com/wiki/contents/articles/30939.wpf-change-tracking.aspx
+// https://docs.microsoft.com/en-us/dotnet/framework/network-programming/using-an-asynchronous-client-socket
 
 namespace Console_MVVMTesting.ViewModels
 {
     public class LCSocketViewModel : ObservableObject
     {
+        #region privates
         private readonly ILoggingService _log;
         private readonly IMessenger _messenger;
 
@@ -52,7 +54,7 @@ namespace Console_MVVMTesting.ViewModels
         private ManualResetEvent connectDone = new ManualResetEvent(false);
         private ManualResetEvent receiveDone = new ManualResetEvent(false);
         private MyUtils mu = new MyUtils();
-
+        #endregion privates
 
 
         public bool IsConnected(Socket terminalSocket)
@@ -119,7 +121,6 @@ namespace Console_MVVMTesting.ViewModels
         #endregion Close
 
 
-
         #region IsHostnameValid
         /// <summary>
         /// Checks hostname for invalid characters. 
@@ -155,7 +156,6 @@ namespace Console_MVVMTesting.ViewModels
         #endregion IsHostnameValid
 
 
-        // works in a new first-level Thread
         #region ResolveIp
         private IPAddress ResolveIp(string host)
         {
@@ -188,7 +188,6 @@ namespace Console_MVVMTesting.ViewModels
             return ip;
         }
         #endregion ResolveIp
-
 
 
         #region ParseResponseData
@@ -231,7 +230,6 @@ namespace Console_MVVMTesting.ViewModels
         #endregion ParseResponseData
 
 
-
         #region ParseOutputData
         // adds '\r\n' to the end of string data
         private string ParseOutputData(string outData)
@@ -245,6 +243,7 @@ namespace Console_MVVMTesting.ViewModels
         #endregion ParseOutputData
 
 
+        #region ConnectCallback
         private void ConnectCallback(IAsyncResult ar)
         {
             string consoleColor = "LGREEN";     // kolbaki w innym kolorze
@@ -279,8 +278,10 @@ namespace Console_MVVMTesting.ViewModels
             connectDone.Set();
             //_log.Log(consoleColor, $"LCSocketViewModel::ConnectCallback(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : End of method.");
         }
+        #endregion ConnectCallback
 
 
+        #region MyConnectAsync
         private async Task<bool> MyConnectAsync(EndPoint remoteEP, Socket terminalSocket)
         {
             _log.Log(consoleColor, $"LCSocketViewModel::MyConnectAsync(): socket: {terminalSocket.Handle}, ThreadId: {Thread.CurrentThread.ManagedThreadId} : Start of method  ({this.GetHashCode():x8})");
@@ -306,7 +307,7 @@ namespace Console_MVVMTesting.ViewModels
             _log.Log(consoleColor, $"LCSocketViewModel::MyConnectAsync(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : End of method.");
             return (result is not null) ? result.IsCompleted : false;
         }
-
+        #endregion MyConnectAsync
 
 
         #region ConnectToSocket
@@ -351,8 +352,6 @@ namespace Console_MVVMTesting.ViewModels
         #endregion ConnectToSocket
 
 
-
-        // https://docs.microsoft.com/en-us/dotnet/framework/network-programming/using-an-asynchronous-client-socket
         #region ReceiveCallBack
         private void ReceiveCallBack(IAsyncResult ar)
         {
@@ -413,30 +412,6 @@ namespace Console_MVVMTesting.ViewModels
         #endregion ReceiveCallBack
 
 
-
-        private async Task MyReceiveAsync(Socket terminalSocket)
-        {
-            _log.Log(consoleColor, $"LCSocketViewModel::MyReceiveAsync(): socket: {terminalSocket.Handle}, ThreadId: {Thread.CurrentThread.ManagedThreadId} : Start of method  ({this.GetHashCode():x8})");
-            try
-            {
-                // Create the state object.  
-                StateObject state = new StateObject();
-                state.workSocket = terminalSocket;
-
-                // Begin receiving the data from the remote device.  
-                terminalSocket.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReceiveCallBack), state);
-            }
-            catch (Exception e)
-            {
-                _log.Log(consoleColor, e.ToString());
-            }
-
-            await Task.Yield();
-            _log.Log(consoleColor, $"LCSocketViewModel::MyReceiveAsync(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : End of method  ({this.GetHashCode():x8})");
-        }
-
-
-
         #region ReceiveFromSocket
         public void ReceiveFromSocket(Socket terminalSocket, CancellationTokenSource cts)
         {
@@ -448,9 +423,21 @@ namespace Console_MVVMTesting.ViewModels
                 _ctsDisposed1 = false;
             }
 
-            Task MyTask = Task.Run(async () =>
+            Task MyTask = Task.Run( () =>
             {
-                await this.MyReceiveAsync(terminalSocket);
+                try
+                {
+                    // Create the state object.  
+                    StateObject state = new StateObject();
+                    state.workSocket = terminalSocket;
+
+                    // Begin receiving the data from the remote device.  
+                    terminalSocket.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReceiveCallBack), state);
+                }
+                catch (Exception e)
+                {
+                    _log.Log(consoleColor, e.ToString());
+                }
                 receiveDone.WaitOne();
             });
 
@@ -459,8 +446,7 @@ namespace Console_MVVMTesting.ViewModels
         #endregion ReceiveFromSocket
 
 
-
-
+        #region SendCallBack
         private void SendCallBack(IAsyncResult ar)
         {
             _log.Log(consoleColor, $"LCSocketViewModel::SendCallBack(): ThreadId: {Thread.CurrentThread.ManagedThreadId} - Start of method.");
@@ -484,9 +470,10 @@ namespace Console_MVVMTesting.ViewModels
             }
             _log.Log(consoleColor, $"LCSocketViewModel::SendCallBack(): ThreadId: {Thread.CurrentThread.ManagedThreadId} - End of method.");
         }
+        #endregion SendCallBack
 
 
-
+        #region SendToSocket
         // BeginSend() Sends data asynchronously to a connected System.Net.Sockets.Socket.
         // works in a second level new Thread!
         public void SendToSocket(Socket terminalSocket, string text)   // hujowata nazwa
@@ -507,10 +494,10 @@ namespace Console_MVVMTesting.ViewModels
             }
             _log.Log(consoleColor, $"LCSocketViewModel::SendToSocket(): ThreadId: {Thread.CurrentThread.ManagedThreadId} - End of method.");
         }
+        #endregion SendToSocket
 
 
-
-
+        #region RunInitCommandMessage
         private void RunInitCommandMessage()
         {
             //_log.Log(consoleColor, $"LCSocketViewModel::RunInitCommandMessage(): Start of method  ({this.GetHashCode():x8})");
@@ -582,9 +569,7 @@ namespace Console_MVVMTesting.ViewModels
                 MyTask = Task.Delay(250);
                 MyTask.Wait();
             }
-
-
-
+     
 
 
             // now we want to close the open sockets
@@ -609,8 +594,10 @@ namespace Console_MVVMTesting.ViewModels
 
             //_log.Log(consoleColor, $"LCSocketViewModel::RunInitCommandMessage(): End of method.");
         }
+        #endregion RunInitCommandMessage
 
 
+        #region Constructor
         public LCSocketViewModel(ILoggingService loggingService, IMessenger messenger, EastTesterViewModel etvm)
         {
             _log = loggingService;
@@ -641,7 +628,7 @@ namespace Console_MVVMTesting.ViewModels
 
             _log.Log(consoleColor, $"LCSocketViewModel::LCSocketViewModel(): End of constructor  ({this.GetHashCode():x8})");
         }
-
+        #endregion Constructor
 
     }
 }
