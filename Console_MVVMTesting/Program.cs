@@ -100,8 +100,6 @@ namespace Console_MVVMTesting
 
 
         /// ////////////////////////////////////
-
-
         static void Main(string[] args)
         {
             mu = new MyUtils();
