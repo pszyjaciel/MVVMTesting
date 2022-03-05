@@ -196,6 +196,17 @@ namespace Console_MVVMTesting.ViewModels
         #endregion ParseResponseData
 
 
+        #region ParseOutputData
+        // adds '\r\n' to the end of string data
+        private string ParseOutputData(string outData)
+        {
+            _log.Log("LCSocketViewModel::ParseOutputData()");
+
+            string parsedData;
+            parsedData = String.Format("{0}\r\n", outData);
+            return parsedData;
+        }
+        #endregion ParseOutputData
 
 
         private void SendCallBack(IAsyncResult ar)
@@ -236,18 +247,6 @@ namespace Console_MVVMTesting.ViewModels
             }
         }
 
-
-        #region ParseOutputData
-        // adds '\r\n' to the end of string data
-        private string ParseOutputData(string outData)
-        {
-            _log.Log("LCSocketViewModel::ParseOutputData()");
-
-            string parsedData;
-            parsedData = String.Format("{0}\r\n", outData);
-            return parsedData;
-        }
-        #endregion ParseOutputData
 
 
         #region MessageHandler

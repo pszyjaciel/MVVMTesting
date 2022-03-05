@@ -134,13 +134,11 @@ namespace Console_MVVMTesting.Helpers
             return _myColorsDict;
         }
 
-
- 
+         
 
         internal void DisplayStringInBytes(string myString)
         {
             if (myString.Length == 0) return;
-            //MyConsoleWriteLine("LWHITE", $"{myString.Length}");
 
             int myValue, myIndex = 0;
             char[] chars = myString.ToCharArray();
@@ -151,7 +149,7 @@ namespace Console_MVVMTesting.Helpers
                 //XAMLtbRX += $"{value:X2} ";
                 myIndex++;
             }
-            //Console.WriteLine();
+            MyConsoleWriteLine("LWHITE", $"[{myString.Length}]: {myString}");
         }
 
 
