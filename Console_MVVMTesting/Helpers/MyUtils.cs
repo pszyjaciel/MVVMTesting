@@ -3,23 +3,23 @@ using System.Collections.Generic;
 using System.Text;
 
 
-namespace Console_MVVMTesting.Helpers
+ namespace Console_MVVMTesting.Helpers
 {
-    internal class MyUtils
+    internal static class MyUtils
     {
         private const string _defaultColor = "\x1B[37m";
         private const string _defaultBackgroundColor = "\x1B[40m";
 
-        private Dictionary<string, string> _myColorsDict;
-        
+        private static Dictionary<string, string> _myColorsDict;
 
-        public MyUtils()
+
+        static MyUtils()
         {
-            _myColorsDict = this.PrepareColorDictionary();
+            _myColorsDict = PrepareColorDictionary();
         }
 
 
-        internal void MyConsoleWriteLine(string myString)
+        internal static void MyConsoleWriteLine(string myString)
         {
             MyConsoleWriteLine(_defaultColor, myString);
         }
@@ -28,7 +28,7 @@ namespace Console_MVVMTesting.Helpers
         /// <summary>
         /// Function outputs myString to screen using the Foreground-color
         /// </summary>
-        internal void MyConsoleWriteLine(string myColorName, string myString)
+        internal static void MyConsoleWriteLine(string myColorName, string myString)
         {
             bool colorFound = false;
             foreach (KeyValuePair<string, string> kvp in _myColorsDict)
@@ -51,7 +51,7 @@ namespace Console_MVVMTesting.Helpers
         /// <summary>
         /// Function outputs myString to screen using both FG and BG-colors
         /// </summary>
-        internal void MyConsoleWriteLineExt(string myForegroundColorName, string myBackgroundColorName, string myString)
+        internal static void MyConsoleWriteLineExt(string myForegroundColorName, string myBackgroundColorName, string myString)
         {
             string _myForegroundColorName = "";
             string _myBackgroundColorName = "";
@@ -87,7 +87,7 @@ namespace Console_MVVMTesting.Helpers
 
 
 
-        private Dictionary<string, string> PrepareColorDictionary()
+        private static Dictionary<string, string> PrepareColorDictionary()
         {
             // \x1B czy \x1b to jeden huj
             _myColorsDict = new Dictionary<string, string>();
@@ -134,29 +134,57 @@ namespace Console_MVVMTesting.Helpers
             return _myColorsDict;
         }
 
-         
 
-        internal void DisplayStringInBytes(string myString)
+
+        internal static void DisplayStringInBytes2(string myString)
         {
             if (myString.Length == 0) return;
+
+            //MyConsoleWriteLine("LWHITE", $"[{myString.Length}]: {myString}");
 
             int myValue, myIndex = 0;
             char[] chars = myString.ToCharArray();
             foreach (char myChar in chars)
             {
+                //if ((myChar == 0x0a) || (myChar == 0x0d)) { myChar = 0x20; }
                 myValue = Convert.ToInt32(myChar);
-                MyConsoleWriteLine("DWHITE", $"[{myIndex:D4}] : [{myValue:X2}] : {myChar}");
+                if ((myChar == 0x0a) || (myChar == 0x0d))
+                    MyConsoleWriteLine("DWHITE", $"[{myIndex:D4}] : [{myValue:X2}]");
+                else
+                    MyConsoleWriteLine("DWHITE", $"[{myIndex:D4}] : [{myValue:X2}] : {myChar}");
                 //XAMLtbRX += $"{value:X2} ";
                 myIndex++;
             }
+        }
+
+
+
+        internal static void DisplayStringInBytes(string myString)
+        {
+            if (myString.Length == 0) return;
+
             MyConsoleWriteLine("LWHITE", $"[{myString.Length}]: {myString}");
+
+            int myValue;
+            char[] chars = myString.ToCharArray();
+
+            for (int i = 0; i < chars.Length; i++)
+            {
+                if (i % 0x10 == 0)
+                {
+                    System.Diagnostics.Debug.Write($"\n[{i:D4}] : ");
+                }
+                myValue = Convert.ToInt32(chars[i]);
+                System.Diagnostics.Debug.Write($"[{myValue:X2}] ");   // [VS] write to immediate window
+            }
+            System.Diagnostics.Debug.Write("\n\n");
         }
 
 
         /// <summary>
         /// Returns incoming string as byte-string with new line
         /// </summary>
-        internal string GimmeStringInBytes(string myString)
+        internal static string GimmeStringInBytes(string myString)
         {
             if (myString.Length == 0) return "";
             StringBuilder stringBuilder = new StringBuilder();
@@ -173,7 +201,7 @@ namespace Console_MVVMTesting.Helpers
         }
 
 
-        public void MyWinUIConsoleWriteLine(ConsoleColor myForegroundColor, ConsoleColor myBackgroundColor, string something)
+        public static void MyWinUIConsoleWriteLine(ConsoleColor myForegroundColor, ConsoleColor myBackgroundColor, string something)
         {
             ConsoleColor currentBackground = Console.BackgroundColor;
             ConsoleColor currentForeground = Console.ForegroundColor;
