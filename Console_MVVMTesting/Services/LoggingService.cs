@@ -24,14 +24,12 @@ namespace Console_MVVMTesting.Services
 
         public void Log(string consoleColor, string message)
         {
-            MyUtils mu = new MyUtils();
-            mu.MyConsoleWriteLine(consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] {message} ");
+            MyUtils.MyConsoleWriteLine(consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] {message} ");
         }
 
         public void Log(string message)
         {
-            MyUtils mu = new MyUtils();
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] {message} ");
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] {message} ");
         }
     }
 }

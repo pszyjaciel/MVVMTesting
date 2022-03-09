@@ -10,14 +10,12 @@ namespace Console_MVVMTesting.Messages
 {
     public class StatusRequestMessage : RequestMessage<bool>
     {
-        private MyUtils mu;
         private const string consoleColor = "DWHITE";
 
         public StatusRequestMessage()
         {
-            mu = new MyUtils();
 
-            //mu.MyConsoleWriteLine(consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            //MyUtils.MyConsoleWriteLine(consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
             //  $"StatusRequestMessage::StatusRequestMessage()  ({this.GetHashCode():x8})");
         }
     }

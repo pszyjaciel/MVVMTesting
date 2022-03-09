@@ -26,14 +26,12 @@ namespace Console_MVVMTesting
         public static ProductionPage Content8 { get; internal set; }
 
 
-        private static MyUtils mu;
-
         
         private static Semaphore _serialSemaphore;
 
         internal static void Activate()
         {
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
               $"Program::Activate() ({typeof(SerialPortExtensions).GetHashCode():x8})");
         }
 
@@ -48,7 +46,7 @@ namespace Console_MVVMTesting
 
         private static IServiceProvider ConfigureMyServices()
         {
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
                 $"Program::ConfigureServices(): start of method" +
                 $"({typeof(SerialPortExtensions).GetHashCode():x8})");
 
@@ -89,7 +87,7 @@ namespace Console_MVVMTesting
             services.AddTransient<LCSocketPage>();
             services.AddSingleton<LCSocketViewModel>();
 
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
                 $"Program::ConfigureServices(): end of method" +
                 $"({typeof(SerialPortExtensions).GetHashCode():x8})");
 
@@ -102,10 +100,9 @@ namespace Console_MVVMTesting
         /// ////////////////////////////////////
         static void Main(string[] args)
         {
-            mu = new MyUtils();
             MySerialPort msp = new MySerialPort();
 
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
                 $"==========> Program::Main(): start of program <========== " +
                 $"({typeof(SerialPortExtensions).GetHashCode():x8})");
 
@@ -123,12 +120,12 @@ namespace Console_MVVMTesting
             //    result1 = await myBackgroudTaskAsync1();
             //});
             //myBackgroudTask1.Wait();
-            //mu.MyConsoleWriteLine($"Program::Main(): result1: {result1}");
+            //MyUtils.MyConsoleWriteLine($"Program::Main(): result1: {result1}");
 
             //Task myBackgroudTask2 = Task.Run(async () =>
             //{
             //    bool result2 = await myBackgroudTaskAsync2();
-            //    mu.MyConsoleWriteLine($"Program::Main(): result2: {result2}");
+            //    MyUtils.MyConsoleWriteLine($"Program::Main(): result2: {result2}");
             //});
 
             //msp.RunSerialPort();
@@ -138,7 +135,7 @@ namespace Console_MVVMTesting
             // http://sheepsqueezers.com/media/presentations/dotNetLectureSeries_CSharpProgrammingIII.pdf tesz fajne
 
 
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
                 $"==========> Program::Main(): end of program <========== " +
                 $"({typeof(SerialPortExtensions).GetHashCode():x8})");
 

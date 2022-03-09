@@ -11,12 +11,10 @@ namespace Console_MVVMTesting
 {
     class MySerialPort
     {
-        private MyUtils mu;
         private Semaphore _serialSemaphore;
 
         public MySerialPort()
         {
-            mu = new MyUtils();
             _serialSemaphore = new Semaphore(1, 1, "MySemaphore");
         }
 
@@ -24,33 +22,33 @@ namespace Console_MVVMTesting
 
         private async Task<bool> myBackgroudTaskAsync1()
         {
-            mu.MyConsoleWriteLine($"Program::myBackgroudTaskAsync1(): Start of method");
+            MyUtils.MyConsoleWriteLine($"Program::myBackgroudTaskAsync1(): Start of method");
             List<SerialPort> myListOfSerialPorts = RunSerialPortSync();
-            mu.MyConsoleWriteLine($"Program::myBackgroudTaskAsync1(): {myListOfSerialPorts.Count}");
+            MyUtils.MyConsoleWriteLine($"Program::myBackgroudTaskAsync1(): {myListOfSerialPorts.Count}");
 
             if (myListOfSerialPorts.Count > 0)
                 return true;
 
             await Task.CompletedTask;
-            mu.MyConsoleWriteLine($"Program::myBackgroudTaskAsync1(): End of method");
+            MyUtils.MyConsoleWriteLine($"Program::myBackgroudTaskAsync1(): End of method");
             return false;
         }
 
         //private static async Task<bool> myBackgroudTaskAsync2()
         //{
-        //    mu.MyConsoleWriteLine($"Program::myBackgroudTaskAsync2(): Start of method");
+        //    MyUtils.MyConsoleWriteLine($"Program::myBackgroudTaskAsync2(): Start of method");
         //    await Task.Delay(5000);
         //    await Task.CompletedTask;
-        //    mu.MyConsoleWriteLine($"Program::myBackgroudTaskAsync2(): End of method");
+        //    MyUtils.MyConsoleWriteLine($"Program::myBackgroudTaskAsync2(): End of method");
         //    return false;
         //}
 
         //private async static Task MyCallbackTaskAsync()
         //{
-        //    mu.MyConsoleWriteLine($"Program::MyCallbackTaskAsync(): Start of method");
+        //    MyUtils.MyConsoleWriteLine($"Program::MyCallbackTaskAsync(): Start of method");
         //    await Task.Delay(6000);
         //    await Task.CompletedTask;
-        //    mu.MyConsoleWriteLine($"Program::MyCallbackTaskAsync(): End of method");
+        //    MyUtils.MyConsoleWriteLine($"Program::MyCallbackTaskAsync(): End of method");
         //}
 
 
@@ -59,11 +57,11 @@ namespace Console_MVVMTesting
         private List<SerialPort> RunSerialPortSync()
         {
             List<SerialPort> myListOfSerialPorts = RetrieveSerialPortParallel();
-            mu.MyConsoleWriteLine($"Program::RunSerialPortAsync(): {myListOfSerialPorts.Count}");
+            MyUtils.MyConsoleWriteLine($"Program::RunSerialPortAsync(): {myListOfSerialPorts.Count}");
 
             foreach (SerialPort mySerialPortName in myListOfSerialPorts)
             {
-                mu.MyConsoleWriteLine($"Program::RunSerialPortAsync(): Found: {mySerialPortName.PortName}");
+                MyUtils.MyConsoleWriteLine($"Program::RunSerialPortAsync(): Found: {mySerialPortName.PortName}");
             }
 
             CloseSerialPortParallelSync(myListOfSerialPorts);
@@ -77,12 +75,12 @@ namespace Console_MVVMTesting
             {
                 try
                 {
-                    mu.MyConsoleWriteLine($"Program::CloseSerialPortParallelSync(): {sp.PortName} is going close.");
+                    MyUtils.MyConsoleWriteLine($"Program::CloseSerialPortParallelSync(): {sp.PortName} is going close.");
                     sp.Close();
                 }
                 catch (Exception ex)
                 {
-                    mu.MyConsoleWriteLine($"Program::CloseSerialPortParallelSync(): {ex.Message}");
+                    MyUtils.MyConsoleWriteLine($"Program::CloseSerialPortParallelSync(): {ex.Message}");
                 }
             }
         }
@@ -92,7 +90,7 @@ namespace Console_MVVMTesting
 
         private List<SerialPort> FindAndOpenSerialPorts()
         {
-            mu.MyConsoleWriteLine($"Program::FindAndOpenSerialPorts(): start of method");
+            MyUtils.MyConsoleWriteLine($"Program::FindAndOpenSerialPorts(): start of method");
             //await Task.Yield(); // Make us async right away
 
             List<SerialPort> mySerialPortList = new List<SerialPort>();
@@ -113,10 +111,10 @@ namespace Console_MVVMTesting
                     }
                     catch (Exception ex)
                     {
-                        mu.MyConsoleWriteLine($"Program::FindAndOpenSerialPorts(): {ex.Message}");
+                        MyUtils.MyConsoleWriteLine($"Program::FindAndOpenSerialPorts(): {ex.Message}");
                     }
                 }
-                mu.MyConsoleWriteLine($"Program::FindAndOpenSerialPorts(): is {mySerialPort.PortName} open: {mySerialPort.IsOpen}");
+                MyUtils.MyConsoleWriteLine($"Program::FindAndOpenSerialPorts(): is {mySerialPort.PortName} open: {mySerialPort.IsOpen}");
             }
             return mySerialPortList;
         }
@@ -128,13 +126,13 @@ namespace Console_MVVMTesting
         // This doesn't work with async-await, where you want to release the thread for the duration of the async call.
         private List<SerialPort> RetrieveSerialPortParallel()
         {
-            mu.MyConsoleWriteLine($"Program::RetrieveSerialPortParallel(): Start of method");
+            MyUtils.MyConsoleWriteLine($"Program::RetrieveSerialPortParallel(): Start of method");
             //await Task.Yield();
 
             List<SerialPort> myListOfOpenedSerialPorts = FindAndOpenSerialPorts();
             foreach (SerialPort mySerialPortName in myListOfOpenedSerialPorts)
             {
-                mu.MyConsoleWriteLine($"Program::RetrieveSerialPortParallel(): mySerialPortName: {mySerialPortName.PortName}");
+                MyUtils.MyConsoleWriteLine($"Program::RetrieveSerialPortParallel(): mySerialPortName: {mySerialPortName.PortName}");
             }
 
             List<SerialPort> myInitializedListOfSerialPorts = new List<SerialPort>();
@@ -142,21 +140,21 @@ namespace Console_MVVMTesting
             Parallel.ForEach(myListOfOpenedSerialPorts, (mySerialPort) =>
             {
                 initResult = InitializeSerialPort(mySerialPort);
-                mu.MyConsoleWriteLine($"Program::RetrieveSerialPortParallel(): initResult: {initResult}");
+                MyUtils.MyConsoleWriteLine($"Program::RetrieveSerialPortParallel(): initResult: {initResult}");
                 if (initResult)
                 {
                     myInitializedListOfSerialPorts.Add(mySerialPort);
                 }
             });
 
-            mu.MyConsoleWriteLine($"Program::RetrieveSerialPortParallel(): myInitializedListOfSerialPorts.Count: {myInitializedListOfSerialPorts.Count}");
-            mu.MyConsoleWriteLine($"Program::RetrieveSerialPortParallel(): End of method");
+            MyUtils.MyConsoleWriteLine($"Program::RetrieveSerialPortParallel(): myInitializedListOfSerialPorts.Count: {myInitializedListOfSerialPorts.Count}");
+            MyUtils.MyConsoleWriteLine($"Program::RetrieveSerialPortParallel(): End of method");
             return myInitializedListOfSerialPorts;
         }
 
         private bool InitializeSerialPort(SerialPort mySerialPort)
         {
-            mu.MyConsoleWriteLine($"Program::InitializeSerialPort(): Start of method");
+            MyUtils.MyConsoleWriteLine($"Program::InitializeSerialPort(): Start of method");
 
 
             Dictionary<string, string> ETInitCommandDict = new Dictionary<string, string>();
@@ -166,17 +164,17 @@ namespace Console_MVVMTesting
             try
             {
                 response = SerialPortExtensions.SendCommand(mySerialPort, myCommand);
-                mu.MyConsoleWriteLine($"Program::InitializeSerialPort(): response: {response}");
+                MyUtils.MyConsoleWriteLine($"Program::InitializeSerialPort(): response: {response}");
             }
             catch (TimeoutException te)
             {
-                mu.MyConsoleWriteLine($"Program::InitializeSerialPort(): {te.Message}");
+                MyUtils.MyConsoleWriteLine($"Program::InitializeSerialPort(): {te.Message}");
                 return false;
             }
 
             if (!response.Contains("ET5410"))
             {
-                mu.MyConsoleWriteLine($"Program::InitializeSerialPort(): Wrong device. Not ET5410.");
+                MyUtils.MyConsoleWriteLine($"Program::InitializeSerialPort(): Wrong device. Not ET5410.");
                 return false;
             }
 
@@ -197,26 +195,26 @@ namespace Console_MVVMTesting
                 }
                 catch (TimeoutException te)
                 {
-                    mu.MyConsoleWriteLine($"Program::InitializeSerialPort(): {te.Message}");
+                    MyUtils.MyConsoleWriteLine($"Program::InitializeSerialPort(): {te.Message}");
                     return false;
                 }
 
-                mu.MyConsoleWriteLine($"Program::InitializeSerialPort(): response: {response}");
+                MyUtils.MyConsoleWriteLine($"Program::InitializeSerialPort(): response: {response}");
                 if (response.Contains("err"))
                 {
-                    mu.MyConsoleWriteLine($"Program::InitializeSerialPort(): response contains 'err'.");
+                    MyUtils.MyConsoleWriteLine($"Program::InitializeSerialPort(): response contains 'err'.");
                     return false;
                 }
             }
 
-            mu.MyConsoleWriteLine($"Program::InitializeSerialPort(): End of method");
+            MyUtils.MyConsoleWriteLine($"Program::InitializeSerialPort(): End of method");
             return true;
         }
 
 
         private async Task<bool> InitializeETAsync(SerialPort mySerialPort)
         {
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
                  $"Program::InitializeETAsync(): mySerialPort.PortName: {mySerialPort.PortName}" +
                  $"({typeof(SerialPortExtensions).GetHashCode():x8})");
 
@@ -225,7 +223,7 @@ namespace Console_MVVMTesting
 
             if (mySerialPort == null)
             {
-                mu.MyConsoleWriteLine("Program::InitializeETAsync(): mySerialPort == null");
+                MyUtils.MyConsoleWriteLine("Program::InitializeETAsync(): mySerialPort == null");
                 return false;
             }
 
@@ -237,7 +235,7 @@ namespace Console_MVVMTesting
             {
                 return false;
             }
-            mu.MyConsoleWriteLine($"Program::InitializeETAsync(): Semaphore aquired on thread {Thread.CurrentThread.ManagedThreadId}");
+            MyUtils.MyConsoleWriteLine($"Program::InitializeETAsync(): Semaphore aquired on thread {Thread.CurrentThread.ManagedThreadId}");
 
             string myCommand = "*IDN?" + '\n';
             string response = null;
@@ -245,25 +243,25 @@ namespace Console_MVVMTesting
             {
                 //await SerialPortExtensions.ReadLineAsync(mySerialPort);
                 response = await SerialPortExtensions.SendCommandAsync(mySerialPort, myCommand);
-                mu.MyConsoleWriteLine($"Program::InitializeETAsync(): {response}");
+                MyUtils.MyConsoleWriteLine($"Program::InitializeETAsync(): {response}");
             }
             catch (AggregateException ex)
             {
-                mu.MyConsoleWriteLine($"Program::InitializeETAsync(): AggregateException: {ex.InnerException.Message}");
+                MyUtils.MyConsoleWriteLine($"Program::InitializeETAsync(): AggregateException: {ex.InnerException.Message}");
             }
 
             catch (OperationCanceledException oce)
             {
-                mu.MyConsoleWriteLine($"SerialPortExtensions::InitializeETAsync(): OperationCanceledException: {oce.Message}");
+                MyUtils.MyConsoleWriteLine($"SerialPortExtensions::InitializeETAsync(): OperationCanceledException: {oce.Message}");
                 return false;
             }
 
             catch (TimeoutException te)
             {
-                mu.MyConsoleWriteLine($"Program::InitializeETAsync(): TimeoutException: {te.Message}");
+                MyUtils.MyConsoleWriteLine($"Program::InitializeETAsync(): TimeoutException: {te.Message}");
 
                 _serialSemaphore.Release();
-                mu.MyConsoleWriteLine($"Program::InitializeETAsync(): In catch: Semaphore released on thread {Thread.CurrentThread.ManagedThreadId}");
+                MyUtils.MyConsoleWriteLine($"Program::InitializeETAsync(): In catch: Semaphore released on thread {Thread.CurrentThread.ManagedThreadId}");
 
                 // maybe close the serial port
                 return false;
@@ -271,10 +269,10 @@ namespace Console_MVVMTesting
 
             if (!response.Contains("ET5410"))
             {
-                mu.MyConsoleWriteLine($"Program::InitializeETAsync(): Wrong device. Not ET5410.");
+                MyUtils.MyConsoleWriteLine($"Program::InitializeETAsync(): Wrong device. Not ET5410.");
 
                 _serialSemaphore.Release();
-                mu.MyConsoleWriteLine($"Program::InitializeETAsync(): Semaphore released on thread {Thread.CurrentThread.ManagedThreadId}");
+                MyUtils.MyConsoleWriteLine($"Program::InitializeETAsync(): Semaphore released on thread {Thread.CurrentThread.ManagedThreadId}");
 
                 mySerialPort.Close();
                 return false;
@@ -284,7 +282,7 @@ namespace Console_MVVMTesting
 
 
             _serialSemaphore.Release();
-            mu.MyConsoleWriteLine($"Program::InitializeETAsync(): Semaphore released on thread {Thread.CurrentThread.ManagedThreadId}");
+            MyUtils.MyConsoleWriteLine($"Program::InitializeETAsync(): Semaphore released on thread {Thread.CurrentThread.ManagedThreadId}");
             return true;
         }
 
@@ -292,7 +290,7 @@ namespace Console_MVVMTesting
 
         private async Task<List<SerialPort>> OpenCOMPortsAsync()
         {
-            mu.MyConsoleWriteLine($"Program::OpenCOMPortsAsync(): start of method");
+            MyUtils.MyConsoleWriteLine($"Program::OpenCOMPortsAsync(): start of method");
             await Task.Yield(); // Make us async right away
 
             List<SerialPort> myAvailableSerialPortList = new List<SerialPort>();
@@ -315,13 +313,13 @@ namespace Console_MVVMTesting
                     }
                     catch (Exception ex)
                     {
-                        mu.MyConsoleWriteLine($"Program::OpenCOMPortsAsync(): {ex.Message}");
+                        MyUtils.MyConsoleWriteLine($"Program::OpenCOMPortsAsync(): {ex.Message}");
                     }
                 }
-                //mu.MyConsoleWriteLine($"Program::OpenCOMPortsAsync(): is {mySerialPort.PortName} open: {mySerialPort.IsOpen}");
+                //MyUtils.MyConsoleWriteLine($"Program::OpenCOMPortsAsync(): is {mySerialPort.PortName} open: {mySerialPort.IsOpen}");
             }
 
-            //mu.MyConsoleWriteLine($"Program::OpenCOMPortsAsync(): before Init(): {myAvailableSerialPortList.Count}");
+            //MyUtils.MyConsoleWriteLine($"Program::OpenCOMPortsAsync(): before Init(): {myAvailableSerialPortList.Count}");
 
             List<SerialPort> myInitializedSerialPortList = new List<SerialPort>();
             bool initResult;
@@ -334,9 +332,9 @@ namespace Console_MVVMTesting
                 }
             }
 
-            //mu.MyConsoleWriteLine($"Program::OpenCOMPortsAsync(): after Init(): {myInitializedSerialPortList.Count}");
+            //MyUtils.MyConsoleWriteLine($"Program::OpenCOMPortsAsync(): after Init(): {myInitializedSerialPortList.Count}");
 
-            mu.MyConsoleWriteLine($"Program::OpenCOMPortsAsync(): end of method");
+            MyUtils.MyConsoleWriteLine($"Program::OpenCOMPortsAsync(): end of method");
             return myInitializedSerialPortList;
         }
 
@@ -344,7 +342,7 @@ namespace Console_MVVMTesting
 
         internal void RunSerialPort()
         {
-            mu.MyConsoleWriteLine($"Program::RunSerialPort(): start of method");
+            MyUtils.MyConsoleWriteLine($"Program::RunSerialPort(): start of method");
 
             List<SerialPort> myListOfSerialPorts = new List<SerialPort>();
 
@@ -355,14 +353,14 @@ namespace Console_MVVMTesting
                 //Task myTask = OpenCOMPortsAsync();
                 Task myTask = Task.Run(async () => { myListOfSerialPorts = await OpenCOMPortsAsync(); });
                 myTask.Wait();
-                mu.MyConsoleWriteLine($"Program::RunSerialPort(): myListOfSerialPorts: {myListOfSerialPorts.Count}");
+                MyUtils.MyConsoleWriteLine($"Program::RunSerialPort(): myListOfSerialPorts: {myListOfSerialPorts.Count}");
             }
             catch (AggregateException aex)
             {
-                mu.MyConsoleWriteLine($"Program::RunSerialPort(): AggregateException: {aex.Message}");
+                MyUtils.MyConsoleWriteLine($"Program::RunSerialPort(): AggregateException: {aex.Message}");
             }
 
-            mu.MyConsoleWriteLine($"Program::RunSerialPort(): end of method");
+            MyUtils.MyConsoleWriteLine($"Program::RunSerialPort(): end of method");
         }
 
 

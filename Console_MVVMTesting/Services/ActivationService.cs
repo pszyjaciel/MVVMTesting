@@ -14,8 +14,6 @@ namespace Console_MVVMTesting.Services
         private EastTesterPage _eastTesterPage = null;
         private LCSocketPage _lcSocketPage = null;
 
-        private MyUtils mu;
-
         private UserReceiverPage _userReceiverPage = null;
         private UserSenderPage _userSenderPage = null;
         private UserReceiver2Page _userReceiver2Page = null;
@@ -28,8 +26,7 @@ namespace Console_MVVMTesting.Services
 
         public ActivationService(ActivationHandler<LaunchActivatedEventArgs> defaultHandler, IEnumerable<IActivationHandler> activationHandlers)
         {
-            mu = new MyUtils();
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] ActivationService::ActivationService() {this.GetHashCode()}");
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] ActivationService::ActivationService() {this.GetHashCode()}");
 
             _defaultHandler = defaultHandler;
             _activationHandlers = activationHandlers;
@@ -38,7 +35,7 @@ namespace Console_MVVMTesting.Services
 
         public void ActivateAsync(object activationArgs)
         {
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] ActivationService::ActivateAsync() {this.GetHashCode()}");
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] ActivationService::ActivateAsync() {this.GetHashCode()}");
 
             // Initialize services that you need before app activation
             // take into account that the splash screen is shown while this code runs.
@@ -80,7 +77,7 @@ namespace Console_MVVMTesting.Services
 
         private void HandleActivationAsync(object activationArgs)
         {
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] ActivationService::HandleActivationAsync() ({this.GetHashCode()})");
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] ActivationService::HandleActivationAsync() ({this.GetHashCode()})");
 
             IActivationHandler activationHandler = _activationHandlers.FirstOrDefault(h => h.CanHandle(activationArgs));
 
@@ -98,7 +95,7 @@ namespace Console_MVVMTesting.Services
 
         private void InitializeAsync()
         {
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] ActivationService::InitializeAsync() ({this.GetHashCode()})");
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] ActivationService::InitializeAsync() ({this.GetHashCode()})");
 
             //await _themeSelectorService.InitializeAsync().ConfigureAwait(false);
             //await Task.CompletedTask;
@@ -106,7 +103,7 @@ namespace Console_MVVMTesting.Services
 
         private void StartupAsync()
         {
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] ActivationService::StartupAsync() ({this.GetHashCode()})");
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] ActivationService::StartupAsync() ({this.GetHashCode()})");
 
             //await _themeSelectorService.SetRequestedThemeAsync();
             //await Task.CompletedTask;

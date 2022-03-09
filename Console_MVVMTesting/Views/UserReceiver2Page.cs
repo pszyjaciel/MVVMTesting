@@ -9,11 +9,11 @@ namespace Console_MVVMTesting.Views
     class UserReceiver2Page : MyPage
     {
         public UserReceiver2ViewModel XamlUserReceiver2ViewModel { get; private set; }
-        private MyUtils mu = new MyUtils();
+        
 
         public UserReceiver2Page()
         {
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] UserReceiverPage::UserReceiverPage() {this.GetHashCode()}");
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] UserReceiverPage::UserReceiverPage() {this.GetHashCode()}");
             XamlUserReceiver2ViewModel = Ioc.Default.GetService<UserReceiver2ViewModel>();
         }
     }

@@ -28,10 +28,9 @@ namespace Console_MVVMTesting.Models
     public sealed class PostListing
     {
         private const string consoleColor = "LRED";
-        MyUtils mu = new MyUtils();
         public PostListing()
         {
-            mu.MyConsoleWriteLine(consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            MyUtils.MyConsoleWriteLine(consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
                     $"PostListing::PostListing()  ({this.GetHashCode():x8})");
         }
 
@@ -48,10 +47,9 @@ namespace Console_MVVMTesting.Models
     public sealed class PostData
     {
         private const string consoleColor = "LRED";
-        MyUtils mu = new MyUtils();
         public PostData()
         {
-            mu.MyConsoleWriteLine(consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            MyUtils.MyConsoleWriteLine(consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
                     $"PostData::PostData()  ({this.GetHashCode():x8})");
         }
 
@@ -68,11 +66,10 @@ namespace Console_MVVMTesting.Models
     public sealed class Post
     {
         private const string consoleColor = "LRED";
-        MyUtils mu = new MyUtils();
 
         public Post()
         {
-            mu.MyConsoleWriteLine(consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            MyUtils.MyConsoleWriteLine(consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
               $"Post::Post()  ({this.GetHashCode():x8})");
         }
 

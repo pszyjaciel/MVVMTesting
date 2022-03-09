@@ -12,11 +12,10 @@ namespace Console_MVVMTesting.Views
     class UserSenderPage : MyPage
     {
         public UserSenderViewModel XamlUserSenderViewModel { get; private set; }
-        private MyUtils mu = new MyUtils();
 
         public UserSenderPage()
         {
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
                $"UserSenderPage::UserSenderPage() " +
                $"({this.GetHashCode():x8})");
 

@@ -6,12 +6,12 @@ namespace Console_MVVMTesting.Messages
 {
     internal class MyObjectChangedMessage : ValueChangedMessage<MyObject>
     {
-        private MyUtils mu = new MyUtils();
+        
 
 
         internal MyObjectChangedMessage(MyObject value) : base(value)
         {
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
             $"MyObjectChangedMessage::MyObjectChangedMessage() " +
             $"({this.GetHashCode():x8})");
 

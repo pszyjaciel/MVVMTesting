@@ -55,7 +55,7 @@ namespace Console_MVVMTesting.ViewModels
         private ManualResetEvent receiveDone = new ManualResetEvent(false);
         private ManualResetEvent sendDone = new ManualResetEvent(false);
 
-        private MyUtils mu = new MyUtils();
+        
         #endregion privates
 
 
@@ -393,7 +393,7 @@ namespace Console_MVVMTesting.ViewModels
                 {
                     string response = state.sb.ToString();
                     _log.Log($"socket {terminalSocket.Handle}: {response}");
-                    //mu.DisplayStringInBytes(response);
+                    //MyUtils.DisplayStringInBytes(response);
                 }
 
                 // Signal that all bytes have been received.  

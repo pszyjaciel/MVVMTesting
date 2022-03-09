@@ -20,11 +20,11 @@ namespace Console_MVVMTesting.Messages
 
     public sealed class ShellStateMessage : AsyncRequestMessage<ShellState>
     {
-        private MyUtils mu = new MyUtils();
+        
 
         public ShellStateMessage(ShellState state)
         {
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
                     $"ShellStateMessage::ShellStateMessage() " +
                     $"({this.GetHashCode():x8})");
 

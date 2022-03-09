@@ -10,8 +10,6 @@ namespace Console_MVVMTesting.Models
     public class ConnectionItem : ObservableObject
     {
         private const string consoleColor = "LEMON";
-        MyUtils mu = new MyUtils();
-
 
         #region Property Name
         public const string NamePropertyName = "Name";  // nazwa do poprawy
@@ -158,7 +156,7 @@ namespace Console_MVVMTesting.Models
 
         public ConnectionItem()
         {
-            mu.MyConsoleWriteLine(consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            MyUtils.MyConsoleWriteLine(consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
                 $"ConnectionItem::ConnectionItem()  ({this.GetHashCode():x8})");
 
             Name = "";

@@ -6,7 +6,7 @@ namespace Console_MVVMTesting.Messages
 {
     class MyEnum
     {
-        private MyUtils mu = new MyUtils();
+        
         private bool _myBool;
         
 
@@ -15,13 +15,13 @@ namespace Console_MVVMTesting.Messages
 
         public MyEnum()
         {
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
                    $"MyEnum::MyEnum(1)  ({this.GetHashCode():x8})");
         }
 
         public MyEnum(bool myBool)
         {
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
                    $"MyEnum::MyEnum(2) myBool: {myBool}  ({this.GetHashCode():x8})");
 
             this._myBool = myBool;

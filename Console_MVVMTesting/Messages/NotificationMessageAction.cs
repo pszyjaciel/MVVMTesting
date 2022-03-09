@@ -12,11 +12,11 @@ namespace Console_MVVMTesting.Messages
         private Action<object> p;
         private EastTesterViewModel sender;
         private Action<User32.MessageBoxResult> callback;
-        private MyUtils mu = new MyUtils();
+        
 
         public NotificationMessageAction(EastTesterViewModel eastTesterViewModel, string v, Action<object> p)
         {
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
                 $"NotificationMessageAction::NotificationMessageAction(1) ({this.GetHashCode():x8})");
 
             this.eastTesterViewModel = eastTesterViewModel;
@@ -26,7 +26,7 @@ namespace Console_MVVMTesting.Messages
 
         public NotificationMessageAction(EastTesterViewModel sender, string v, Action<User32.MessageBoxResult> callback)
         {
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
                 $"NotificationMessageAction::NotificationMessageAction(2) " +
                 $"({this.GetHashCode():x8})");
 
@@ -39,13 +39,13 @@ namespace Console_MVVMTesting.Messages
 
         internal void Execute(object result)
         {
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
                 $"NotificationMessageAction::Execute() ({this.GetHashCode():x8})");
 
             if (result == null) return;
             if (result is EastTesterViewModel)
             {
-                mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+                MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
                     $"NotificationMessageAction::Execute(): result is EastTesterViewModel " +
                     $"({this.GetHashCode():x8})");
             }

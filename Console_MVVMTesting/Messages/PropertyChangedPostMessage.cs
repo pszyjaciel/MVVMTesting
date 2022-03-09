@@ -11,9 +11,7 @@ namespace Console_MVVMTesting.Messages
 
         public PropertyChangedPostMessage(object sender, string propertyName, Post oldValue, Post newValue) : base(sender, propertyName, oldValue, newValue)
         {
-            MyUtils mu = new MyUtils();
-
-            mu.MyConsoleWriteLine(consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            MyUtils.MyConsoleWriteLine(consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
               $"PropertyChangedPostMessage::PropertyChangedPostMessage()  ({this.GetHashCode():x8})");
         }
     }

@@ -14,24 +14,22 @@ namespace Console_MVVMTesting.Messages
 
     public class LoggedInUserRequestMessage : AsyncRequestMessage<MyUser>
     {
-        private MyUtils mu;
         public LoggedInUserRequestMessage()
         {
-            mu = new MyUtils();
 
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
                 $"LoggedInUserRequestMessage::LoggedInUserRequestMessage() ({this.GetHashCode():x8})");
         }
 
         internal new void Reply(MyUser myUser)
         {
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
                 $"LoggedInUserRequestMessage::Reply(1) ({this.GetHashCode():x8})");
         }
 
         internal void Reply(string myName)
         {
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
                 $"LoggedInUserRequestMessage::Reply(2) ({this.GetHashCode():x8})");
         }
     }

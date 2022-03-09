@@ -10,11 +10,11 @@ namespace Console_MVVMTesting.Views
     {
         public LCSocketViewModel XamlLCSocketViewModel { get; private set; }
         public EastTesterViewModel XamlEastTesterViewModel { get; private set; }
-        private MyUtils mu = new MyUtils();
+        
 
         public LCSocketPage()
         {
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
               $"LCSocketPage::LCSocketPage() " +
               $"({this.GetHashCode():x8})");
 

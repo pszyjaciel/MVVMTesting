@@ -9,13 +9,11 @@ namespace Console_MVVMTesting.Views
     {
         public ShellViewModel XamlShellViewModel { get; }
 
-        private MyUtils mu;
 
         public ShellPage()
         {
-            mu = new MyUtils();
 
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] ShellPage::ShellPage() {this.GetHashCode()}");
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] ShellPage::ShellPage() {this.GetHashCode()}");
             XamlShellViewModel = Ioc.Default.GetService<ShellViewModel>();
      
         }

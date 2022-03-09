@@ -12,11 +12,11 @@ namespace Console_MVVMTesting.Views
     class UserReceiverPage : MyPage
     {
         public UserReceiverViewModel XamlUserReceiverViewModel { get; private set; }
-        private MyUtils mu = new MyUtils();
+        
 
         public UserReceiverPage()
         {
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] UserReceiverPage::UserReceiverPage() {this.GetHashCode()}");
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] UserReceiverPage::UserReceiverPage() {this.GetHashCode()}");
             XamlUserReceiverViewModel = Ioc.Default.GetService<UserReceiverViewModel>();
             XamlUserReceiverViewModel.IsActive = true;
         }

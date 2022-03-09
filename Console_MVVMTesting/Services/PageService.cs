@@ -11,11 +11,11 @@ namespace Console_MVVMTesting.Services
     internal class PageService : IPageService
     {
         private readonly Dictionary<string, Type> _pages = new Dictionary<string, Type>();
-        private MyUtils mu = new MyUtils();
+        
 
         public PageService()
         {
-            mu.MyConsoleWriteLine($"PageService::PageService()");
+            MyUtils.MyConsoleWriteLine($"PageService::PageService()");
 
             Configure<ProductionViewModel, ProductionPage>();
 
@@ -31,7 +31,7 @@ namespace Console_MVVMTesting.Services
 
         public Type GetPageType(string key)
         {
-            mu.MyConsoleWriteLine($"PageService::GetPageType()");
+            MyUtils.MyConsoleWriteLine($"PageService::GetPageType()");
             Type pageType;
             lock (_pages)
             {

@@ -9,19 +9,19 @@ namespace Console_MVVMTesting.Messages
 {
     public class OperationMessage<messageOp>
     {
-        private MyUtils mu = new MyUtils();
+        
 //        public MessageOp messageOp { get; set; }
 
         public OperationMessage()
         {
-            //mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            //MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
             //    $"OperationMessage::OperationMessage(1) " +
             //    $"({this.GetHashCode():x8})");
         }
 
         public OperationMessage(bool majBul)
         {
-            //mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            //MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
             //    $"OperationMessage::OperationMessage(2) " +
             //    $"({this.GetHashCode():x8})");
         }

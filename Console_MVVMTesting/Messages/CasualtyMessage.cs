@@ -9,10 +9,10 @@ namespace Console_MVVMTesting.Messages
 {
     public class CasualtyMessage
     {
-        private MyUtils mu = new MyUtils();
+        
         public CasualtyMessage()
         {
-            //mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            //MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
             //   $"CasualtyMessage::CasualtyMessage() " +
             //   $"({this.GetHashCode():x8})");
         }

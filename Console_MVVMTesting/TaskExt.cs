@@ -8,11 +8,9 @@ namespace Console_MVVMTesting
     // FromEvent<>, based on http://stackoverflow.com/a/22798789/1768303
     public class TaskExt
     {
-        private MyUtils mu;
 
         public TaskExt()
         {
-            MyUtils mu = new MyUtils();
         }
 
         public async Task<TEventArgs> FromEvent<TEventHandler, TEventArgs>(
@@ -22,7 +20,7 @@ namespace Console_MVVMTesting
             Action<Action<TEventArgs>, Action, Action<Exception>> initiate,
             CancellationToken token) where TEventHandler : class
         {
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] TaskExt::FromEvent()" +
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] TaskExt::FromEvent()" +
                 $"({typeof(SerialPortExtensions).GetHashCode():x8})");
 
             TaskCompletionSource<TEventArgs> tcs = new TaskCompletionSource<TEventArgs>();

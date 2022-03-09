@@ -54,21 +54,21 @@ namespace Console_MVVMTesting.ViewModels
 //DTE m_dte = (DTE)obj;
 
 
-//mu.MyConsoleWriteLine($"EastTesterViewModel::EastTesterViewModel(): {m_dte.ActiveWindow.WindowState}");
-//mu.MyConsoleWriteLine($"EastTesterViewModel::EastTesterViewModel(): {m_dte.MainWindow.Project.FullName}");
-//mu.MyConsoleWriteLine($"EastTesterViewModel::EastTesterViewModel(): {m_dte.MainWindow.Project.FileName}");
-//mu.MyConsoleWriteLine($"EastTesterViewModel::EastTesterViewModel(): {m_dte.MainWindow.Project.Name}");
-//mu.MyConsoleWriteLine($"EastTesterViewModel::EastTesterViewModel(): {m_dte.MainWindow.Project.Saved}");
-////mu.MyConsoleWriteLine($"EastTesterViewModel::EastTesterViewModel(): {m_dte.Solution.FileName}");
-//mu.MyConsoleWriteLine($"EastTesterViewModel::EastTesterViewModel(): {m_dte.Solution.FullName}");
-//mu.MyConsoleWriteLine($"EastTesterViewModel::EastTesterViewModel(): {m_dte.Version}");
-//mu.MyConsoleWriteLine($"EastTesterViewModel::EastTesterViewModel(): {m_dte.ActiveDocument.ProjectItem}");
-//mu.MyConsoleWriteLine($"EastTesterViewModel::EastTesterViewModel(): {m_dte.ActiveDocument.FullName}");
-//mu.MyConsoleWriteLine($"EastTesterViewModel::EastTesterViewModel(): {m_dte.ActiveDocument.Name}");
+//MyUtils.MyConsoleWriteLine($"EastTesterViewModel::EastTesterViewModel(): {m_dte.ActiveWindow.WindowState}");
+//MyUtils.MyConsoleWriteLine($"EastTesterViewModel::EastTesterViewModel(): {m_dte.MainWindow.Project.FullName}");
+//MyUtils.MyConsoleWriteLine($"EastTesterViewModel::EastTesterViewModel(): {m_dte.MainWindow.Project.FileName}");
+//MyUtils.MyConsoleWriteLine($"EastTesterViewModel::EastTesterViewModel(): {m_dte.MainWindow.Project.Name}");
+//MyUtils.MyConsoleWriteLine($"EastTesterViewModel::EastTesterViewModel(): {m_dte.MainWindow.Project.Saved}");
+////MyUtils.MyConsoleWriteLine($"EastTesterViewModel::EastTesterViewModel(): {m_dte.Solution.FileName}");
+//MyUtils.MyConsoleWriteLine($"EastTesterViewModel::EastTesterViewModel(): {m_dte.Solution.FullName}");
+//MyUtils.MyConsoleWriteLine($"EastTesterViewModel::EastTesterViewModel(): {m_dte.Version}");
+//MyUtils.MyConsoleWriteLine($"EastTesterViewModel::EastTesterViewModel(): {m_dte.ActiveDocument.ProjectItem}");
+//MyUtils.MyConsoleWriteLine($"EastTesterViewModel::EastTesterViewModel(): {m_dte.ActiveDocument.FullName}");
+//MyUtils.MyConsoleWriteLine($"EastTesterViewModel::EastTesterViewModel(): {m_dte.ActiveDocument.Name}");
 
-//mu.MyConsoleWriteLine($"EastTesterViewModel::EastTesterViewModel(): {m_dte.ActiveWindow.HWnd}");
-//mu.MyConsoleWriteLine($"EastTesterViewModel::EastTesterViewModel(): {m_dte.ActiveWindow.Document}");
-//mu.MyConsoleWriteLine($"EastTesterViewModel::EastTesterViewModel(): {m_dte.ActiveWindow.Document.Language}");
+//MyUtils.MyConsoleWriteLine($"EastTesterViewModel::EastTesterViewModel(): {m_dte.ActiveWindow.HWnd}");
+//MyUtils.MyConsoleWriteLine($"EastTesterViewModel::EastTesterViewModel(): {m_dte.ActiveWindow.Document}");
+//MyUtils.MyConsoleWriteLine($"EastTesterViewModel::EastTesterViewModel(): {m_dte.ActiveWindow.Document.Language}");
 
 
 //EnvDTE.Solution m_dteSolution = MyUtils.Call(() => (m_dte.Solution));

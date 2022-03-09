@@ -9,11 +9,11 @@ namespace Console_MVVMTesting.Views
     class ProductionPage : MyPage
     {
         public ProductionViewModel XamlProductionViewModel { get; private set; }
-        private MyUtils mu = new MyUtils();
+        
 
         public ProductionPage()
         {
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
                $"ProductionPage::ProductionPage() " +
                $"({this.GetHashCode():x8})");
 

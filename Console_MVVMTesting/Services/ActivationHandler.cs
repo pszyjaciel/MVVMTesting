@@ -12,10 +12,8 @@ namespace Console_MVVMTesting.Services
 {
     public abstract class ActivationHandler<T> : IActivationHandler where T : class
     {
-        MyUtils mu;
         protected ActivationHandler()
         {
-            mu = new MyUtils();
         }
 
         // Override this method to add the activation logic in your activation handler
@@ -23,7 +21,7 @@ namespace Console_MVVMTesting.Services
 
         public void HandleAsync(object args)
         {
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
                 $"{$"ActivationHandler::HandleAsync()"} ({this.GetHashCode():x8})");
 
             HandleInternalAsync(args as T);
@@ -31,7 +29,7 @@ namespace Console_MVVMTesting.Services
 
         public bool CanHandle(object args)
         {
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
                 $"{$"ActivationHandler::CanHandle()"} ({this.GetHashCode():x8})");
 
             // CanHandle checks the args is of type you have configured
@@ -42,7 +40,7 @@ namespace Console_MVVMTesting.Services
         // to determine if your ActivationHandler should handle this activation args
         protected virtual bool CanHandleInternal(T args)
         {
-            mu.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
                 $"{$"ActivationHandler::CanHandleInternal()"} ({this.GetHashCode():x8})");
 
             return true;

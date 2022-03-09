@@ -10,7 +10,7 @@ namespace Console_MVVMTesting.Messages
 
         //public MyObject(MyPerson myPerson)
         //{
-        //    mu.MyConsoleWriteLine($"MyObject::MyObject(): {this.GetHashCode()}");
+        //    MyUtils.MyConsoleWriteLine($"MyObject::MyObject(): {this.GetHashCode()}");
         //    MyPerson = myPerson;
         //}
 
@@ -19,13 +19,13 @@ namespace Console_MVVMTesting.Messages
         //    get
         //    {
         //        System.Diagnostics.Debug.Assert(_name != null);
-        //        mu.MyConsoleWriteLine($"MyObject::Name.get: {_name}");
+        //        MyUtils.MyConsoleWriteLine($"MyObject::Name.get: {_name}");
         //        return _name;
         //    }
         //    set
         //    {
         //        _name = value;
-        //        mu.MyConsoleWriteLine($"MyObject::Name.set: {_name}");
+        //        MyUtils.MyConsoleWriteLine($"MyObject::Name.set: {_name}");
         //    }
         //}
 
