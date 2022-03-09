@@ -163,7 +163,7 @@ using System.Text;
         {
             if (myString.Length == 0) return;
 
-            MyConsoleWriteLine("LWHITE", $"[{myString.Length}]: {myString}");
+            //MyConsoleWriteLine("LWHITE", $"[{myString.Length}]: {myString}");
 
             int myValue;
             char[] chars = myString.ToCharArray();

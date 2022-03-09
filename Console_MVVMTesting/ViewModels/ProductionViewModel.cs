@@ -50,24 +50,19 @@ namespace Console_MVVMTesting.ViewModels
             string heartbeat = "'0x40''0x0d''0x0a'";    // zle
             //_log.Log(consoleColor, $"{heartbeat}");
 
-            string heartbeat2 = "@\r\n";
-            _log.Log(consoleColor, $"{heartbeat2}");
+            string heartbeat1 = "@\r\n";
+            _log.Log(consoleColor, $"{heartbeat1}");
+            string heartbeat2 = "@\n\r";
+            _log.Log(consoleColor, $"{heartbeat1}");
 
-            byte[] myBytes = { 0x40, 0x0d, 0x0a, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e, 0x4f, 0x0d, 0x0a, 0x00 };
+            byte[] myBytes = { 0x40, 0x0d, 0x0a, 0x40, 0x0d, 0x0a, 0x40, 0x0d, 0x0a, 0x40, 0x0d, 0x0a, 0x43, 0x44,
+                0x45, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e, 0x4f, 0x0d, 0x0a, 0x00 };
             char[] cArray = System.Text.Encoding.ASCII.GetString(myBytes).ToCharArray();
 
             string response = new string(cArray);
-            System.Diagnostics.Debug.WriteLine(response);
             MyUtils.DisplayStringInBytes(response);
-
-            //foreach (char item in cArray)
-            //{
-            //    System.Diagnostics.Debug.Write((char)item);
-            //}
-
-            string tmpResponse = response.Replace(heartbeat2, "");
-            System.Diagnostics.Debug.WriteLine(tmpResponse);
-            MyUtils.DisplayStringInBytes(tmpResponse);
+            MyUtils.DisplayStringInBytes(response.Replace(heartbeat1, ""));
+            MyUtils.DisplayStringInBytes(response.Replace(heartbeat2, ""));
 
         }
         #endregion
