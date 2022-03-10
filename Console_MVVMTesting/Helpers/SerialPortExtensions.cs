@@ -12,6 +12,7 @@ namespace Console_MVVMTesting.Helpers
 {
     public static class SerialPortExtensions
     {
+        // nofsza wersja w projekcie BatteryTester
 
         #region Async methods
 
