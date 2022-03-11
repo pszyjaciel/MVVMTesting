@@ -294,15 +294,10 @@ namespace Console_MVVMTesting.ViewModels
 
 
         #region ConnectToSocket
-        public void ConnectToSocket(Socket terminalSocket, CancellationTokenSource cts)
+        public bool ConnectToSocket(Socket terminalSocket)
         {
-            _log.Log(consoleColor, $"LCSocketViewModel::ConnectToSocket(): socket: {terminalSocket.Handle}, ThreadId: {Thread.CurrentThread.ManagedThreadId} : Start of method  ({this.GetHashCode():x8})");
-
-            if ((cts is null) || _ctsDisposed1 == true)
-            {
-                cts = new CancellationTokenSource();
-                _ctsDisposed1 = false;
-            }
+            _log.Log(consoleColor, $"LCSocketViewModel::ConnectToSocket(): socket: {terminalSocket.Handle}, " +
+                $"ThreadId: {Thread.CurrentThread.ManagedThreadId} : Start of method  ({this.GetHashCode():x8})");
 
             Task MyTask = Task.Run(async () =>
             {
@@ -319,18 +314,14 @@ namespace Console_MVVMTesting.ViewModels
                         await Task.Delay(5000);
                         connectTry--;
                     }
-                    else
-                    {
-                        //await MessageHandlerAsync(terminalSocket, cts);
-                        //MessageHandlerTerminatedEvent.WaitOne();
-                    }
-                } while ((cts.IsCancellationRequested == false) && (IsConnected(terminalSocket) == false) && (connectTry > 0));
+                } while ((IsConnected(terminalSocket) == false) && (connectTry > 0));
 
                 _log.Log(consoleColor, $"LCSocketViewModel::ConnectToSocket(): {terminalSocket.RemoteEndPoint} --> {terminalSocket.LocalEndPoint}");
             });
             MyTask.Wait();
 
             _log.Log(consoleColor, $"LCSocketViewModel::ConnectToSocket(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : End of method");
+            return IsConnected(terminalSocket);
         }
         #endregion ConnectToSocket
 
@@ -507,7 +498,7 @@ namespace Console_MVVMTesting.ViewModels
             Socket terminalSocket1 = new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             if (!IsConnected(terminalSocket1))
             {
-                this.ConnectToSocket(terminalSocket1, myCancellationTokenSource1);
+                this.ConnectToSocket(terminalSocket1);
                 MyTask = Task.Delay(250);
                 MyTask.Wait();
             }
@@ -515,7 +506,7 @@ namespace Console_MVVMTesting.ViewModels
             Socket terminalSocket2 = new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             if (!IsConnected(terminalSocket2))
             {
-                this.ConnectToSocket(terminalSocket2, myCancellationTokenSource2);
+                this.ConnectToSocket(terminalSocket2);
                 MyTask = Task.Delay(250);
                 MyTask.Wait();
             }
@@ -523,7 +514,7 @@ namespace Console_MVVMTesting.ViewModels
             Socket terminalSocket3 = new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             if (!IsConnected(terminalSocket3))
             {
-                this.ConnectToSocket(terminalSocket3, myCancellationTokenSource3);
+                this.ConnectToSocket(terminalSocket3);
                 MyTask = Task.Delay(250);
                 MyTask.Wait();
             }
@@ -531,7 +522,7 @@ namespace Console_MVVMTesting.ViewModels
             Socket terminalSocket4 = new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             if (!IsConnected(terminalSocket4))
             {
-                this.ConnectToSocket(terminalSocket4, myCancellationTokenSource4);
+                this.ConnectToSocket(terminalSocket4);
                 MyTask = Task.Delay(250);
                 MyTask.Wait();
             }
@@ -626,13 +617,6 @@ namespace Console_MVVMTesting.ViewModels
 
 
         ///////////// INITIALIZING SOCKETS /////////////////
-        private bool InitializeSocket(Socket mySocket)
-        {
-            _log.Log(consoleColor, $"LCSocketViewModel::InitializeSocket(): socket: {mySocket.Handle}");
-            return true;
-        }
-
-
         private List<Socket> GetListOfAvailableSockets()
         {
             _log.Log(consoleColor, $"LCSocketViewModel::GetListOfAvailableSockets(): Start of method");
@@ -657,24 +641,33 @@ namespace Console_MVVMTesting.ViewModels
             _log.Log(consoleColor, $"LCSocketViewModel::RunInitCommandMessage(): Start of method  ({this.GetHashCode():x8})");
 
             List<Socket> myListOfAvailableSockets = GetListOfAvailableSockets();
-            foreach (Socket myConnectedSocket in myListOfAvailableSockets)
+            foreach (Socket myAvailableSocket in myListOfAvailableSockets)
             {
-                _log.Log(consoleColor, $"LCSocketViewModel::RunInitCommandMessage(): socket: {myConnectedSocket.Handle}");
+                _log.Log(consoleColor, $"LCSocketViewModel::RunInitCommandMessage(): socket: {myAvailableSocket.Handle}, " +
+                    $"connected: {myAvailableSocket.Connected}");
             }
 
-            bool initResult;
+            bool rs = false;
             myListOfSockets = new List<Socket>();
             Parallel.ForEach(myListOfAvailableSockets, (mySocket) =>
             {
-                initResult = InitializeSocket(mySocket);
-                _log.Log(consoleColor, $"LCSocketViewModel::RunInitCommandMessage(): initResult: {initResult}");
-                if (initResult)
+                if (!IsConnected(mySocket))
+                {
+                    rs = this.ConnectToSocket(mySocket);
+                }
+                if (rs)
                 {
                     myListOfSockets.Add(mySocket);
                 }
+                rs = false;
             });
 
             _log.Log(consoleColor, $"LCSocketViewModel::RunInitCommandMessage(): myListOfSockets.Count: {myListOfSockets.Count}");
+            foreach (Socket myConnectedSocket in myListOfSockets)
+            {
+                _log.Log(consoleColor, $"LCSocketViewModel::RunInitCommandMessage(): socket: {myConnectedSocket.Handle}, " +
+                    $"connected: {myConnectedSocket.Connected}");
+            }
 
             _log.Log(consoleColor, $"LCSocketViewModel::RunInitCommandMessage(): End of method  ({this.GetHashCode():x8})");
         }
