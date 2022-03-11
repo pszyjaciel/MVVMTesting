@@ -642,47 +642,39 @@ namespace Console_MVVMTesting.ViewModels
             ls.Add(new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp));
             ls.Add(new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp));
             ls.Add(new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp));
+            ls.Add(new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp));
+            ls.Add(new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp));
 
             _log.Log(consoleColor, $"LCSocketViewModel::GetListOfAvailableSockets(): End of method");
             return ls;
         }
 
-        // async doesn't work well with ForEach: https://stackoverflow.com/a/23139769/7036047
+        // async doesn't work well with Parallel.ForEach: https://stackoverflow.com/a/23139769/7036047
         // The whole idea behind Parallel.ForEach() is that you have a set of threads and each thread processes part of the collection.
         // This doesn't work with async-await, where you want to release the thread for the duration of the async call.
-        private List<Socket> RetrieveAllSocketsParallel()
-        {
-            _log.Log(consoleColor, $"LCSocketViewModel::RetrieveAllSocketsParallel(): Start of method");
-
-            List<Socket> myListOfAvailableSockets = GetListOfAvailableSockets();
-            foreach (Socket myConnectedSocket in myListOfAvailableSockets)
-            {
-                _log.Log(consoleColor, $"LCSocketViewModel::RetrieveAllSocketsParallel(): socket: {myConnectedSocket.Handle}");
-            }
-
-            bool initResult;
-            List<Socket> myInitializedListOfSockets = new List<Socket>();
-            Parallel.ForEach(myListOfAvailableSockets, (mySocket) =>
-            {
-                initResult = InitializeSocket(mySocket);
-                _log.Log(consoleColor, $"LCSocketViewModel::RetrieveAllSocketsParallel(): initResult: {initResult}");
-                if (initResult)
-                {
-                    myInitializedListOfSockets.Add(mySocket);
-                }
-            });
-
-            _log.Log(consoleColor, $"LCSocketViewModel::RetrieveAllSocketsParallel(): myInitializedListOfSerialPorts.Count: {myInitializedListOfSockets.Count}");
-            _log.Log(consoleColor, $"LCSocketViewModel::RetrieveAllSocketsParallel(): End of method");
-            return myInitializedListOfSockets;
-        }
-
-
         private void RunInitCommandMessage()
         {
             _log.Log(consoleColor, $"LCSocketViewModel::RunInitCommandMessage(): Start of method  ({this.GetHashCode():x8})");
 
-            myListOfSockets = this.RetrieveAllSocketsParallel();
+            List<Socket> myListOfAvailableSockets = GetListOfAvailableSockets();
+            foreach (Socket myConnectedSocket in myListOfAvailableSockets)
+            {
+                _log.Log(consoleColor, $"LCSocketViewModel::RunInitCommandMessage(): socket: {myConnectedSocket.Handle}");
+            }
+
+            bool initResult;
+            myListOfSockets = new List<Socket>();
+            Parallel.ForEach(myListOfAvailableSockets, (mySocket) =>
+            {
+                initResult = InitializeSocket(mySocket);
+                _log.Log(consoleColor, $"LCSocketViewModel::RunInitCommandMessage(): initResult: {initResult}");
+                if (initResult)
+                {
+                    myListOfSockets.Add(mySocket);
+                }
+            });
+
+            _log.Log(consoleColor, $"LCSocketViewModel::RunInitCommandMessage(): myListOfSockets.Count: {myListOfSockets.Count}");
 
             _log.Log(consoleColor, $"LCSocketViewModel::RunInitCommandMessage(): End of method  ({this.GetHashCode():x8})");
         }
@@ -690,27 +682,15 @@ namespace Console_MVVMTesting.ViewModels
 
 
         ////////////////// CLOSING SOCKETS /////////////////
-        private bool CloseSocket(Socket mySocket)
-        {
-            _log.Log(consoleColor, $"LCSocketViewModel::CloseSocket(): End of method  ({this.GetHashCode():x8})");
-            this.Close(mySocket);
-            return true;
-        }
-
         private void RunCloseCommandMessage()
         {
             _log.Log(consoleColor, $"LCSocketViewModel::RunCloseCommandMessage(): Start of method  ({this.GetHashCode():x8})");
 
-            bool initResult;
             List<Socket> myInitializedListOfSockets = new List<Socket>();
             Parallel.ForEach(myListOfSockets, (mySocket) =>
             {
-                initResult = CloseSocket(mySocket);
-                _log.Log(consoleColor, $"LCSocketViewModel::CloseAllSocketsParallel(): mySocket: {mySocket.Handle}, initResult: {initResult}");
-                if (initResult)
-                {
-                    myInitializedListOfSockets.Add(mySocket);
-                }
+                this.Close(mySocket);
+                _log.Log(consoleColor, $"LCSocketViewModel::CloseAllSocketsParallel(): mySocket {mySocket.Handle}: {mySocket.Connected}");
             });
 
             _log.Log(consoleColor, $"LCSocketViewModel::RunCloseCommandMessage(): End of method  ({this.GetHashCode():x8})");
