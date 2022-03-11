@@ -723,7 +723,7 @@ namespace Console_MVVMTesting.ViewModels
 
 
             // listen for the command in ProductionViewModel
-            _messenger.Register<InitLCMessage>(this, (r, m) => { RunInitCommandMessage(); });
+            _messenger.Register<LCInitMessage>(this, (r, m) => { RunInitCommandMessage(); });
 
             //_log.Log(consoleColor, $"LCSocketViewModel::LCSocketViewModel() XamlLCSocketViewModel.GetHashCode(): {XamlLCSocketViewModel.GetHashCode()}");
             _log.Log(consoleColor, $"LCSocketViewModel::LCSocketViewModel() etvm.GetHashCode(): {etvm.GetHashCode()}");

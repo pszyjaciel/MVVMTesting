@@ -83,13 +83,15 @@ namespace Console_MVVMTesting.ViewModels
 
             //_messenger.Register<UserReceiver2ViewModel, string>(this, _currentUser._myName);
 
-            _myLCSocketPrivateProperyName = new Post { Title = "LCSocketOldTitle2", Thumbnail = "LCSocketOldThumbnail2", SelfText = "Some old LCSocket text2" };
 
-            //_messenger.Send(new PropertyChangedPostMessage(this, nameof(MyLCSocketPublicProperyName), _myLCSocketPrivateProperyName,
-            //    new Post { Title = "LCSocketTitle1", Thumbnail = "LCSocketThumbnail1", SelfText = "Some LCSocket text1" }));
+            ///// PropertyChangedMessage /////
+            _myLCSocketPrivateProperyName = new Post { Title = "LCSocketOldTitle2", Thumbnail = "LCSocketOldThumbnail2", SelfText = "Some old LCSocket text2" };
+            _messenger.Send(new PropertyChangedPostMessage(this, nameof(MyLCSocketPublicProperyName), _myLCSocketPrivateProperyName,
+                new Post { Title = "LCSocketTitle1", Thumbnail = "LCSocketThumbnail1", SelfText = "Some LCSocket text1" }));
 
             _messenger.Send(new PropertyChangedPostMessage(this, "MyLCSocketPublicProperyName", _myLCSocketPrivateProperyName,
                 new Post { Title = "LCSocketTitle2", Thumbnail = "LCSocketThumbnail2", SelfText = "Some LCSocket text2" }));
+
 
 
             _messenger.Register<CasualtyMessage, bool>(this, false, (r, m) => { RunBlanketStatusFalse(); });
@@ -107,7 +109,7 @@ namespace Console_MVVMTesting.ViewModels
                 _log.Log($"UserReceiver2ViewModel::UserReceiver2ViewModel().MyTestMessage: m: {m}");  // [Console_MVVMTesting.Messages.MyEnum]
                 RunMyTestMessage();
             });
-            _messenger.Register<InitMessage>(this, (r, m) => { RunInitMessage(); });
+            //_messenger.Register<InitETMessage>(this, (r, m) => { RunInitMessage(); });
             _messenger.Register<ResetMessage>(this, (r, m) => { RunResetMessage(); });
             _messenger.Register<OperationMessage<MessageOp>, bool>(this, MessageOp.Exit, (r, m) => { RunOperationMessage2(); });
             //_messenger.Register<ResetMessage<MessageOp>, bool>(this, MessageOp.Reset, (r, m) => { RunOperationMessage3(); });

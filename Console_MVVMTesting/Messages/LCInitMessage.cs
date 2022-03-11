@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Console_MVVMTesting.Messages
 {
-    class InitLCMessage
+    class LCInitMessage
     {
-        public InitLCMessage()
+        public LCInitMessage()
         {
             System.Diagnostics.Debug.WriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] InitLCMessage::InitLCMessage()  ({this.GetHashCode():x8})");
         }

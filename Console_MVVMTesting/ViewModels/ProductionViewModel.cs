@@ -18,31 +18,18 @@ namespace Console_MVVMTesting.ViewModels
 
         private const string consoleColor = "DCYAN";
 
-
-
-        #region Constructor
-        public ProductionViewModel(ILoggingService loggingService, IMessenger messenger)
+        
+        #region XamlIsSocketInitialized1
+        private bool isSocketInitialized1;
+        public bool XamlIsSocketInitialized1
         {
-            _log = loggingService;
-            _log.Log(consoleColor, $"ProductionViewModel::ProductionViewModel(): Start of constructor  ({this.GetHashCode():x8})");
-
-            _messenger = messenger;
-
-
-            this.TestRegex();
-
-            Task.Delay(2000);
-            //_messenger.Send(new InitETMessage());
-            //_log.Log($"ProductionViewModel::ProductionViewModel(): InitETMessage()  ({GetHashCode():x8})");
-
-            //_messenger.Send(new InitLCMessage());
-            //_log.Log($"ProductionViewModel::ProductionViewModel(): InitLCMessage()  ({GetHashCode():x8})");
-
-
-            Task.WaitAll();
-            _log.Log(consoleColor, $"ProductionViewModel::ProductionViewModel(): End of constructor  ({this.GetHashCode():x8})");
+            get { return isSocketInitialized1; }
+            set { SetProperty(ref isSocketInitialized1, value); }
         }
+        #endregion
 
+
+        #region TestRegex
         private void TestRegex()
         {
             _log.Log(consoleColor, $"ProductionViewModel::TestRegex()");
@@ -64,6 +51,44 @@ namespace Console_MVVMTesting.ViewModels
             MyUtils.DisplayStringInBytes(response.Replace(heartbeat1, ""));
             MyUtils.DisplayStringInBytes(response.Replace(heartbeat2, ""));
 
+        }
+        #endregion TestRegex
+
+
+        #region Constructor
+        public ProductionViewModel(ILoggingService loggingService, IMessenger messenger)
+        {
+            _log = loggingService;
+            _log.Log(consoleColor, $"ProductionViewModel::ProductionViewModel(): Start of constructor  ({this.GetHashCode():x8})");
+
+            _messenger = messenger;
+
+
+            //this.TestRegex();
+
+            Task.Delay(2000);
+            //_messenger.Send(new InitETMessage());
+            //_log.Log($"ProductionViewModel::ProductionViewModel(): InitETMessage()  ({GetHashCode():x8})");
+
+            _messenger.Send(new LCInitMessage());
+            _log.Log($"ProductionViewModel::ProductionViewModel(): LCInitMessage()  ({GetHashCode():x8})");
+
+            _messenger.Send(new LCCloseMessage());
+            _log.Log($"ProductionViewModel::ProductionViewModel(): LCCloseMessage()  ({GetHashCode():x8})");
+
+
+            _messenger.Register<LCSocketStateMessage>(this, (r, m) =>
+            {
+                if (m.LCStatus == LCSocketStatusEnum.Connected)
+                    XamlIsSocketInitialized1 = true;
+                else
+                    XamlIsSocketInitialized1 = false;
+
+                m.Reply(m.LCStatus);
+            });
+
+            Task.WaitAll();
+            _log.Log(consoleColor, $"ProductionViewModel::ProductionViewModel(): End of constructor  ({this.GetHashCode():x8})");
         }
         #endregion
     }

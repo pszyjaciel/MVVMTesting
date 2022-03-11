@@ -25,7 +25,7 @@ namespace Console_MVVMTesting.ViewModels
         private readonly ILoggingService _log;
         private readonly IMessenger _messenger;
         private bool _isBusy;
-        private const string consoleColor = "DCYAN";
+        private const string consoleColor = "DYELLOW";
 
         private MyUser _myETUser;
         public MyUser myETUser
@@ -75,6 +75,15 @@ namespace Console_MVVMTesting.ViewModels
         }
 
 
+
+        private bool _isInitialized;
+        public bool XamlIsInitialized
+        {
+            get => _isInitialized;
+            set => SetProperty(ref _isInitialized, value, "");
+        }
+
+
         private Post _myEastTesterPrivateProperyName;
         public Post MyEastTesterPublicProperyName
         {
@@ -92,6 +101,26 @@ namespace Console_MVVMTesting.ViewModels
         }
 
 
+        private void RunBlanketStatusTrue()
+        {
+            _log.Log(consoleColor, $"EastTesterViewModel::RunBlanketStatusTrue()  ({this.GetHashCode():x8})");
+        }
+
+        private void RunBlanketStatusFalse()
+        {
+            _log.Log(consoleColor, $"EastTesterViewModel::RunBlanketStatusFalse()  ({this.GetHashCode():x8})");
+
+        }
+
+
+        private async Task MyTask()
+        {
+            _log.Log(consoleColor, $"LCSocketViewModel::MyTask()");
+            await Task.Delay(2000);
+        }
+
+
+        #region Constructor
         public EastTesterViewModel(ILoggingService loggingService, IMessenger messenger)
         {
             _log = loggingService;
@@ -235,11 +264,10 @@ namespace Console_MVVMTesting.ViewModels
 
             //_log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): myUser._myName: {myUser._myName}");
 
+            // PropertyChangedMessage
             _myEastTesterPrivateProperyName = new Post { Title = "EastTesterOldTitle2", Thumbnail = "EastTesterOldThumbnail2", SelfText = "Some old EastTester text2" };
             _messenger.Send(new PropertyChangedPostMessage(this, "MyEastTesterPublicProperyName", _myEastTesterPrivateProperyName,
                 new Post { Title = "EastTesterTitle2", Thumbnail = "EastTesterThumbnail2", SelfText = "Some EastTester text2" }));
-
-
 
 
             _messenger.Register<CasualtyMessage, bool>(this, false, (r, m) => { RunBlanketStatusFalse(); });
@@ -247,27 +275,21 @@ namespace Console_MVVMTesting.ViewModels
 
             _messenger.Send<MyTestMessage<MyEnum>>();       // gdy stont wysle to recipient nie reaguje, mimo rze dziala z sendera
 
+
+            // listen for the command in ProductionViewModel
+            _messenger.Register<InitETMessage>(this, (r, m) => { RunInitETCommandMessage(); });
+
+
             _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): end of constructor  ({this.GetHashCode():x8})");
         }
 
-
-        private void RunBlanketStatusTrue()
+        private void RunInitETCommandMessage()
         {
-            _log.Log(consoleColor, $"EastTesterViewModel::RunBlanketStatusTrue()  ({this.GetHashCode():x8})");
+            _log.Log(consoleColor, $"EastTesterViewModel::RunInitETCommandMessage()  ({this.GetHashCode():x8})");
+            _isInitialized = true;
         }
-
-        private void RunBlanketStatusFalse()
-        {
-            _log.Log(consoleColor, $"EastTesterViewModel::RunBlanketStatusFalse()  ({this.GetHashCode():x8})");
-
-        }
+        #endregion Constructor
 
 
-
-        private async Task MyTask()
-        {
-            _log.Log(consoleColor, $"LCSocketViewModel::MyTask()");
-            await Task.Delay(2000);
-        }
     }
 }

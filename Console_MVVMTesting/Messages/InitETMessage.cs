@@ -3,14 +3,12 @@ using System;
 
 namespace Console_MVVMTesting.Messages
 {
-    class InitMessage
+    class InitETMessage
     {
-        
-
-        public InitMessage()
+        public InitETMessage()
         {
             MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
-               $"InitMessage::InitMessage(1) ({this.GetHashCode():x8})");
+               $"InitETMessage::InitETMessage() ({this.GetHashCode():x8})");
         }
     }
 }

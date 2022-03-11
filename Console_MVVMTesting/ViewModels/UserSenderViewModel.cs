@@ -125,18 +125,20 @@ namespace Console_MVVMTesting.ViewModels
 
 
             ///////// PropertyChangedPostMessage : PropertyChangedMessage<Post> /////////
-            //_selectedPost = new Post { Title = "staryTajtyl1", Thumbnail = "majOldTambnejl1" };
-            //_messenger.Send(new PropertyChangedPostMessage(this, "SelectedPost", _selectedPost,
-            //    new Post { Title = "nowyTajtyl1", Thumbnail = "majNjuTambnejl1" }));
+            _log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel() Start of sending PropertyChangedPostMessage");
 
-            _log.Log(consoleColor, $"UserSenderViewModel::Receive() this: {this}");
+            _selectedPost = new Post { Title = "staryTajtyl1", Thumbnail = "majOldTambnejl1" };
+            _messenger.Send(new PropertyChangedPostMessage(this, "SelectedPost", _selectedPost,
+                new Post { Title = "nowyTajtyl1", Thumbnail = "majNjuTambnejl1" }));
 
-            //_mySenderPrivateProperyName = new Post { Title = "staryTajtyl2", Thumbnail = "majOldTambnejl2", SelfText="jakis tam SelfTest2" };
-            //_messenger.Send(new PropertyChangedPostMessage(typeof(Console_MVVMTesting.ViewModels.UserSenderViewModel), "MyPublicProperyName", _mySenderPrivateProperyName,
-            //    new Post { Title = "nowyTajtyl2", Thumbnail = "majNjuTambnejl2", SelfText = "A new selftext2" }));
+            _mySenderPrivateProperyName = new Post { Title = "staryTajtyl2", Thumbnail = "majOldTambnejl2", SelfText = "jakis tam SelfTest2" };
+            _messenger.Send(new PropertyChangedPostMessage(typeof(Console_MVVMTesting.ViewModels.UserSenderViewModel), "MyPublicProperyName", _mySenderPrivateProperyName,
+                new Post { Title = "nowyTajtyl2", Thumbnail = "majNjuTambnejl2", SelfText = "A new selftext2" }));
 
-            //_messenger.Send(new PropertyChangedPostMessage(this, "MySenderPublicProperyName", _mySenderPrivateProperyName,
-            //    new Post { Title = "nowyTajtyl2", Thumbnail = "majNjuTambnejl2", SelfText = "A new selftext2" }));
+            _messenger.Send(new PropertyChangedPostMessage(this, "MySenderPublicProperyName", _mySenderPrivateProperyName,
+                new Post { Title = "nowyTajtyl2", Thumbnail = "majNjuTambnejl2", SelfText = "A new selftext2" }));
+            
+            _log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel() End of sending PropertyChangedPostMessage (3 times)");
 
 
 
@@ -150,10 +152,10 @@ namespace Console_MVVMTesting.ViewModels
 
 
             /////////// StatusRequestMessage : RequestMessage<bool> ///////////
-            srm = _messenger.Send(new StatusRequestMessage());
+            //srm = _messenger.Send(new StatusRequestMessage());
             //_log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(1).request: {srm.Response}");
 
-            srm = _messenger.Send(new StatusRequestMessage());  // RequestMessage<string>
+            //srm = _messenger.Send(new StatusRequestMessage());  // RequestMessage<string>
                                                                 //_log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(2).request: {srm.Response}");
 
 
@@ -163,31 +165,30 @@ namespace Console_MVVMTesting.ViewModels
 
             //_messenger.Send(new GenericMessage(MessageOp.Reset));
 
-            _messenger.Send(new InitMessage());
-            _log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(): InitMessage  ({this.GetHashCode():x8})");
+            //_messenger.Send(new InitETMessage());
+            //_log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(): InitMessage  ({this.GetHashCode():x8})");
 
-            _messenger.Send(new ResetMessage());    // public static TMessage Send<TMessage>(this IMessenger messenger, TMessage message) where TMessage : class;
-            _log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(): ResetMessage  ({this.GetHashCode():x8})");
+            //_messenger.Send(new ResetMessage());    // public static TMessage Send<TMessage>(this IMessenger messenger, TMessage message) where TMessage : class;
+            //_log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(): ResetMessage  ({this.GetHashCode():x8})");
 
-            _messenger.Send(new ResetMessage(true));
-            _log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(): ResetMessage(true)  ({this.GetHashCode():x8})");
+            //_messenger.Send(new ResetMessage(true));
+            //_log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(): ResetMessage(true)  ({this.GetHashCode():x8})");
 
-            _messenger.Send(new ResetMessage(false));
-            _log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(): ResetMessage(false)  ({this.GetHashCode():x8})");
+            //_messenger.Send(new ResetMessage(false));
+            //_log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(): ResetMessage(false)  ({this.GetHashCode():x8})");
 
-            _messenger.Send(new OperationMessage<bool>());      // public static class IMessengerExtensions: public static TMessage Send<TMessage>(this IMessenger messenger, TMessage message) where TMessage : class;
-            _log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(): OperationMessage()  ({this.GetHashCode():x8})");
+            //_messenger.Send(new OperationMessage<bool>());      // public static class IMessengerExtensions: public static TMessage Send<TMessage>(this IMessenger messenger, TMessage message) where TMessage : class;
+            //_log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(): OperationMessage()  ({this.GetHashCode():x8})");
 
-            _messenger.Send(new OperationMessage<bool>(MessageOp.Exit));
-            _log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(): OperationMessage(MessageOp.Exit)  ({this.GetHashCode():x8})");
+            //_messenger.Send(new OperationMessage<bool>(MessageOp.Exit));
+            //_log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(): OperationMessage(MessageOp.Exit)  ({this.GetHashCode():x8})");
 
             //_messenger.Send<MyTestMessage<MyEnum>>();
 
             //_messenger.Send(MyEnum.majRzal);    // public interface IMessenger: TMessage Send<TMessage, TToken>(TMessage message, TToken token)
 
 
-
-
+  
 
 
 

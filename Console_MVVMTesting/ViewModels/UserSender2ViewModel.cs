@@ -25,7 +25,7 @@ namespace Console_MVVMTesting.ViewModels
             MyPerson myPerson3 = new MyPerson("Wladimir", "Putin", 55, true);
             _messenger.Send(myPerson3);
 
-            _messenger.Send(new InitMessage());
+            _messenger.Send(new InitETMessage());
             _log.Log(consoleColor, $"UserSender2ViewModel::UserSender2ViewModel(): InitMessage  ({this.GetHashCode():x8})");
 
             _messenger.Send(new ResetMessage());    // public static TMessage Send<TMessage>(this IMessenger messenger, TMessage message) where TMessage : class;
