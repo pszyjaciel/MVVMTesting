@@ -62,6 +62,16 @@ namespace Console_MVVMTesting.ViewModels
         #endregion privates
 
 
+
+        private Post _myLCSocketPrivateProperyName;
+        public Post MyLCSocketPublicProperyName
+        {
+            get => _myLCSocketPrivateProperyName;
+            set => SetProperty(ref _myLCSocketPrivateProperyName, value);
+        }
+
+
+
         public bool IsConnected(Socket terminalSocket)
         {
             _log.Log(consoleColor, $"LCSocketViewModel::IsConnected(): socket: {terminalSocket.Handle}, ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
@@ -692,13 +702,12 @@ namespace Console_MVVMTesting.ViewModels
 
 
         #region Constructor
-        public LCSocketViewModel(ILoggingService loggingService, IMessenger messenger, EastTesterViewModel etvm)
+        public LCSocketViewModel(ILoggingService loggingService, IMessenger messenger)
         {
             _log = loggingService;
             _log.Log(consoleColor, $"LCSocketViewModel::LCSocketViewModel(): Start of constructor  ({this.GetHashCode():x8})");
 
             _messenger = messenger;
-            _eastTesterViewModel = etvm;
 
             _connectionItem = new ConnectionItem();
             _connectionItem.Name = _connectionItem_Name;
@@ -710,17 +719,31 @@ namespace Console_MVVMTesting.ViewModels
 
 
             // listen for the command in ProductionViewModel
-            _messenger.Register<LCInitMessage>(this, (r, m) => { RunInitCommandMessage(); });
-            _messenger.Register<LCCloseMessage>(this, (r, m) => { RunCloseCommandMessage(); });
+            //_messenger.Register<LCInitMessage>(this, (r, m) => { RunInitCommandMessage(); });
+            //_messenger.Register<LCCloseMessage>(this, (r, m) => { RunCloseCommandMessage(); });
 
+            ///// PropertyChangedMessage /////
+            Post myLCSocketPrivateProperyNameOld = new Post
+            {
+                Updated = false,
+                Title = "LCSocketOldTitle2",
+                Thumbnail = "LCSocketOldThumbnail2",
+                SelfText = "Some old LCSocket text2"
+            };
+
+            Post myLCSocketPrivateProperyNameNew = new Post
+            {
+                Updated = true,
+                Title = "LCSocketNewTitle",
+                Thumbnail = "LCSocketNewThumbnail",
+                SelfText = "Some new LCSocket text"
+            };
+
+            _messenger.Send(new PropertyChangedPostMessage(this, nameof(MyLCSocketPublicProperyName), 
+                myLCSocketPrivateProperyNameOld, myLCSocketPrivateProperyNameNew));
 
 
             //_log.Log(consoleColor, $"LCSocketViewModel::LCSocketViewModel() XamlLCSocketViewModel.GetHashCode(): {XamlLCSocketViewModel.GetHashCode()}");
-            _log.Log(consoleColor, $"LCSocketViewModel::LCSocketViewModel() etvm.GetHashCode(): {etvm.GetHashCode()}");
-            _log.Log(consoleColor, $"LCSocketViewModel::LCSocketViewModel() etvm.IsBusy(): {etvm.IsBusy}");
-            _log.Log(consoleColor, $"LCSocketViewModel::LCSocketViewModel() etvm.IsDateTime(): {etvm.IsDateTime}");
-            int result = etvm.MyEastTesterViewModelMethod(12);
-            _log.Log(consoleColor, $"LCSocketViewModel::LCSocketViewModel() {result}");
 
 
             _log.Log(consoleColor, $"LCSocketViewModel::LCSocketViewModel(): End of constructor  ({this.GetHashCode():x8})");

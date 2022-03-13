@@ -103,11 +103,7 @@ namespace Console_MVVMTesting.ViewModels
             _messenger.Register<UserReceiverViewModel, StatusRequestMessage>(this, StatusMessageHandler);
 
 
-            //_postProperty = new Post();
-            //////// PropertyChangedPostMessage //////////
-            _messenger.Register<UserReceiverViewModel, PropertyChangedPostMessage>(this, PropertyChangedPostMessageHandler);
-
-
+     
 
             // szukac Messenger.Register<CasualtyMessage, string>(this, "blanket", m => { OnCasualtyMessageReceived(); });
             // tutej https://xamlbrewer.wordpress.com/category/mvvm/
@@ -126,8 +122,102 @@ namespace Console_MVVMTesting.ViewModels
             //_messenger.Unregister<StatusRequestMessage>(this);
             //_messenger.Unregister<PropertyChangedPostMessage>(this);
 
+            //_postProperty = new Post();
+            //////// PropertyChangedPostMessage //////////
+            _messenger.Register<UserReceiverViewModel, PropertyChangedPostMessage>(this, PropertyChangedPostMessageHandler);
+
+
             _log.Log(consoleColor, $"UserReceiverViewModel::UserReceiverViewModel(): End of constructor ({this.GetHashCode():x8})");
         }
+
+
+
+        private void PropertyChangedPostMessageHandler(UserReceiverViewModel recipient, PropertyChangedPostMessage message)
+        {
+            _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(): start of PropertyChangedPostMessageHandler()  ({this.GetHashCode():x8})");
+
+            _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(): ({this.GetHashCode():x8})");
+            _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(): {message.Sender.GetType()}");
+            _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(): {message.PropertyName}");
+            _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(): ({message.Sender.GetHashCode():x8})");
+
+            _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(): OldValue.Updated {message.OldValue.Updated}");
+            _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(): OldValue.SelfText {message.OldValue.SelfText}");
+            _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(): OldValue.Title {message.OldValue.Title}");
+            _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(): OldValue.Thumbnail {message.OldValue.Thumbnail}");
+
+            _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(): NewValue.Updated {message.NewValue.Updated}");
+            _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(): NewValue.SelfText {message.NewValue.SelfText}");
+            _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(): NewValue.Title {message.NewValue.Title}");
+            _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(): NewValue.Thumbnail {message.NewValue.Thumbnail}");
+
+            _log.Log(consoleColor, $"1. UserReceiverViewModel::PropertyChangedPostMessageHandler(0): message.Sender.GetType(): {message.Sender.GetType()}");
+            _log.Log(consoleColor, $"2. UserReceiverViewModel::PropertyChangedPostMessageHandler(0): typeof(UserSenderViewModel): {typeof(UserSenderViewModel)}");
+            _log.Log(consoleColor, $"3. UserReceiverViewModel::PropertyChangedPostMessageHandler(0): message.PropertyName : {message.PropertyName }");
+            _log.Log(consoleColor, $"4. UserReceiverViewModel::PropertyChangedPostMessageHandler(0): nameof(UserSenderViewModel.SelectedPost): {nameof(UserSenderViewModel.SelectedPost)}");
+            _log.Log(consoleColor, $"5. UserReceiverViewModel::PropertyChangedPostMessageHandler(0): nameof(UserSenderViewModel.MySenderPublicProperyName): " +
+                $"{nameof(UserSenderViewModel.MySenderPublicPropertyName)}");
+            //_log.Log(consoleColor, $"6. UserReceiverViewModel::PropertyChangedPostMessageHandler(): nameof(LCSocketViewModel.MyLCSocketPublicProperyName): " +
+            //    $"{nameof(UserReceiver2ViewModel.MyLCSocketPublicProperyName)}");
+
+            if (message.Sender.GetType() == typeof(UserSenderViewModel) &&
+                message.PropertyName == nameof(UserSenderViewModel.SelectedPost))
+            {
+                this.PostProperty = message.NewValue;
+
+                _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(1): PostProperty.Title: {this.PostProperty.Title}");
+                _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(1): PostProperty.Thumbnail: {this.PostProperty.Thumbnail}");
+                _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(1): PostProperty.SelfText: {this.PostProperty.SelfText}");
+            }
+
+            else if (message.Sender.GetType() == typeof(UserSenderViewModel) &&
+                message.PropertyName == nameof(UserSenderViewModel.MySenderPublicPropertyName))
+            {
+                this.PostProperty = message.NewValue;
+
+                _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(2): PostProperty.Title: {this.PostProperty.Title}");
+                _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(2): PostProperty.Thumbnail: {this.PostProperty.Thumbnail}");
+                _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(2): PostProperty.SelfText: {this.PostProperty.SelfText}");
+
+            }
+
+            else if (message.Sender.GetType() == typeof(LCSocketViewModel) &&
+                message.PropertyName == nameof(LCSocketViewModel.MyLCSocketPublicProperyName))
+            {
+                _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(): ==> pszet: jeste fsrodku1 <==");
+                this.PostProperty = message.NewValue;
+
+                _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(3): PostProperty.Title: {this.PostProperty.Updated}");
+                _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(3): PostProperty.Title: {this.PostProperty.Title}");
+                _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(3): PostProperty.Thumbnail: {this.PostProperty.Thumbnail}");
+                _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(3): PostProperty.SelfText: {this.PostProperty.SelfText}");
+
+                _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(): ==> ipo: jeste fsrodku1 <==");
+            }
+
+            else if (message.Sender.GetType() == typeof(EastTesterViewModel) &&
+                message.PropertyName == nameof(EastTesterViewModel.MyEastTesterPublicProperyName))
+            {
+                _log.Log(consoleColor, $"UserReceiverViewModel::Receive(): ==> pszet: jeste fsrodku2 <==");
+                this.PostProperty = message.NewValue;
+
+                _log.Log(consoleColor, $"===> UserReceiverViewModel::PropertyChangedPostMessageHandler(4): PostProperty.Title: {this.PostProperty.Updated}");
+                _log.Log(consoleColor, $"===> UserReceiverViewModel::PropertyChangedPostMessageHandler(4): PostProperty.Title: {this.PostProperty.Title}");
+                _log.Log(consoleColor, $"===> UserReceiverViewModel::PropertyChangedPostMessageHandler(4): PostProperty.Thumbnail: {this.PostProperty.Thumbnail}");
+                _log.Log(consoleColor, $"===> UserReceiverViewModel::PropertyChangedPostMessageHandler(4): PostProperty.SelfText: {this.PostProperty.SelfText}");
+
+                _log.Log(consoleColor, $"UserReceiverViewModel::Receive(): ==> ipo: jeste fsrodku2 <==");
+            }
+
+
+
+            _messenger.Send<MyTestMessage<MyEnum>>();   // tesz nie dziala stont
+
+            _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(): end of PropertyChangedPostMessageHandler()  ({this.GetHashCode():x8})");
+        }
+
+
+
 
         private void RunGrzypki()
         {
@@ -157,87 +247,6 @@ namespace Console_MVVMTesting.ViewModels
             //_log.Log(consoleColor, $"UserReceiverViewModel::RunSomething() ({this.GetHashCode():x8})");
             Reaction = _reactions[rnd.Next(0, 5)];
             _userReceiverStatus = true;
-        }
-
-
-        private void PropertyChangedPostMessageHandler(UserReceiverViewModel recipient, PropertyChangedPostMessage message)
-        {
-            _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(): start of PropertyChangedPostMessageHandler()  ({this.GetHashCode():x8})");
-
-            _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler() ({this.GetHashCode():x8})");
-            _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler() {message.Sender.GetType()}");
-            _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler() {message.PropertyName}");
-            _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler() ({message.Sender.GetHashCode():x8})");
-            _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler() {message.OldValue.SelfText}");
-            _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler() {message.OldValue.Title}");
-            _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler() {message.OldValue.Thumbnail}");
-
-            _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler() {message.NewValue.Title}");
-            _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler() {message.NewValue.Thumbnail}");
-            _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler() {message.NewValue.SelfText}");
-
-            _log.Log(consoleColor, $"1. UserReceiverViewModel::PropertyChangedPostMessageHandler(): message.Sender.GetType(): {message.Sender.GetType()}");
-            _log.Log(consoleColor, $"2. UserReceiverViewModel::PropertyChangedPostMessageHandler(): typeof(UserSenderViewModel): {typeof(UserSenderViewModel)}");
-            _log.Log(consoleColor, $"3. UserReceiverViewModel::PropertyChangedPostMessageHandler(): message.PropertyName : {message.PropertyName }");
-            _log.Log(consoleColor, $"4. UserReceiverViewModel::PropertyChangedPostMessageHandler(): nameof(UserSenderViewModel.SelectedPost): {nameof(UserSenderViewModel.SelectedPost)}");
-            _log.Log(consoleColor, $"5. UserReceiverViewModel::PropertyChangedPostMessageHandler(): nameof(UserSenderViewModel.MySenderPublicProperyName): " +
-                $"{nameof(UserSenderViewModel.MySenderPublicProperyName)}");
-            _log.Log(consoleColor, $"6. UserReceiverViewModel::PropertyChangedPostMessageHandler(): nameof(LCSocketViewModel.MyLCSocketPublicProperyName): " +
-                $"{nameof(UserReceiver2ViewModel.MyLCSocketPublicProperyName)}");
-
-            if (message.Sender.GetType() == typeof(UserSenderViewModel) &&
-                message.PropertyName == nameof(UserSenderViewModel.SelectedPost))
-            {
-                this.PostProperty = message.NewValue;
-
-                _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(1): PostProperty.Title: {this.PostProperty.Title}");
-                _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(1): PostProperty.Thumbnail: {this.PostProperty.Thumbnail}");
-                _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(1): PostProperty.SelfText: {this.PostProperty.SelfText}");
-            }
-
-            else if (message.Sender.GetType() == typeof(UserSenderViewModel) &&
-                message.PropertyName == nameof(UserSenderViewModel.MySenderPublicProperyName))
-            {
-                this.PostProperty = message.NewValue;
-
-                _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(2): PostProperty.Title: {this.PostProperty.Title}");
-                _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(2): PostProperty.Thumbnail: {this.PostProperty.Thumbnail}");
-                _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(2): PostProperty.SelfText: {this.PostProperty.SelfText}");
-
-            }
-
-            else if (message.Sender.GetType() == typeof(UserReceiver2ViewModel) &&
-                message.PropertyName == nameof(UserReceiver2ViewModel.MyLCSocketPublicProperyName))
-            {
-
-                //_log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(): ==> pszet: jeste fsrodku1 <==");
-                this.PostProperty = message.NewValue;
-
-                _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(3): PostProperty.Title: {this.PostProperty.Title}");
-                _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(3): PostProperty.Thumbnail: {this.PostProperty.Thumbnail}");
-                _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(3): PostProperty.SelfText: {this.PostProperty.SelfText}");
-
-                //_log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(): ==> ipo: jeste fsrodku1 <==");
-            }
-
-            else if (message.Sender.GetType() == typeof(EastTesterViewModel) &&
-                message.PropertyName == nameof(EastTesterViewModel.MyEastTesterPublicProperyName))
-            {
-                //_log.Log(consoleColor, $"UserReceiverViewModel::Receive(): ==> pszet: jeste fsrodku2 <==");
-                this.PostProperty = message.NewValue;
-
-                //_log.Log(consoleColor, $"===> UserReceiverViewModel::Receive(): PostProperty.Title: {this.PostProperty.Title}");
-                //_log.Log(consoleColor, $"===> UserReceiverViewModel::Receive(): PostProperty.Thumbnail: {this.PostProperty.Thumbnail}");
-                //_log.Log(consoleColor, $"===> UserReceiverViewModel::Receive(): PostProperty.SelfText: {this.PostProperty.SelfText}");
-
-                //_log.Log(consoleColor, $"UserReceiverViewModel::Receive(): ==> ipo: jeste fsrodku2 <==");
-            }
-
-
-
-            _messenger.Send<MyTestMessage<MyEnum>>();   // tesz nie dziala stont
-
-            _log.Log(consoleColor, $"UserReceiverViewModel::PropertyChangedPostMessageHandler(): end of PropertyChangedPostMessageHandler()  ({this.GetHashCode():x8})");
         }
 
 

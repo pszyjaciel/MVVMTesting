@@ -38,11 +38,11 @@ namespace Console_MVVMTesting.ViewModels
         }
 
 
-        private Post _mySenderPrivateProperyName;
-        public Post MySenderPublicProperyName
+        private Post _mySenderPrivatePropertyName;
+        public Post MySenderPublicPropertyName
         {
-            get => _mySenderPrivateProperyName;
-            set => SetProperty(ref _mySenderPrivateProperyName, value);
+            get => _mySenderPrivatePropertyName;
+            set => SetProperty(ref _mySenderPrivatePropertyName, value);
         }
         //SetProperty<T>([NotNullIfNotNull("newValue")] ref T field, T newValue, bool broadcast, [CallerMemberName] string? propertyName = null);
 
@@ -63,6 +63,20 @@ namespace Console_MVVMTesting.ViewModels
         }
 
 
+
+
+        private void RunBlanketStatusTrue()
+        {
+            _log.Log(consoleColor, $"UserSenderViewModel::RunBlanketStatusTrue()  ({this.GetHashCode():x8})");
+        }
+
+        private void RunBlanketStatusFalse()
+        {
+            _log.Log(consoleColor, $"UserSenderViewModel::RunBlanketStatusFalse()  ({this.GetHashCode():x8})");
+        }
+
+
+        #region Constructor
         public UserSenderViewModel(ILoggingService loggingService, IMessenger messenger)
         {
             _log = loggingService;
@@ -127,17 +141,20 @@ namespace Console_MVVMTesting.ViewModels
             ///////// PropertyChangedPostMessage : PropertyChangedMessage<Post> /////////
             _log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel() Start of sending PropertyChangedPostMessage");
 
-            _selectedPost = new Post { Title = "staryTajtyl1", Thumbnail = "majOldTambnejl1" };
-            _messenger.Send(new PropertyChangedPostMessage(this, "SelectedPost", _selectedPost,
-                new Post { Title = "nowyTajtyl1", Thumbnail = "majNjuTambnejl1" }));
+            //_selectedPost = new Post { Title = "staryTajtyl1", Thumbnail = "majOldTambnejl1" };
+            //_messenger.Send(new PropertyChangedPostMessage(this, "SelectedPost", _selectedPost,
+            //    new Post { Title = "nowyTajtyl1", Thumbnail = "majNjuTambnejl1" }));
 
-            _mySenderPrivateProperyName = new Post { Title = "staryTajtyl2", Thumbnail = "majOldTambnejl2", SelfText = "jakis tam SelfTest2" };
-            _messenger.Send(new PropertyChangedPostMessage(typeof(Console_MVVMTesting.ViewModels.UserSenderViewModel), "MyPublicProperyName", _mySenderPrivateProperyName,
-                new Post { Title = "nowyTajtyl2", Thumbnail = "majNjuTambnejl2", SelfText = "A new selftext2" }));
+            // receiver nie rozpoznaje przez to: typeof(Console_MVVMTesting.ViewModels.UserSenderViewModel zamiast this.
+            _mySenderPrivatePropertyName = new Post { Title = "staryTajtyl2", Thumbnail = "majOldTambnejl2", SelfText = "jakis tam SelfTest2" };
+            _messenger.Send(new PropertyChangedPostMessage(typeof(Console_MVVMTesting.ViewModels.UserSenderViewModel), "MyPublicPropertyName",
+                _mySenderPrivatePropertyName, new Post { Title = "nowyTajtyl2", Thumbnail = "majNjuTambnejl2", SelfText = "A new selftext2" }));
 
-            _messenger.Send(new PropertyChangedPostMessage(this, "MySenderPublicProperyName", _mySenderPrivateProperyName,
-                new Post { Title = "nowyTajtyl2", Thumbnail = "majNjuTambnejl2", SelfText = "A new selftext2" }));
-            
+            // dziala ok
+            _mySenderPrivatePropertyName = new Post { Title = "staryTajtyl2b", Thumbnail = "majOldTambnejl2b", SelfText = "jakis tam SelfTest2b" };
+            _messenger.Send(new PropertyChangedPostMessage(this, "MySenderPublicPropertyName", _mySenderPrivatePropertyName,
+                new Post { Title = "nowyTajtyl2b", Thumbnail = "majNjuTambnejl2b", SelfText = "A new selftext2b" }));
+
             _log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel() End of sending PropertyChangedPostMessage (3 times)");
 
 
@@ -200,16 +217,9 @@ namespace Console_MVVMTesting.ViewModels
 
             _log.Log(consoleColor, $"UserSenderViewModel::UserSenderViewModel(): End of constructor  ({this.GetHashCode():x8})");
         }
+        #endregion Constructor
 
-        private void RunBlanketStatusTrue()
-        {
-            _log.Log(consoleColor, $"UserSenderViewModel::RunBlanketStatusTrue()  ({this.GetHashCode():x8})");
-        }
 
-        private void RunBlanketStatusFalse()
-        {
-            _log.Log(consoleColor, $"UserSenderViewModel::RunBlanketStatusFalse()  ({this.GetHashCode():x8})");
-        }
 
     }
 }

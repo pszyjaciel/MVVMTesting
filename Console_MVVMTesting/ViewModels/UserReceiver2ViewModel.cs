@@ -25,14 +25,6 @@ namespace Console_MVVMTesting.ViewModels
         }
 
 
-        private Post _myLCSocketPrivateProperyName;
-        public Post MyLCSocketPublicProperyName
-        {
-            get => _myLCSocketPrivateProperyName;
-            set => SetProperty(ref _myLCSocketPrivateProperyName, value);
-        }
-
-
         public UserReceiver2ViewModel(ILoggingService loggingService, IMessenger messenger)
         {
             _log = loggingService;
@@ -79,20 +71,7 @@ namespace Console_MVVMTesting.ViewModels
             });
             _messenger.Unregister<ShowPasswordMessage>(this);
 
-
-
             //_messenger.Register<UserReceiver2ViewModel, string>(this, _currentUser._myName);
-
-
-            ///// PropertyChangedMessage /////
-            _myLCSocketPrivateProperyName = new Post { Title = "LCSocketOldTitle2", Thumbnail = "LCSocketOldThumbnail2", SelfText = "Some old LCSocket text2" };
-            _messenger.Send(new PropertyChangedPostMessage(this, nameof(MyLCSocketPublicProperyName), _myLCSocketPrivateProperyName,
-                new Post { Title = "LCSocketTitle1", Thumbnail = "LCSocketThumbnail1", SelfText = "Some LCSocket text1" }));
-
-            _messenger.Send(new PropertyChangedPostMessage(this, "MyLCSocketPublicProperyName", _myLCSocketPrivateProperyName,
-                new Post { Title = "LCSocketTitle2", Thumbnail = "LCSocketThumbnail2", SelfText = "Some LCSocket text2" }));
-
-
 
             _messenger.Register<CasualtyMessage, bool>(this, false, (r, m) => { RunBlanketStatusFalse(); });
             _messenger.Register<CasualtyMessage, bool>(this, true, (r, m) => { RunBlanketStatusTrue(); });

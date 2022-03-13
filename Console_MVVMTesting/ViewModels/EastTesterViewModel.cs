@@ -162,8 +162,8 @@ namespace Console_MVVMTesting.ViewModels
             //{
             //    // do your resetting here
             //    _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(2): r: {r}, m: {m}");
-                
-                
+
+
             //});
 
 
@@ -176,7 +176,7 @@ namespace Console_MVVMTesting.ViewModels
             MessageOp mo1 = new MessageOp("myReset");
             //_messenger.Register<ResetMessage, MessageOp>(this, mo1, (r, m) =>
             //    {
-                    
+
             //    });
 
             //_messenger.Register<OperationMessage>(this, (r, m) => {
@@ -264,10 +264,26 @@ namespace Console_MVVMTesting.ViewModels
 
             //_log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): myUser._myName: {myUser._myName}");
 
-            // PropertyChangedMessage
-            _myEastTesterPrivateProperyName = new Post { Title = "EastTesterOldTitle2", Thumbnail = "EastTesterOldThumbnail2", SelfText = "Some old EastTester text2" };
-            _messenger.Send(new PropertyChangedPostMessage(this, "MyEastTesterPublicProperyName", _myEastTesterPrivateProperyName,
-                new Post { Title = "EastTesterTitle2", Thumbnail = "EastTesterThumbnail2", SelfText = "Some EastTester text2" }));
+            // PropertyChangedMessage _myEastTesterPrivateProperyName
+            Post _myEastTesterPrivateProperyNameOld = new Post
+            {
+                Updated = false,
+                Title = "EastTesterOldTitle2",
+                Thumbnail = "EastTesterOldThumbnail2",
+                SelfText = "Some old EastTester text2"
+            };
+
+            Post _myEastTesterPrivateProperyNameNew = new Post
+            {
+                Updated = true,
+                Title = "EastTesterNewTitle2",
+                Thumbnail = "EastTesterNewThumbnail2",
+                SelfText = "Some new EastTester text2"
+            };
+
+            _messenger.Send(new PropertyChangedPostMessage(this, "MyEastTesterPublicProperyName",
+                _myEastTesterPrivateProperyNameOld, _myEastTesterPrivateProperyNameNew));
+       
 
 
             _messenger.Register<CasualtyMessage, bool>(this, false, (r, m) => { RunBlanketStatusFalse(); });
@@ -277,7 +293,7 @@ namespace Console_MVVMTesting.ViewModels
 
 
             // listen for the command in ProductionViewModel
-            _messenger.Register<InitETMessage>(this, (r, m) => { RunInitETCommandMessage(); });
+            //_messenger.Register<InitETMessage>(this, (r, m) => { RunInitETCommandMessage(); });
 
 
             _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): end of constructor  ({this.GetHashCode():x8})");

@@ -73,6 +73,9 @@ namespace Console_MVVMTesting.Models
               $"Post::Post()  ({this.GetHashCode():x8})");
         }
 
+        public bool Updated { get; set; }
+
+
         /// <summary>
         /// Gets or sets the title of the post.
         /// </summary>

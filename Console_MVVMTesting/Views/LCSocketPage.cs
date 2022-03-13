@@ -9,7 +9,7 @@ namespace Console_MVVMTesting.Views
     internal class LCSocketPage : MyPage
     {
         public LCSocketViewModel XamlLCSocketViewModel { get; private set; }
-        public EastTesterViewModel XamlEastTesterViewModel { get; private set; }
+        //public EastTesterViewModel XamlEastTesterViewModel { get; private set; }
         
 
         public LCSocketPage()
@@ -19,7 +19,7 @@ namespace Console_MVVMTesting.Views
               $"({this.GetHashCode():x8})");
 
             XamlLCSocketViewModel = Ioc.Default.GetService<LCSocketViewModel>();
-            XamlEastTesterViewModel = Ioc.Default.GetService<EastTesterViewModel>();
+            //XamlEastTesterViewModel = Ioc.Default.GetService<EastTesterViewModel>();
             
         }
     }
