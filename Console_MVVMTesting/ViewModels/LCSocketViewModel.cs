@@ -700,7 +700,6 @@ namespace Console_MVVMTesting.ViewModels
         }
 
 
-
         #region Constructor
         public LCSocketViewModel(ILoggingService loggingService, IMessenger messenger)
         {
@@ -739,14 +738,46 @@ namespace Console_MVVMTesting.ViewModels
                 SelfText = "Some new LCSocket text"
             };
 
-            _messenger.Send(new PropertyChangedPostMessage(this, nameof(MyLCSocketPublicProperyName), 
+
+            //C:\Users\pak\Source\Repos\MVVM-Samples-master\samples\MvvmSampleUwp.sln
+
+            _messenger.Send(new PropertyChangedPostMessage(this, nameof(MyLCSocketPublicProperyName),
                 myLCSocketPrivateProperyNameOld, myLCSocketPrivateProperyNameNew));
 
+            LCSocketStateMessage lcssm = new LCSocketStateMessage(LCSocketStatusEnum.Connected);
+            //_messenger.Send(this, lcssm);     // wywala
+
+            //TMessage Send<TMessage, TToken>(TMessage message, TToken token)
+            //    where TMessage : class
+            //    where TToken : IEquatable<TToken>;
 
             //_log.Log(consoleColor, $"LCSocketViewModel::LCSocketViewModel() XamlLCSocketViewModel.GetHashCode(): {XamlLCSocketViewModel.GetHashCode()}");
 
 
+
+
+
+            // LoggedInUserRequestMessage is requested from the ProductionViewModel
+            _messenger.Register<LCSocketViewModel, LoggedInUserRequestMessage>(this, (r, m) =>
+            {
+                m.Reply(r.GetLCSocketUser());
+            });
+
+
+            MyUser myUser = new MyUser { MyUserName = "LCSocketUserName"};
+            // Send a message from some other module
+            _messenger.Send(new LoggedInUserChangedMessage(myUser));
+
+
+
+
             _log.Log(consoleColor, $"LCSocketViewModel::LCSocketViewModel(): End of constructor  ({this.GetHashCode():x8})");
+        }
+
+        private MyUser GetLCSocketUser()
+        {
+            _log.Log(consoleColor, $"LCSocketViewModel::GetLCSocketUser()");
+            return new MyUser("MyLCSocketUser");
         }
         #endregion Constructor
 

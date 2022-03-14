@@ -5,7 +5,7 @@ namespace Console_MVVMTesting.Messages
 {
     public class MyUser
     {
-        public string _myName { get; private set; }
+        public string MyUserName { get; set; }
         
 
         public MyUser(string myName)
@@ -14,7 +14,7 @@ namespace Console_MVVMTesting.Messages
               $"MyUser::MyUser(1) " +
               $"({this.GetHashCode():x8})");
 
-            _myName = myName;
+            MyUserName = myName;
         }
 
         public MyUser()

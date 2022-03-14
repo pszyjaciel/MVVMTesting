@@ -9,6 +9,7 @@ using Microsoft.Toolkit.Mvvm.Messaging;
 using System;
 using System.Collections;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using static PInvoke.User32;
 
@@ -285,11 +286,15 @@ namespace Console_MVVMTesting.ViewModels
                 _myEastTesterPrivateProperyNameOld, _myEastTesterPrivateProperyNameNew));
        
 
-
             _messenger.Register<CasualtyMessage, bool>(this, false, (r, m) => { RunBlanketStatusFalse(); });
             _messenger.Register<CasualtyMessage, bool>(this, true, (r, m) => { RunBlanketStatusTrue(); });
 
             _messenger.Send<MyTestMessage<MyEnum>>();       // gdy stont wysle to recipient nie reaguje, mimo rze dziala z sendera
+
+
+            
+            Task MyTask = Task.Run(SendLoggedInUserChangedMessage);
+            MyTask.Wait();
 
 
             // listen for the command in ProductionViewModel
@@ -297,6 +302,23 @@ namespace Console_MVVMTesting.ViewModels
 
 
             _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): end of constructor  ({this.GetHashCode():x8})");
+        }
+
+        private void SendLoggedInUserChangedMessage()
+        {
+            _log.Log(consoleColor, "EastTesterViewModel::SendLoggedInUserChangedMessage(): Start of method");
+            AutoResetEvent myWait = new AutoResetEvent(false);
+            myWait.Set();
+
+            Task.Delay(2300);
+
+            MyUser myUser = new MyUser { MyUserName = "EastTesterUserName" };
+            // Send a message from some other module
+            _messenger.Send(new LoggedInUserChangedMessage(myUser));
+            myWait.WaitOne();
+
+            _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): _messenger.Send(new LoggedInUserChangedMessage(myUser))");
+            _log.Log(consoleColor, "EastTesterViewModel::SendLoggedInUserChangedMessage(): End of method");
         }
 
         private void RunInitETCommandMessage()

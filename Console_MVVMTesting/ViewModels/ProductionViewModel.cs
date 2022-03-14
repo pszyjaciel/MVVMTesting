@@ -16,9 +16,9 @@ namespace Console_MVVMTesting.ViewModels
         private readonly ILoggingService _log;
         private readonly IMessenger _messenger;
 
-        private const string consoleColor = "DCYAN";
+        private const string consoleColor = "LBLUE";
 
-        
+
         #region XamlIsSocketInitialized1
         private bool isSocketInitialized1;
         public bool XamlIsSocketInitialized1
@@ -34,7 +34,7 @@ namespace Console_MVVMTesting.ViewModels
         {
             _log.Log(consoleColor, $"ProductionViewModel::TestRegex()");
 
-            string heartbeat = "'0x40''0x0d''0x0a'";    // zle
+            string heartbeat = "'0x40''0x0d''0x0a'";    // litosci!
             //_log.Log(consoleColor, $"{heartbeat}");
 
             string heartbeat1 = "@\r\n";
@@ -55,6 +55,14 @@ namespace Console_MVVMTesting.ViewModels
         #endregion TestRegex
 
 
+
+        public MyUser GetCurrentUserAsync()
+        {
+            return new MyUser("from ProductionViewModel(): huj w dupe i kula wuep putinowi");
+        }
+
+
+
         #region Constructor
         public ProductionViewModel(ILoggingService loggingService, IMessenger messenger)
         {
@@ -63,26 +71,50 @@ namespace Console_MVVMTesting.ViewModels
 
             _messenger = messenger;
 
-
             //this.TestRegex();
 
-            Task.Delay(2000);
+            //Task.Delay(2000);
             //_messenger.Send(new InitETMessage());
             //_log.Log($"ProductionViewModel::ProductionViewModel(): InitETMessage()  ({GetHashCode():x8})");
 
-            _messenger.Send(new LCInitMessage());
-            _log.Log($"ProductionViewModel::ProductionViewModel(): LCInitMessage()  ({GetHashCode():x8})");
+            //_messenger.Send(new LCInitMessage());
+            //_log.Log($"ProductionViewModel::ProductionViewModel(): LCInitMessage()  ({GetHashCode():x8})");
 
-            _messenger.Send(new LCCloseMessage());
-            _log.Log($"ProductionViewModel::ProductionViewModel(): LCCloseMessage()  ({GetHashCode():x8})");
+            //_messenger.Send(new LCCloseMessage());
+            //_log.Log($"ProductionViewModel::ProductionViewModel(): LCCloseMessage()  ({GetHashCode():x8})");
 
 
+            // request value from LCSocketViewModel
+            MyUser myUser = _messenger.Send<LoggedInUserRequestMessage>();
+            _log.Log(consoleColor, $"ProductionViewModel::ProductionViewModel(): myUser._myName: {myUser.MyUserName}");
+
+
+            // Register a message in some module
+            _messenger.Register<LoggedInUserChangedMessage>(this, (r, m) =>
+            {
+                // Handle the message here, with r being the recipient and m being the
+                // input messenger. Using the recipient passed as input makes it so that
+                // the lambda expression doesn't capture "this", improving performance.
+               
+                _log.Log(consoleColor, $"ProductionViewModel::ProductionViewModel():  r.GetType(): { r.GetType()}; m.Value: {m.Value}");
+                
+            });
+
+
+
+
+            // C:\Users\pak\Source\Repos\MVVM-Samples-master\samples\MvvmSampleUwp.sln
             _messenger.Register<LCSocketStateMessage>(this, (r, m) =>
             {
                 if (m.LCStatus == LCSocketStatusEnum.Connected)
+                {
                     XamlIsSocketInitialized1 = true;
+                }
                 else
+                {
                     XamlIsSocketInitialized1 = false;
+                }
+                _log.Log($"ProductionViewModel::ProductionViewModel(): XamlIsSocketInitialized1 is {XamlIsSocketInitialized1}");
 
                 m.Reply(m.LCStatus);
             });

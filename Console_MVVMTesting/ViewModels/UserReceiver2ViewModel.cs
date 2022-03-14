@@ -15,7 +15,7 @@ namespace Console_MVVMTesting.ViewModels
     {
         private readonly ILoggingService _log;
         private readonly IMessenger _messenger;
-        private const string consoleColor = "DCYAN";
+        private const string consoleColor = "LMAGENTA";
 
         private MyUser _currentUser;
         public MyUser CurrentUser
@@ -32,16 +32,17 @@ namespace Console_MVVMTesting.ViewModels
 
             _messenger = messenger;
 
-
-            //// Register the receiver in a module
-            //WeakReferenceMessenger.Default.Register<UserReceiver2ViewModel, LoggedInUserRequestMessage>(this, (r, m) =>
-            //{
-            //    // Assume that "CurrentUser" is a private member in our viewmodel.
-            //    // As before, we're accessing it through the recipient passed as
-            //    // input to the handler, to avoid capturing "this" in the delegate.
-            //    //m.Reply(r._eastTesterViewModel.myETUser._myName);
-            //    m.Reply(r.GetCurrentUserAsync());
-            //});
+            // Register the receiver in a module; requested sender is in the ProductionViewModel
+            // cannot replace UserReceiver2ViewModel with 'this'
+            _messenger.Register<UserReceiver2ViewModel, LoggedInUserRequestMessage>(this, (r, m) =>
+            {
+                // Assume that "CurrentUser" is a private member in our viewmodel.
+                // we're accessing it through the recipient passed as
+                // input to the handler, to avoid capturing "this" in the delegate.
+                //m.Reply(r._eastTesterViewModel.myETUser._myName);
+                // Obs: this error can occure: A response has already been issued for the current message
+                //m.Reply(r.GetCurrentUserAsync());       
+            });
 
 
             //_messenger.Register<NotificationMessageAction<MessageBoxResult>>(this, (r, m) =>
@@ -151,7 +152,8 @@ namespace Console_MVVMTesting.ViewModels
 
         private MyUser GetCurrentUserAsync()
         {
-            return new MyUser("huj w dupe putinowi");
+            _log.Log(consoleColor, $"UserReceiver2ViewModel::GetCurrentUserAsync()  ({this.GetHashCode():x8})");
+            return new MyUser("from UserReceiver2ViewModel(): huj w dupe putinowi");
         }
 
         private async Task MyTask()

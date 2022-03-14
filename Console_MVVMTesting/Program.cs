@@ -97,6 +97,8 @@ namespace Console_MVVMTesting
         }
 
 
+        // http://sheepsqueezers.com/media/presentations/dotNetLectureSeries_CSharpProgrammingIII.pdf tesz fajne
+
         /// ////////////////////////////////////
         static void Main(string[] args)
         {
@@ -112,35 +114,16 @@ namespace Console_MVVMTesting
             activationService.ActivateAsync(args);
 
 
-            //Task.Run(MyCallbackTaskAsync);
-
-            //bool result1= false;
-            //Task myBackgroudTask1 = Task.Run(async () =>
-            //{
-            //    result1 = await myBackgroudTaskAsync1();
-            //});
-            //myBackgroudTask1.Wait();
-            //MyUtils.MyConsoleWriteLine($"Program::Main(): result1: {result1}");
-
-            //Task myBackgroudTask2 = Task.Run(async () =>
-            //{
-            //    bool result2 = await myBackgroudTaskAsync2();
-            //    MyUtils.MyConsoleWriteLine($"Program::Main(): result2: {result2}");
-            //});
-
-            //msp.RunSerialPort();
-            //Task<List<SerialPort>> myListOfSerialPorts = RunSerialPortAsync();
-            //Task.WaitAll(myListOfSerialPorts);
-
-            // http://sheepsqueezers.com/media/presentations/dotNetLectureSeries_CSharpProgrammingIII.pdf tesz fajne
-
 
             MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
                 $"==========> Program::Main(): end of program <========== " +
                 $"({typeof(SerialPortExtensions).GetHashCode():x8})");
 
 
-            //Console.ReadLine();
+            //Simulate performing work here...main program must not end before
+            // thread finishes or you will lose your results!
+            Console.ReadLine();
+            
         }
 
 
