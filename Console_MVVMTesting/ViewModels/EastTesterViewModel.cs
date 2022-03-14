@@ -284,7 +284,7 @@ namespace Console_MVVMTesting.ViewModels
 
             _messenger.Send(new PropertyChangedPostMessage(this, "MyEastTesterPublicProperyName",
                 _myEastTesterPrivateProperyNameOld, _myEastTesterPrivateProperyNameNew));
-       
+
 
             _messenger.Register<CasualtyMessage, bool>(this, false, (r, m) => { RunBlanketStatusFalse(); });
             _messenger.Register<CasualtyMessage, bool>(this, true, (r, m) => { RunBlanketStatusTrue(); });
@@ -292,7 +292,7 @@ namespace Console_MVVMTesting.ViewModels
             _messenger.Send<MyTestMessage<MyEnum>>();       // gdy stont wysle to recipient nie reaguje, mimo rze dziala z sendera
 
 
-            
+
             Task MyTask = Task.Run(SendLoggedInUserChangedMessage);
             MyTask.Wait();
 
@@ -317,17 +317,33 @@ namespace Console_MVVMTesting.ViewModels
             _messenger.Send(new LoggedInUserChangedMessage(myUser));
             myWait.WaitOne();
 
+
+            Task MyTask = Task.Run(MyRunningTask);
+            //MyTask.Wait();
+
+
             _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): _messenger.Send(new LoggedInUserChangedMessage(myUser))");
             _log.Log(consoleColor, "EastTesterViewModel::SendLoggedInUserChangedMessage(): End of method");
         }
+        #endregion Constructor
 
         private void RunInitETCommandMessage()
         {
             _log.Log(consoleColor, $"EastTesterViewModel::RunInitETCommandMessage()  ({this.GetHashCode():x8})");
             _isInitialized = true;
         }
-        #endregion Constructor
 
+
+
+
+        private async Task MyRunningTask()
+        {
+            while (true)
+            {
+                _log.Log(consoleColor, $"EastTesterViewModel::MyRunningTask()");
+                await Task.Delay(2500);
+            }
+        }
 
     }
 }

@@ -769,9 +769,18 @@ namespace Console_MVVMTesting.ViewModels
             _messenger.Send(new LoggedInUserChangedMessage(myUser));
 
 
-
+            Task MyTask = Task.Run(MyLongRunningTask);
 
             _log.Log(consoleColor, $"LCSocketViewModel::LCSocketViewModel(): End of constructor  ({this.GetHashCode():x8})");
+        }
+
+        private async Task MyLongRunningTask()
+        {
+            while (true)
+            {
+                _log.Log(consoleColor, $"LCSocketViewModel::MyRunningTask()");
+                await Task.Delay(2000);
+            }
         }
 
         private MyUser GetLCSocketUser()
