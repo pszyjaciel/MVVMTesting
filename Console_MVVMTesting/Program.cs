@@ -26,7 +26,7 @@ namespace Console_MVVMTesting
         public static ProductionPage Content8 { get; internal set; }
 
 
-        
+
         private static Semaphore _serialSemaphore;
 
         internal static void Activate()
@@ -42,7 +42,7 @@ namespace Console_MVVMTesting
         }
 
 
-   
+
 
         private static IServiceProvider ConfigureMyServices()
         {
@@ -108,7 +108,7 @@ namespace Console_MVVMTesting
                 $"==========> Program::Main(): start of program <========== " +
                 $"({typeof(SerialPortExtensions).GetHashCode():x8})");
 
-        
+
             Ioc.Default.ConfigureServices(ConfigureMyServices());
             IActivationService activationService = Ioc.Default.GetService<IActivationService>();
             activationService.ActivateAsync(args);
@@ -122,8 +122,8 @@ namespace Console_MVVMTesting
 
             //Simulate performing work here...main program must not end before
             // thread finishes or you will lose your results!
-            Console.ReadLine();
-            
+            Console.ReadLine();     // musi ma byc, o ile nie zablokuje sie gdzies w ViewModelach 
+
         }
 
 
