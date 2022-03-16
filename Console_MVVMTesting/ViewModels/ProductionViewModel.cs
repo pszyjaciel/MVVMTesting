@@ -58,7 +58,90 @@ namespace Console_MVVMTesting.ViewModels
 
         public MyUser GetCurrentUserAsync()
         {
-            return new MyUser("from ProductionViewModel(): huj w dupe i kula wuep putinowi");
+            return new MyUser("from ProductionViewModel(): huj w dupe i kula wuep jebanemu putinowi");
+        }
+
+
+        private async Task OnStartButtonExecute()
+        {
+            _log.Log(consoleColor, $"ProductionViewModel::OnStartButtonExecute(): Start of method.");
+
+            bool result;
+
+
+            result = await this.InitLoadsTaskAsync();
+            if (!result)
+            {
+                return;
+            }
+
+            result = await this.InitSocketsTaskAsync();
+            if (!result)
+            {
+                return;
+            }
+
+            result = this.ShutdownTaskAsync();
+            if (!result)
+            {
+                return;
+            }
+
+            //while (true)
+            //{
+            //    _log.Log(consoleColor, $"ProductionViewModel::MyRunningTask()");
+            //    await Task.Delay(2000);
+            //}
+
+            _log.Log(consoleColor, $"ProductionViewModel::OnStartButtonExecute(): End of method.");
+            _log.Log(consoleColor, $"ProductionViewModel::OnStartButtonExecute(): Now press [Enter].");
+
+        }
+
+    
+
+        private async Task<bool> InitLoadsTaskAsync()
+        {
+            _log.Log(consoleColor, "ProductionViewModel::InitLoadsTaskAsync(): Start of method");
+            bool rs;
+
+            // Run load-init in the EastTesterViewModule and request result
+            EastTesterStateMessage etmsm = await _messenger.Send<EastTesterStatusRequestMessage>();
+            _log.Log(consoleColor, $"ProductionViewModel::InitLoadsTaskAsync(): etmsm.MyStateName: {etmsm.MyStateName}, etmsm.etStatus: {etmsm.etStatus}");
+
+            if (etmsm.etStatus != ETStatus.Success)
+            {
+                _log.Log(consoleColor, $"ProductionViewModel::InitLoadsTaskAsync(): Load initializing failed with error.\n" + "Are loads connected and switched on ?");
+                rs = false;
+            }
+            else
+            {
+                rs = true;
+            }
+
+            _log.Log(consoleColor, "ProductionViewModel::InitLoadsTaskAsync(): End of method");
+            return rs;
+        }
+
+        
+        private async Task<bool> InitSocketsTaskAsync()
+        {
+            await Task.Delay(2000);
+            return true;
+        }
+
+
+        private bool ShutdownTaskAsync()
+        {
+            // shutdown for loads
+            EastTesterStateMessage etsm = _messenger.Send<EastTesterShutdownRequestMessage>();
+            _log.Log(consoleColor, $"ProductionViewModel::IsShuttingDown.set: etsm.ETErrorNumber: {etsm.ETErrorNumber}");
+
+            // shutdown for sockets
+            LCSocketStateMessage lcssm = _messenger.Send<LCShutdownRequestMessage>();
+            _log.Log(consoleColor, $"ProductionViewModel::IsShuttingDown.set: lcssm.LCErrorNumber: {lcssm.LCErrorNumber}");
+
+            return true;
         }
 
 
@@ -70,7 +153,7 @@ namespace Console_MVVMTesting.ViewModels
             _log.Log(consoleColor, $"ProductionViewModel::ProductionViewModel(): Start of constructor  ({this.GetHashCode():x8})");
 
             _messenger = messenger;
-
+            
             //this.TestRegex();
 
             //Task.Delay(2000);
@@ -104,24 +187,27 @@ namespace Console_MVVMTesting.ViewModels
 
 
             // C:\Users\pak\Source\Repos\MVVM-Samples-master\samples\MvvmSampleUwp.sln
-            _messenger.Register<LCSocketStateMessage>(this, (r, m) =>
-            {
-                if (m.LCStatus == LCSocketStatusEnum.Connected)
-                {
-                    XamlIsSocketInitialized1 = true;
-                }
-                else
-                {
-                    XamlIsSocketInitialized1 = false;
-                }
-                _log.Log($"ProductionViewModel::ProductionViewModel(): XamlIsSocketInitialized1 is {XamlIsSocketInitialized1}");
+            //_messenger.Register<LCSocketStateMessage>(this, (r, m) =>
+            //{
+            //    if (m.LCStatus == LCSocketStatusEnum.Connected)
+            //    {
+            //        XamlIsSocketInitialized1 = true;
+            //    }
+            //    else
+            //    {
+            //        XamlIsSocketInitialized1 = false;
+            //    }
+            //    _log.Log($"ProductionViewModel::ProductionViewModel(): XamlIsSocketInitialized1 is {XamlIsSocketInitialized1}");
 
-                m.Reply(m.LCStatus);
-            });
+            //    m.Reply(m.LCStatus);
+            //});
 
-            Task.WaitAll();
+            
+            Task MyTask = Task.Run(OnStartButtonExecute);
+            //MyTask.Wait();
+
             _log.Log(consoleColor, $"ProductionViewModel::ProductionViewModel(): End of constructor  ({this.GetHashCode():x8})");
         }
-        #endregion
+        #endregion Constructor
     }
 }
