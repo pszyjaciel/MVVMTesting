@@ -121,6 +121,107 @@ namespace Console_MVVMTesting.ViewModels
         }
 
 
+        private bool RunInitCommandMessage()
+        {
+            _log.Log(consoleColor, $"EastTesterViewModel::RunInitCommandMessage(): Start of method  ({this.GetHashCode():x8})");
+
+            bool initResult = true;
+            // synchronous, because of parallel threads
+            Task myOpenPortTask = Task.Run(() =>
+            {
+                //_myListOfSerialPorts = this.RetrieveSerialPortParallel();    // tu sie fszysko dzieje
+                //_log.Log($"EastTesterViewModel::RunInitCommandMessage(): myListOfSerialPorts.Count: {_myListOfSerialPorts.Count}");
+                //if (_myListOfSerialPorts.Count == 0)
+                //{
+                //    initResult = false;
+                //}
+
+                //this.InitLinkGroupColors(_myListOfSerialPorts);
+                //this.InitMeasureThreads(_myListOfSerialPorts);
+                //this.InitAttachDetachButtons(_myListOfSerialPorts);
+            });
+            myOpenPortTask.Wait();
+
+            _log.Log(consoleColor, $"EastTesterViewModel::RunInitCommandMessage(): End of method; initResult: {initResult}  ({this.GetHashCode():x8})");
+            return initResult;
+        }
+
+
+        private async Task<EastTesterStateMessage> EasyTesterInitAsync()
+        {
+            _log.Log(consoleColor, $"EastTesterViewModel::EasyTesterInitAsync()");
+
+            bool rs = await Task.Run(RunInitCommandMessage);
+            return new EastTesterStateMessage { MyStateName = "EastTesterViewModel", etStatus = rs ? ETStatus.Success : ETStatus.Error, ETErrorNumber = 0 };
+        }
+
+
+        private void SendLoggedInUserChangedMessage()
+        {
+            _log.Log(consoleColor, "EastTesterViewModel::SendLoggedInUserChangedMessage(): Start of method");
+            AutoResetEvent myWait = new AutoResetEvent(false);
+            myWait.Set();
+
+            Task.Delay(2300);
+
+            MyUser myUser = new MyUser { MyUserName = "EastTesterUserName" };
+            // Send a message from some other module
+            _messenger.Send(new LoggedInUserChangedMessage(myUser));
+            myWait.WaitOne();
+
+            // initialize-listener
+            _messenger.Register<EastTesterViewModel, EastTesterStatusRequestMessage>(this, (myReceiver, myMessenger) =>
+            {
+                myMessenger.Reply(myReceiver.EasyTesterInitAsync());
+            });
+
+            _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): _messenger.Send(new LoggedInUserChangedMessage(myUser))");
+            _log.Log(consoleColor, "EastTesterViewModel::SendLoggedInUserChangedMessage(): End of method");
+        }
+
+
+        private void RunInitETCommandMessage()
+        {
+            _log.Log(consoleColor, $"EastTesterViewModel::RunInitETCommandMessage()  ({this.GetHashCode():x8})");
+            _isInitialized = true;
+        }
+
+
+        ////////////////// SHUTDOWN /////////////////////
+
+        private bool RunPostCloseCommand()
+        {
+            _log.Log(consoleColor, $"EastTesterViewModel::RunPostCloseCommand(): Start of method");
+
+            bool result = false, finalResult = true;
+
+            _log.Log(consoleColor, $"EastTesterViewModel::RunPostCloseCommand(): End of method: finalResult: {finalResult}");
+            return finalResult;
+        }
+
+
+        private EastTesterStateMessage RunETShutdownCommand()
+        {
+            _log.Log(consoleColor, $"EastTesterViewModel::RunETShutdownCommand()  Start of method");
+
+            bool shutDownResult = false;
+            Task MyClosingTask = Task.Run(() =>
+            {
+                shutDownResult = this.RunPostCloseCommand();
+                _log.Log(consoleColor, $"EastTesterViewModel::RunETShutdownCommand(): shutDownResult: {shutDownResult}");
+            });
+            MyClosingTask.Wait();
+
+            EastTesterStateMessage etsm = new EastTesterStateMessage();
+            etsm.ETErrorNumber = shutDownResult ? 0 : -1;      // error number can expand
+            etsm.MyStateName = "EastTesterViewModel";
+            etsm.etStatus = shutDownResult ? ETStatus.Success : ETStatus.Error;
+
+            _log.Log(consoleColor, $"EastTesterViewModel::RunETShutdownCommand()  End of method");
+            return etsm;
+        }
+
+
         #region Constructor
         public EastTesterViewModel(ILoggingService loggingService, IMessenger messenger)
         {
@@ -300,50 +401,18 @@ namespace Console_MVVMTesting.ViewModels
             // listen for the command in ProductionViewModel
             //_messenger.Register<InitETMessage>(this, (r, m) => { RunInitETCommandMessage(); });
 
+            // shutdown-listener
+            _messenger.Register<EastTesterViewModel, EastTesterShutdownRequestMessage>(this, (myReceiver, myMessenger) =>
+            {
+                myMessenger.Reply(myReceiver.RunETShutdownCommand());       // pacz ShellViewModel::IsShuttingDown
+            });
+
 
             _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): end of constructor  ({this.GetHashCode():x8})");
         }
-
-        private void SendLoggedInUserChangedMessage()
-        {
-            _log.Log(consoleColor, "EastTesterViewModel::SendLoggedInUserChangedMessage(): Start of method");
-            AutoResetEvent myWait = new AutoResetEvent(false);
-            myWait.Set();
-
-            Task.Delay(2300);
-
-            MyUser myUser = new MyUser { MyUserName = "EastTesterUserName" };
-            // Send a message from some other module
-            _messenger.Send(new LoggedInUserChangedMessage(myUser));
-            myWait.WaitOne();
-
-
-            Task MyTask = Task.Run(MyRunningTask);
-            //MyTask.Wait();
-
-
-            _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): _messenger.Send(new LoggedInUserChangedMessage(myUser))");
-            _log.Log(consoleColor, "EastTesterViewModel::SendLoggedInUserChangedMessage(): End of method");
-        }
         #endregion Constructor
 
-        private void RunInitETCommandMessage()
-        {
-            _log.Log(consoleColor, $"EastTesterViewModel::RunInitETCommandMessage()  ({this.GetHashCode():x8})");
-            _isInitialized = true;
-        }
 
-
-
-
-        private async Task MyRunningTask()
-        {
-            while (true)
-            {
-                _log.Log(consoleColor, $"EastTesterViewModel::MyRunningTask()");
-                await Task.Delay(2500);
-            }
-        }
 
     }
 }
