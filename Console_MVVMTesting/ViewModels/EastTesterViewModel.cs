@@ -28,19 +28,6 @@ namespace Console_MVVMTesting.ViewModels
         private bool _isBusy;
         private const string consoleColor = "DYELLOW";
 
-        private MyUser _myETUser;
-        public MyUser myETUser
-        {
-            get
-            {
-                return _myETUser;
-            }
-            set
-            {
-                _myETUser = value;
-            }
-        }
-
 
         public bool IsBusy
         {
@@ -58,8 +45,6 @@ namespace Console_MVVMTesting.ViewModels
         }
 
         private bool _isDateTime;
-        private object m_dteSolution;
-
         public bool IsDateTime
         {
             get
@@ -77,14 +62,6 @@ namespace Console_MVVMTesting.ViewModels
 
 
 
-        private bool _isInitialized;
-        public bool XamlIsInitialized
-        {
-            get => _isInitialized;
-            set => SetProperty(ref _isInitialized, value, "");
-        }
-
-
         private Post _myEastTesterPrivateProperyName;
         public Post MyEastTesterPublicProperyName
         {
@@ -99,25 +76,6 @@ namespace Console_MVVMTesting.ViewModels
 
             somePrimitiveIntVariable++;
             return somePrimitiveIntVariable;
-        }
-
-
-        private void RunBlanketStatusTrue()
-        {
-            _log.Log(consoleColor, $"EastTesterViewModel::RunBlanketStatusTrue()  ({this.GetHashCode():x8})");
-        }
-
-        private void RunBlanketStatusFalse()
-        {
-            _log.Log(consoleColor, $"EastTesterViewModel::RunBlanketStatusFalse()  ({this.GetHashCode():x8})");
-
-        }
-
-
-        private async Task MyTask()
-        {
-            _log.Log(consoleColor, $"LCSocketViewModel::MyTask()");
-            await Task.Delay(2000);
         }
 
 
@@ -180,15 +138,7 @@ namespace Console_MVVMTesting.ViewModels
         }
 
 
-        private void RunInitETCommandMessage()
-        {
-            _log.Log(consoleColor, $"EastTesterViewModel::RunInitETCommandMessage()  ({this.GetHashCode():x8})");
-            _isInitialized = true;
-        }
-
-
         ////////////////// SHUTDOWN /////////////////////
-
         private bool RunPostCloseCommand()
         {
             _log.Log(consoleColor, $"EastTesterViewModel::RunPostCloseCommand(): Start of method");
@@ -253,153 +203,9 @@ namespace Console_MVVMTesting.ViewModels
                 m.Reply(m.State);
             });
 
-            //_messenger.Register<ResetMessage>(this, (r, m) =>
-            //{
-            //    // do your resetting here
-            //    _log.Log($"EastTesterViewModel::EastTesterViewModel(1): r: {r}, m: {m}");
-            //    _log.Log($"EastTesterViewModel::EastTesterViewModel(1): r: {r}, m: {m}");
-            //});
-
-            //_messenger.Register<OperationMessage, bool>(this, MessageOp.Exit, (r, m) =>
-            //{
-            //    // do your resetting here
-            //    _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(2): r: {r}, m: {m}");
-
-
-            //});
-
-
-            //_messenger.Register<OperationMessage, MessageOp>(this, MessageOp.Reset, (r, m) =>
-            //{
-            //    // do your resetting here
-            //    _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(2): r: {r}, m: {m}");
-            //});
-
-            MessageOp mo1 = new MessageOp("myReset");
-            //_messenger.Register<ResetMessage, MessageOp>(this, mo1, (r, m) =>
-            //    {
-
-            //    });
-
-            //_messenger.Register<OperationMessage>(this, (r, m) => {
-            //    // handle all operations here - the operation is avaiable via m.Content
-            //});
-
-            //_messenger.Register<MessageOp>(this, (m) => {
-            //    if (m == MessageOp.Reset)
-            //    {
-            //        // your code
-            //    }
-            //});
-
-
-
-            _messenger.Register<MyObject>(this, (r, m) =>
-            {
-                // do your resetting here
-                _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(3): r: {r}, m: {m}");
-            });
-
-            _messenger.Register<MyObjectChangedMessage>(this, (r, m) =>
-            {
-                // do your resetting here
-                _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(4): r: {r}, m: {m}");
-            });
-
-            _messenger.Register<MyPerson>(this, (r, m) =>
-            {
-                // do your resetting here
-                _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(5): r: {r}, m: {m}");
-                _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(5): r: {r}, m: {m.FirstName}");
-                _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(5): r: {r}, m: {m.LastName}");
-                _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(5): r: {r}, m: {m.PersonsAge}");
-                _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(5): r: {r}, m: {m.Neutralise}");
-
-            });
-
-            LoggedInUserRequestMessage liurm = null;
-            try
-            {
-                liurm = WeakReferenceMessenger.Default.Send<LoggedInUserRequestMessage>();
-                _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): liurm: {liurm}");
-                _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): liurm.HasReceivedResponse: {liurm.HasReceivedResponse}");
-
-            }
-            catch (Exception ex)
-            {
-                _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): {ex.Message}");
-            }
-
-
-            //Task myTask = Task.Run(MyTask);
-            //myTask.Wait();
-
-            //_log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): liurm.HasReceivedResponse: {liurm.HasReceivedResponse}");
-            //_log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): liurm.Response: {liurm.Response}");
-
-
-            //MyUser myUser = WeakReferenceMessenger.Default.Send<LoggedInUserRequestMessage>();
-
-
-            ///////////////////////////////
-            //NotificationMessageAction<MessageBoxResult> msg = new NotificationMessageAction<MessageBoxResult>(this, "GetPassword", (r) =>
-            //{
-            //    if (r.Equals(MessageBoxResult.IDOK))
-            //    {
-            //        // do stuff
-            //        _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): sie ruwna.");
-            //    }
-            //});
-
-            ShowPasswordMessage msg = new ShowPasswordMessage(this, (r) =>
-            {
-                _log.Log(consoleColor, $"==> EastTesterViewModel::EastTesterViewModel(): r: {r}");
-
-                if (r.Equals(MessageBoxResult.IDOK))
-                {
-                    // do stuff
-                    _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): sie ruwna.");
-                }
-            });
-            _messenger.Send(msg);
-            _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): mesecz pojszet.");
-
-            //_log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): myUser._myName: {myUser._myName}");
-
-            // PropertyChangedMessage _myEastTesterPrivateProperyName
-            Post _myEastTesterPrivateProperyNameOld = new Post
-            {
-                Updated = false,
-                Title = "EastTesterOldTitle2",
-                Thumbnail = "EastTesterOldThumbnail2",
-                SelfText = "Some old EastTester text2"
-            };
-
-            Post _myEastTesterPrivateProperyNameNew = new Post
-            {
-                Updated = true,
-                Title = "EastTesterNewTitle2",
-                Thumbnail = "EastTesterNewThumbnail2",
-                SelfText = "Some new EastTester text2"
-            };
-
-            _messenger.Send(new PropertyChangedPostMessage(this, "MyEastTesterPublicProperyName",
-                _myEastTesterPrivateProperyNameOld, _myEastTesterPrivateProperyNameNew));
-
-
-            _messenger.Register<CasualtyMessage, bool>(this, false, (r, m) => { RunBlanketStatusFalse(); });
-            _messenger.Register<CasualtyMessage, bool>(this, true, (r, m) => { RunBlanketStatusTrue(); });
-
-            _messenger.Send<MyTestMessage<MyEnum>>();       // gdy stont wysle to recipient nie reaguje, mimo rze dziala z sendera
-
-
-
+    
             Task MyTask = Task.Run(SendLoggedInUserChangedMessage);
             MyTask.Wait();
-
-
-            // listen for the command in ProductionViewModel
-            //_messenger.Register<InitETMessage>(this, (r, m) => { RunInitETCommandMessage(); });
 
             // shutdown-listener
             _messenger.Register<EastTesterViewModel, EastTesterShutdownRequestMessage>(this, (myReceiver, myMessenger) =>

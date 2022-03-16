@@ -87,15 +87,8 @@ namespace Console_MVVMTesting.ViewModels
                 return;
             }
 
-            //while (true)
-            //{
-            //    _log.Log(consoleColor, $"ProductionViewModel::MyRunningTask()");
-            //    await Task.Delay(2000);
-            //}
-
             _log.Log(consoleColor, $"ProductionViewModel::OnStartButtonExecute(): End of method.");
             _log.Log(consoleColor, $"ProductionViewModel::OnStartButtonExecute(): Now press [Enter].");
-
         }
 
     

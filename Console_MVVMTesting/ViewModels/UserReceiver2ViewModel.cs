@@ -95,6 +95,77 @@ namespace Console_MVVMTesting.ViewModels
             //_messenger.Register<ResetMessage<MessageOp>, bool>(this, MessageOp.Reset, (r, m) => { RunOperationMessage3(); });
 
 
+            _messenger.Register<MyObject>(this, (r, m) =>
+            {
+                // do your resetting here
+                _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(3): r: {r}, m: {m}");
+            });
+
+            _messenger.Register<MyObjectChangedMessage>(this, (r, m) =>
+            {
+                // do your resetting here
+                _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(4): r: {r}, m: {m}");
+            });
+
+            _messenger.Register<MyPerson>(this, (r, m) =>
+            {
+                // do your resetting here
+                _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(5): r: {r}, m: {m}");
+                _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(5): r: {r}, m: {m.FirstName}");
+                _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(5): r: {r}, m: {m.LastName}");
+                _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(5): r: {r}, m: {m.PersonsAge}");
+                _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(5): r: {r}, m: {m.Neutralise}");
+            });
+
+            LoggedInUserRequestMessage liurm = null;
+            try
+            {
+                liurm = WeakReferenceMessenger.Default.Send<LoggedInUserRequestMessage>();
+                _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): liurm: {liurm}");
+                _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): liurm.HasReceivedResponse: {liurm.HasReceivedResponse}");
+
+            }
+            catch (Exception ex)
+            {
+                _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): {ex.Message}");
+            }
+
+
+            //Task myTask = Task.Run(MyTask);
+            //myTask.Wait();
+
+            _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): liurm.HasReceivedResponse: {liurm.HasReceivedResponse}");
+            _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): liurm.Response: {liurm.Response}");
+
+
+            MyUser myUser = WeakReferenceMessenger.Default.Send<LoggedInUserRequestMessage>();
+
+            //PropertyChangedMessage _myEastTesterPrivateProperyName
+            Post _myEastTesterPrivateProperyNameOld = new Post
+            {
+                Updated = false,
+                Title = "EastTesterOldTitle2",
+                Thumbnail = "EastTesterOldThumbnail2",
+                SelfText = "Some old EastTester text2"
+            };
+
+            Post _myEastTesterPrivateProperyNameNew = new Post
+            {
+                Updated = true,
+                Title = "EastTesterNewTitle2",
+                Thumbnail = "EastTesterNewThumbnail2",
+                SelfText = "Some new EastTester text2"
+            };
+
+            _messenger.Send(new PropertyChangedPostMessage(this, "MyEastTesterPublicProperyName",
+                _myEastTesterPrivateProperyNameOld, _myEastTesterPrivateProperyNameNew));
+
+
+            //_messenger.Register<CasualtyMessage, bool>(this, false, (r, m) => { RunBlanketStatusFalse(); });
+            //_messenger.Register<CasualtyMessage, bool>(this, true, (r, m) => { RunBlanketStatusTrue(); });
+
+            _messenger.Send<MyTestMessage<MyEnum>>();       // gdy stont wysle to recipient nie reaguje, mimo rze dziala z sendera
+
 
 
             _log.Log(consoleColor, $"UserReceiver2ViewModel::UserReceiver2ViewModel(): End of constructor ({this.GetHashCode():x8})");
