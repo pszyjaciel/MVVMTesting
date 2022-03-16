@@ -6,6 +6,7 @@ namespace Console_MVVMTesting.ViewModels        // to be moved some other place
 {
     public class StateObject
     {
+        public bool socketConnected = false;
         public const int BufferSize = 1024;           //size of receive buffer
         public byte[] buffer = new byte[BufferSize];  //receive buffer
         public int dataSize = 0;                      //data size to be received
