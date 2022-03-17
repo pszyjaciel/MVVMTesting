@@ -1,6 +1,7 @@
 ﻿using Console_MVVMTesting.Helpers;
 using Microsoft.Toolkit.Mvvm.Messaging.Messages;
 using System;
+using System.Collections.Generic;
 using System.Net.Sockets;
 
 namespace Console_MVVMTesting.Messages
@@ -16,10 +17,15 @@ namespace Console_MVVMTesting.Messages
 
     public class LCSocketStateMessage
     {
-        public Socket mySocket { get; set; }
         public string MyStateName { get; set; }
         public LCStatus lcStatus { get; set; }
         public int LCErrorNumber { get; set; }
+        
+        //public int SocketHandle { get; set; }
+        //public Socket mySocket { get; set; }
+        //public decimal ACInVoltage { get; set; }
+        public Dictionary<IntPtr, Tuple<string, double, int>> MySocket { get; set; }
+
 
 
         public LCSocketStateMessage(string myStateName, LCStatus lcs)

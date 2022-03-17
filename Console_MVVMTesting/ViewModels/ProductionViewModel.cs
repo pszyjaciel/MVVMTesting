@@ -81,6 +81,15 @@ namespace Console_MVVMTesting.ViewModels
                 return;
             }
 
+            result = await this.CheckPowerSupplyTaskAsync();
+            if (!result)
+            {
+                return;
+            }
+
+
+            await Task.Delay(5000);
+
             result = this.ShutdownTaskAsync();
             if (!result)
             {
@@ -119,7 +128,46 @@ namespace Console_MVVMTesting.ViewModels
         
         private async Task<bool> InitSocketsTaskAsync()
         {
-            await Task.Delay(2000);
+            _log.Log(consoleColor, "ProductionViewModel::InitSocketsTaskAsync(): Start of method");
+
+            bool rs;
+            // Run init of sockets in the LCSocketViewModule and request result
+            // na powrocie musze dostac zainicjalizowane sokety
+            LCSocketStateMessage lcmsm = await _messenger.Send<LCSocketInitStatusRequestMessage>();
+            _log.Log(consoleColor, $"ProductionViewModel::InitSocketsTaskAsync(): lcmsm.MyStateName: {lcmsm.MyStateName}, lcmsm.lcStatus: {lcmsm.lcStatus}");
+
+            if (lcmsm.lcStatus != LCStatus.Success)
+            {
+                _log.Log(consoleColor, $"ProductionViewModel::InitSocketsTaskAsync(): Socket initializing failed with error.");
+                rs = false;
+            }
+            else
+            {
+                rs = true;
+            }
+
+            _log.Log(consoleColor, "ProductionViewModel::InitSocketsTaskAsync(): End of method");
+            return rs;
+        }
+
+
+        // 2. Make sure that PS is alive and power source is AC - OM command
+        private async Task<bool> CheckPowerSupplyTaskAsync()
+        {
+            _log.Log(consoleColor, "ProductionViewModel::CheckPowerSupplyTaskAsync(): Start of Task1");
+
+            LCSocketStateMessage lcmsm = await _messenger.Send<LCSocketCheckPowerSupplyRequestMessage>();
+            _log.Log(consoleColor, $"ProductionViewModel::CheckPowerSupplyTaskAsync(): lcmsm.MySocket.Keys.Count: {lcmsm.MySocket.Keys.Count}");
+            if (lcmsm.MySocket.Keys.Count > 0)
+            {
+                foreach (KeyValuePair<IntPtr, Tuple<string, double, int>> entry in lcmsm.MySocket)
+                {
+                    _log.Log(consoleColor, $"ProductionViewModel::CheckPowerSupplyTaskAsync(): socket {entry.Key}: {entry.Value}");
+                }
+            }
+            
+
+            _log.Log(consoleColor, "ProductionViewModel::CheckPowerSupplyTaskAsync(): End of Task1");
             return true;
         }
 
