@@ -159,6 +159,9 @@ using System.Text;
 
 
 
+        /// <summary>
+        /// Methods outputs to Immediate Window only
+        /// </summary>
         internal static void DisplayStringInBytes(string myString)
         {
             if (myString.Length == 0) return;
