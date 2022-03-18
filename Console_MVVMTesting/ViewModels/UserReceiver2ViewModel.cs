@@ -134,9 +134,9 @@ namespace Console_MVVMTesting.ViewModels
             //Task myTask = Task.Run(MyTask);
             //myTask.Wait();
 
-            _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): liurm.HasReceivedResponse: {liurm.HasReceivedResponse}");
-            _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): liurm.Response: {liurm.Response}");
-
+            // A response has already been issued for the current message 
+            //_log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): liurm.HasReceivedResponse: {liurm.HasReceivedResponse}");
+            //_log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): liurm.Response: {liurm.Response}");
 
             MyUser myUser = WeakReferenceMessenger.Default.Send<LoggedInUserRequestMessage>();
 

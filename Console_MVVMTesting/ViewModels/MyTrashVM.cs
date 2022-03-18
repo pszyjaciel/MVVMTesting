@@ -12,6 +12,28 @@ namespace Console_MVVMTesting.ViewModels
 }
 
 
+// obs: parallel call:
+// not really usefull with messenger, because too fast
+//Parallel.ForEach(myListOfAvailableSockets, (mySocket) =>
+//{
+//    bool rs = false;
+//    if (!IsConnected(mySocket))
+//    {
+//        rs = this.ConnectToSocket(mySocket);
+//    }
+//    if (rs)
+//    {
+//        ///// receiving the hello message /////
+//        string response = this.ReceiveFromSocket(mySocket);
+//        _log.Log(consoleColor, $"TRSocketViewModel::TRSocketInitAsync(): Socket { mySocket.Handle} got response: {response}");
+//        _myListOfSockets.Add(mySocket);
+//        Tuple<string, double, int> MyTuple = new(response, 0.0, TRErrorCode);   // can be simplified
+//        MySocketDict.Add(mySocket.Handle, MyTuple);
+//        trssm.MySocket = MySocketDict;
+//        numberOfInitializedSockets++;
+//    }
+//});
+
 ///////////// INITIALIZING SOCKETS /////////////////
 //private List<Socket> GetListOfAvailableSockets()
 //{
