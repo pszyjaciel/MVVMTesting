@@ -18,7 +18,8 @@ namespace Console_MVVMTesting
     {
         public static ShellPage Content1 { get; internal set; }
         public static EastTesterPage Content2 { get; internal set; }
-        public static LCSocketPage Content3 { get; internal set; }
+        public static LCSocketPage lcSocketPage { get; internal set; }
+        public static TRSocketPage trSocketPage { get; internal set; }
         public static UserReceiverPage Content4 { get; internal set; }
         public static UserSenderPage Content5 { get; internal set; }
         public static UserReceiver2Page Content6 { get; internal set; }
@@ -80,12 +81,14 @@ namespace Console_MVVMTesting
             services.AddTransient<UserSender2Page>();
             services.AddSingleton<UserSender2ViewModel>();
 
-
             services.AddTransient<EastTesterPage>();
             services.AddSingleton<EastTesterViewModel>();
 
             services.AddTransient<LCSocketPage>();
             services.AddSingleton<LCSocketViewModel>();
+
+            services.AddTransient<TRSocketPage>();
+            services.AddSingleton<TRSocketViewModel>();
 
             MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
                 $"Program::ConfigureServices(): end of method" +

@@ -100,7 +100,7 @@ namespace Console_MVVMTesting.ViewModels
             _log.Log(consoleColor, $"ProductionViewModel::OnStartButtonExecute(): Now press [Enter].");
         }
 
-    
+
 
         private async Task<bool> InitLoadsTaskAsync()
         {
@@ -125,28 +125,27 @@ namespace Console_MVVMTesting.ViewModels
             return rs;
         }
 
-        
+
         private async Task<bool> InitSocketsTaskAsync()
         {
-            _log.Log(consoleColor, "ProductionViewModel::InitSocketsTaskAsync(): Start of method");
+            _log.Log(consoleColor, "ProductionViewModel::InitSocketsTaskAsync(): Start of Task");
 
             bool rs;
             // Run init of sockets in the LCSocketViewModule and request result
             // na powrocie musze dostac zainicjalizowane sokety
-            LCSocketStateMessage lcmsm = await _messenger.Send<LCSocketInitStatusRequestMessage>();
-            _log.Log(consoleColor, $"ProductionViewModel::InitSocketsTaskAsync(): lcmsm.MyStateName: {lcmsm.MyStateName}, lcmsm.lcStatus: {lcmsm.lcStatus}");
-
-            if (lcmsm.lcStatus != LCStatus.Success)
+            TRSocketStateMessage trmsm = await _messenger.Send<TRSocketInitStatusRequestMessage>();
+            if (trmsm.MyInitSocket == null)
             {
-                _log.Log(consoleColor, $"ProductionViewModel::InitSocketsTaskAsync(): Socket initializing failed with error.");
-                rs = false;
-            }
-            else
-            {
-                rs = true;
+                return false;
             }
 
-            _log.Log(consoleColor, "ProductionViewModel::InitSocketsTaskAsync(): End of method");
+            foreach (KeyValuePair<IntPtr, string> entry in trmsm.MyInitSocket)
+            {
+                _log.Log(consoleColor, $"ProductionViewModel::InitSocketsTaskAsync(): socket {entry.Key}: {entry.Value}");
+            }
+            rs = true;
+
+            _log.Log(consoleColor, "ProductionViewModel::InitSocketsTaskAsync(): End of Task");
             return rs;
         }
 
@@ -154,20 +153,18 @@ namespace Console_MVVMTesting.ViewModels
         // 2. Make sure that PS is alive and power source is AC - OM command
         private async Task<bool> CheckPowerSupplyTaskAsync()
         {
-            _log.Log(consoleColor, "ProductionViewModel::CheckPowerSupplyTaskAsync(): Start of Task1");
+            _log.Log(consoleColor, "ProductionViewModel::CheckPowerSupplyTaskAsync(): Start of Task");
 
-            LCSocketStateMessage lcmsm = await _messenger.Send<LCSocketCheckPowerSupplyRequestMessage>();
-            _log.Log(consoleColor, $"ProductionViewModel::CheckPowerSupplyTaskAsync(): lcmsm.MySocket.Keys.Count: {lcmsm.MySocket.Keys.Count}");
-            if (lcmsm.MySocket.Keys.Count > 0)
+            TRSocketStateMessage trmsm = await _messenger.Send<TRSocketCheckPowerSupplyRequestMessage>();
+            _log.Log(consoleColor, $"ProductionViewModel::CheckPowerSupplyTaskAsync(): trmsm.MySocket.Keys.Count: {trmsm.MySocket.Keys.Count}");
+            if (trmsm.MySocket.Keys.Count > 0)
             {
-                foreach (KeyValuePair<IntPtr, Tuple<string, double, int>> entry in lcmsm.MySocket)
+                foreach (KeyValuePair<IntPtr, Tuple<string, double, int>> entry in trmsm.MySocket)
                 {
                     _log.Log(consoleColor, $"ProductionViewModel::CheckPowerSupplyTaskAsync(): socket {entry.Key}: {entry.Value}");
                 }
             }
-            
-
-            _log.Log(consoleColor, "ProductionViewModel::CheckPowerSupplyTaskAsync(): End of Task1");
+            _log.Log(consoleColor, "ProductionViewModel::CheckPowerSupplyTaskAsync(): End of Task");
             return true;
         }
 
@@ -179,8 +176,8 @@ namespace Console_MVVMTesting.ViewModels
             _log.Log(consoleColor, $"ProductionViewModel::IsShuttingDown.set: etsm.ETErrorNumber: {etsm.ETErrorNumber}");
 
             // shutdown for sockets
-            LCSocketStateMessage lcssm = _messenger.Send<LCShutdownRequestMessage>();
-            _log.Log(consoleColor, $"ProductionViewModel::IsShuttingDown.set: lcssm.LCErrorNumber: {lcssm.LCErrorNumber}");
+            TRSocketStateMessage trssm = _messenger.Send<TRShutdownRequestMessage>();
+            _log.Log(consoleColor, $"ProductionViewModel::IsShuttingDown.set: trssm.TRErrorNumber: {trssm.TRErrorNumber}");
 
             return true;
         }
@@ -194,7 +191,7 @@ namespace Console_MVVMTesting.ViewModels
             _log.Log(consoleColor, $"ProductionViewModel::ProductionViewModel(): Start of constructor  ({this.GetHashCode():x8})");
 
             _messenger = messenger;
-            
+
             //this.TestRegex();
 
             //Task.Delay(2000);
@@ -219,9 +216,9 @@ namespace Console_MVVMTesting.ViewModels
                 // Handle the message here, with r being the recipient and m being the
                 // input messenger. Using the recipient passed as input makes it so that
                 // the lambda expression doesn't capture "this", improving performance.
-               
+
                 _log.Log(consoleColor, $"ProductionViewModel::ProductionViewModel():  r.GetType(): { r.GetType()}; m.Value: {m.Value}");
-                
+
             });
 
 
@@ -243,7 +240,7 @@ namespace Console_MVVMTesting.ViewModels
             //    m.Reply(m.LCStatus);
             //});
 
-            
+
             Task MyTask = Task.Run(OnStartButtonExecute);
             //MyTask.Wait();
 

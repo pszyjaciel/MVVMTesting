@@ -13,6 +13,7 @@ namespace Console_MVVMTesting.Services
         private ShellPage _shellPage = null;
         private EastTesterPage _eastTesterPage = null;
         private LCSocketPage _lcSocketPage = null;
+        private TRSocketPage _trSocketPage = null;
 
         private UserReceiverPage _userReceiverPage = null;
         private UserSenderPage _userSenderPage = null;
@@ -48,7 +49,10 @@ namespace Console_MVVMTesting.Services
             Program.Content2 = _eastTesterPage ?? new EastTesterPage();
 
             _lcSocketPage = Ioc.Default.GetService<LCSocketPage>();
-            Program.Content3 = _lcSocketPage ?? new LCSocketPage();
+            Program.lcSocketPage = _lcSocketPage ?? new LCSocketPage();
+
+            _trSocketPage = Ioc.Default.GetService<TRSocketPage>();
+            Program.trSocketPage = _trSocketPage ?? new TRSocketPage();
 
             _userReceiverPage = Ioc.Default.GetService<UserReceiverPage>();
             Program.Content4 = _userReceiverPage ?? new UserReceiverPage();

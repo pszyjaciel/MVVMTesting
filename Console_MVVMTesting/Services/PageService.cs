@@ -26,7 +26,7 @@ namespace Console_MVVMTesting.Services
 
             Configure<EastTesterViewModel, EastTesterPage>();
             Configure<LCSocketViewModel, LCSocketPage>();
-
+            Configure<TRSocketViewModel, TRSocketPage>();
         }
 
         public Type GetPageType(string key)
