@@ -15,12 +15,102 @@ namespace Console_MVVMTesting.Messages
         Error,
     }
 
+
+
+    public enum SafetyAlert
+    {
+        Overcharge,
+        ChargeTimeoutSuspend,
+        PrechargeTimeoutSuspend,
+        OvercurrentDuringDischargeLatch,
+        OvertemperatureFault,
+        AFEAlert,
+        UndertemperatureDuringDischarge,
+        UndertemperatureDuringCharge,
+        OvertemperatureDuringDischarge,
+        OvertemperatureDuringCharge,
+        ShortCircuitDuringDischargeLatch,
+        ShortCircuitDuringDischarge,
+        OverloadDuringDischargeLatch,
+        OverloadDuringDischarge,
+        OvercurrentDuringDischarge,
+        OvercurrentDuringCharge,
+        CellOvervoltage,
+        CellUndervoltage,
+    }
+
+    public enum SafetyStatus
+    {
+        Overcharge,
+        ChargeTimeout,
+        PrechargeTimeout,
+        OvercurrentDuringDischargeLatch,
+        OvertemperatureFault,
+        AFEAlert,
+        UndertemperatureDuringDischarge,
+        UndertemperatureDuringCharge,
+        OvertemperatureDuringDischarge,
+        OvertemperatureDuringCharge,
+        ShortCircuitDuringDischargeLatch,
+        ShortCircuitDuringDischarge,
+        OverloadDuringDischargeLatch,
+        OverloadDuringDischarge,
+        OvercurrentDuringDischarge,
+        OvercurrentDuringCharge,
+        CellOvervoltage,
+        CellUndervoltage,
+    }
+
+    public enum PFStatus
+    {
+        DataFlashWearoutFailure,
+        InstructionFlashChecksumFailure,
+        SafetyOvertemperatureFETFailure,
+        OpenThermistorTS3Failure,
+        OpenThermistorTS2Failure,
+        OpenThermistorTS1Failure,
+        CompanionBQ769x0AFEXREADYFailure,
+        CompanionBQ769x0AFEOverrideFailure,
+        AFECommunicationFailure,
+        AFERegisterFailure,
+        DischargeFETFailure,
+        ChargeFETFailure,
+        VoltageImbalancewhilepackisatrestfailure,
+        SafetyOvertemperatureCellFailure,
+        SafetyOvercurrentinDischarge,
+        SafetyOvercurrentinCharge,
+        SafetyCellOvervoltageFailure,
+        SafetyCellUndervoltageFailure
+    }
+
+
+    public enum PFAlert
+    {
+        SafetyOvertemperatureFETFailure,
+        OpenThermistorTS3Failure,
+        OpenThermistorTS2Failure,
+        OpenThermistorTS1Failure,
+        CompanionBQ769x0AFEXREADYFailure,
+        CompanionBQ769x0AFEOverrideFailure,
+        AFECommunicationFailure,
+        AFERegisterFailure,
+        DischargeFETFailure,
+        ChargeFETFailure,
+        VoltageImbalanceWhilePackIsAtRestFailure,
+        SafetyOvertemperatureCellFailure,
+        SafetyOvercurrentInDischarge,
+        SafetyOvercurrentInCharge,
+        SafetyCellOvervoltageFailure,
+        SafetyCellUndervoltageFailure,
+    }
+
+
     public class TRSocketStateMessage
     {
         public string MyStateName { get; set; }
         public TRStatus trStatus { get; set; }
         public int TRErrorNumber { get; set; }
-        
+
         //public int SocketHandle { get; set; }
         //public Socket mySocket { get; set; }
         //public decimal ACInVoltage { get; set; }
@@ -58,6 +148,15 @@ namespace Console_MVVMTesting.Messages
         //    return lcStatus;
         //}
 
+    }
+
+
+    internal class CheckBatteryStatusAndAlarmsRequestMessage : AsyncRequestMessage<TRSocketStateMessage>
+    {
+        public CheckBatteryStatusAndAlarmsRequestMessage()
+        {
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] CheckBatteryStatusAndAlarmsRequestMessage::CheckBatteryStatusAndAlarmsRequestMessage()  ({this.GetHashCode():x8})");
+        }
     }
 
 

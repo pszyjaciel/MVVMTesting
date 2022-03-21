@@ -81,6 +81,12 @@ namespace Console_MVVMTesting.ViewModels
                 return;
             }
 
+            result = await this.CheckBatteryStatusAndAlarmsTaskAsync();
+            if (!result)
+            {
+                return;
+            }
+
             result = await this.CheckPowerSupplyTaskAsync();
             if (!result)
             {
@@ -88,7 +94,7 @@ namespace Console_MVVMTesting.ViewModels
             }
 
 
-            await Task.Delay(5000);
+            await Task.Delay(1000);
 
             result = this.ShutdownTaskAsync();
             if (!result)
@@ -150,8 +156,24 @@ namespace Console_MVVMTesting.ViewModels
         }
 
 
-        // 2. Make sure that PS is alive and power source is AC - OM command
-        private async Task<bool> CheckPowerSupplyTaskAsync()
+
+        //CheckBatteryStatusAndAlarmsTaskAsync
+        private async Task<bool> CheckBatteryStatusAndAlarmsTaskAsync()
+        {
+            _log.Log(consoleColor, "ProductionViewModel::CheckBatteryStatusAndAlarmsTaskAsync(): Start of Task");
+
+            TRSocketStateMessage trmsm = await _messenger.Send<CheckBatteryStatusAndAlarmsRequestMessage>();
+
+            await Task.Yield();
+
+
+            _log.Log(consoleColor, "ProductionViewModel::CheckBatteryStatusAndAlarmsTaskAsync(): End of Task");
+            return true;
+        }
+
+
+            // 2. Make sure that PS is alive and power source is AC - OM command
+            private async Task<bool> CheckPowerSupplyTaskAsync()
         {
             _log.Log(consoleColor, "ProductionViewModel::CheckPowerSupplyTaskAsync(): Start of Task");
 
@@ -242,7 +264,7 @@ namespace Console_MVVMTesting.ViewModels
 
 
             Task MyTask = Task.Run(OnStartButtonExecute);
-            //MyTask.Wait();
+            MyTask.Wait();
 
             _log.Log(consoleColor, $"ProductionViewModel::ProductionViewModel(): End of constructor  ({this.GetHashCode():x8})");
         }
