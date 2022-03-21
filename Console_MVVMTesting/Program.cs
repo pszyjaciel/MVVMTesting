@@ -123,9 +123,12 @@ namespace Console_MVVMTesting
                 $"({typeof(SerialPortExtensions).GetHashCode():x8})");
 
 
-            //Simulate performing work here...main program must not end before
+            // Simulate performing work here...main program must not end before
             // thread finishes or you will lose your results!
-            Console.ReadLine();     // musi ma byc, o ile nie zablokuje sie gdzies w ViewModelach 
+
+            // jak nie poczekam, to nie zobacze wyniku..
+            // pacz MyTask.Wait(); w ProductionViewModel zamiast tego ReadLine()
+            //Console.ReadLine();
 
         }
 
