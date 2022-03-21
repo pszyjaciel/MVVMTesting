@@ -685,7 +685,7 @@ namespace Console_MVVMTesting.ViewModels
                     _log.Log(consoleColor, $"TRSocketViewModel::TRSocketInitAsync(): Socket {myAvailableSocket.Handle} got response: {response}");
                     _myListOfSockets.Add(myAvailableSocket);
                     MyInitSocketDict.Add(myAvailableSocket.Handle, response);
-                    trssm.MyInitSocket = MyInitSocketDict;
+                    trssm.SocketInitDict = MyInitSocketDict;
                     numberOfInitializedSockets++;
                 }
             }
@@ -697,15 +697,15 @@ namespace Console_MVVMTesting.ViewModels
                 initResult = false;
             }
 
-            if (trssm.MySocket == null)
+            if (trssm.CheckPowerSupplyDict == null)
             {
                 return trssm;
             }
 
             //trssm.MySocket can be null
-            if (trssm.MySocket.Count > 0)
+            if (trssm.CheckPowerSupplyDict.Count > 0)
             {
-                foreach (KeyValuePair<IntPtr, Tuple<string, double, int>> entry in trssm.MySocket)
+                foreach (KeyValuePair<IntPtr, Tuple<string, double, int>> entry in trssm.CheckPowerSupplyDict)
                 {
                     _log.Log(consoleColor, $"ProductionViewModel::RunTRInitCommandMessage(): socket {entry.Key}: {entry.Value}");
                 }
@@ -804,7 +804,7 @@ namespace Console_MVVMTesting.ViewModels
                 MySocketDict.Add(terminalSocket.Handle, MyTuple);
             }
 
-            trssm.MySocket = MySocketDict;
+            trssm.CheckPowerSupplyDict = MySocketDict;
 
             _log.Log(consoleColor, $"TRSocketViewModel::TRSocketCheckPowerSupplyCommand(): End of method  ({this.GetHashCode():x8})");
             return trssm;
@@ -824,55 +824,55 @@ namespace Console_MVVMTesting.ViewModels
         // Bit 6..2 : reserved
         // PBS(Bit 1) : Primary Battery Support
         // ICC(Bit 0) : Internal Charge Controller
-        private void ParseBatteryMode(string myBatteryMode)
+        private UInt16 ParseBatteryMode(string myBatteryMode)
         {
             _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryMode(): myBatteryStatus: {myBatteryMode}");
 
-            int myIntValue = Convert.ToInt32(myBatteryMode, 16);
-            _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryMode(): myIntValue: {myIntValue}");
+            UInt16 myInt16Value = Convert.ToUInt16(myBatteryMode, 16);
+            _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryMode(): myInt16Value: {myInt16Value}");
 
-            bool CAPACITYMode = Convert.ToBoolean(myIntValue & 0x8000) ? true : false;
+            bool CAPACITYMode = Convert.ToBoolean(myInt16Value & 0x8000) ? true : false;
             if (CAPACITYMode)
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryStatus(): Reports specific data in 10 mW or 10 mWh");
             else
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryStatus(): Reports specific data in mA or mAh(default)");
 
-            bool CHARGERMode = Convert.ToBoolean(myIntValue & 0x4000) ? true : false;
+            bool CHARGERMode = Convert.ToBoolean(myInt16Value & 0x4000) ? true : false;
             if (CHARGERMode)
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryStatus(): Disable ChargingVoltage() and ChargingCurrent() broadcasts to host and smart battery charger");
             else
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryStatus(): Enable ChargingVoltage() and ChargingCurrent() broadcasts to host and smart battery charger(default)");
 
-            bool ALARMMode = Convert.ToBoolean(myIntValue & 0x2000) ? true : false;
+            bool ALARMMode = Convert.ToBoolean(myInt16Value & 0x2000) ? true : false;
             if (ALARMMode)
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryStatus(): Disable Alarm Warning broadcasts to host and smart battery charger(default)");
             else
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryStatus(): Enable AlarmWarning broadcasts to host and smart battery charger");
 
-            bool PrimaryBattery = Convert.ToBoolean(myIntValue & 0x0200) ? true : false;
+            bool PrimaryBattery = Convert.ToBoolean(myInt16Value & 0x0200) ? true : false;
             if (PrimaryBattery)
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryStatus(): Battery is operating in its secondary role.");
             else
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryStatus(): Battery is operating in its primary role(default).");
 
-            bool ChargeControllerEnabled = Convert.ToBoolean(myIntValue & 0x0100) ? true : false;
+            bool ChargeControllerEnabled = Convert.ToBoolean(myInt16Value & 0x0100) ? true : false;
             if (ChargeControllerEnabled)
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryStatus(): Internal charge control enabled");
             else _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryStatus(): Internal charge controller disabled(default)");
 
-            bool ConditionFlag = Convert.ToBoolean(myIntValue & 0x0080) ? true : false;     // GaugingStatus
+            bool ConditionFlag = Convert.ToBoolean(myInt16Value & 0x0080) ? true : false;     // GaugingStatus
             if (ConditionFlag)
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryStatus(): Conditioning cycle requested");
             else
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryStatus(): Battery OK");
 
-            bool PrimaryBatterySupport = Convert.ToBoolean(myIntValue & 0x0002) ? true : false;
+            bool PrimaryBatterySupport = Convert.ToBoolean(myInt16Value & 0x0002) ? true : false;
             if (PrimaryBatterySupport)
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryStatus(): PrimaryBatterySupport: Primary or Secondary Battery Support");
             else
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryStatus(): PrimaryBatterySupport: Function not supported(default)");
 
-            bool InternalChargeController = Convert.ToBoolean(myIntValue & 0x0001) ? true : false;
+            bool InternalChargeController = Convert.ToBoolean(myInt16Value & 0x0001) ? true : false;
             if (InternalChargeController)
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryStatus(): InternalChargeController: Function supported(default)");
             else
@@ -880,6 +880,7 @@ namespace Console_MVVMTesting.ViewModels
 
 
             _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryMode(): ParseBatteryStatus: End of method");
+            return myInt16Value;
         }
 
 
@@ -898,58 +899,58 @@ namespace Console_MVVMTesting.ViewModels
         //      FC(Bit 5) : Fully Charged
         //      FD (Bit 4): Fully Discharged
         //      EC3:0 (Bits 3–0): Error Code
-        private bool ParseBatteryStatus(string myBatteryStatus)
+        private UInt16 ParseBatteryStatus(string myBatteryStatus)
         {
             _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryStatus(): myBatteryStatus: {myBatteryStatus}");
 
-            int myIntValue = Convert.ToInt32(myBatteryStatus, 16);
-            _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryStatus(): myIntValue: {myIntValue}");
+            UInt16 myInt16Value = Convert.ToUInt16(myBatteryStatus, 16);
+            _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryStatus(): myInt16Value: {myInt16Value}");
 
-            bool OverchargedAlarm = Convert.ToBoolean(myIntValue & 0x8000) ? true : false;
+            bool OverchargedAlarm = Convert.ToBoolean(myInt16Value & 0x8000) ? true : false;
             if (OverchargedAlarm)
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryStatus(): OverchargedAlarm: {OverchargedAlarm}");
 
-            bool TerminateChargeAlarm = Convert.ToBoolean(myIntValue & 0x4000) ? true : false;
+            bool TerminateChargeAlarm = Convert.ToBoolean(myInt16Value & 0x4000) ? true : false;
             if (TerminateChargeAlarm)
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryStatus(): TerminateChargeAlarm: {TerminateChargeAlarm}");
 
-            bool OvertemperatureAlarm = Convert.ToBoolean(myIntValue & 0x1000) ? true : false;
+            bool OvertemperatureAlarm = Convert.ToBoolean(myInt16Value & 0x1000) ? true : false;
             if (OvertemperatureAlarm)
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryStatus(): OvertemperatureAlarm: {OvertemperatureAlarm}");
 
-            bool TerminateDischargeAlarm = Convert.ToBoolean(myIntValue & 0x0800) ? true : false;
+            bool TerminateDischargeAlarm = Convert.ToBoolean(myInt16Value & 0x0800) ? true : false;
             if (TerminateDischargeAlarm)
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryStatus(): TerminateDischargeAlarm: {TerminateDischargeAlarm}");
 
-            bool RemainingCapacityAlarm = Convert.ToBoolean(myIntValue & 0x0200) ? true : false;
+            bool RemainingCapacityAlarm = Convert.ToBoolean(myInt16Value & 0x0200) ? true : false;
             if (RemainingCapacityAlarm)
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryStatus(): RemainingCapacityAlarm: {RemainingCapacityAlarm}");
 
-            bool RemainingTimeAlarm = Convert.ToBoolean(myIntValue & 0x0100) ? true : false;
+            bool RemainingTimeAlarm = Convert.ToBoolean(myInt16Value & 0x0100) ? true : false;
             if (RemainingTimeAlarm)
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryStatus(): RemainingTimeAlarm: {RemainingTimeAlarm}");
 
-            bool Initialization = Convert.ToBoolean(myIntValue & 0x0080) ? true : false;
+            bool Initialization = Convert.ToBoolean(myInt16Value & 0x0080) ? true : false;
             if (Initialization)
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryStatus(): Initialization: {Initialization}");
 
-            bool DischargingOrRest = Convert.ToBoolean(myIntValue & 0x0040) ? true : false;
+            bool DischargingOrRest = Convert.ToBoolean(myInt16Value & 0x0040) ? true : false;
             if (DischargingOrRest)
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryStatus(): DischargingOrRest: {DischargingOrRest}");
 
-            bool FullyCharged = Convert.ToBoolean(myIntValue & 0x0020) ? true : false;
+            bool FullyCharged = Convert.ToBoolean(myInt16Value & 0x0020) ? true : false;
             if (FullyCharged)
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryStatus(): FullyCharged: {FullyCharged}");
 
-            bool FullyDischarged = Convert.ToBoolean(myIntValue & 0x0010) ? true : false;
+            bool FullyDischarged = Convert.ToBoolean(myInt16Value & 0x0010) ? true : false;
             if (FullyDischarged)
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryStatus(): FullyDischarged: {FullyDischarged}");
 
-            bool ErrorCode = Convert.ToBoolean(myIntValue & 0x000F) ? true : false;
+            bool ErrorCode = Convert.ToBoolean(myInt16Value & 0x000F) ? true : false;
             if (ErrorCode)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryStatus(): ErrorCode: {ErrorCode}");
-                switch (myIntValue & 0x000F)
+                switch (myInt16Value & 0x000F)
                 {
                     case 0:
                         _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryStatus(): case: OK");
@@ -981,8 +982,8 @@ namespace Console_MVVMTesting.ViewModels
             }
 
             _log.Log(consoleColor, $"TRSocketViewModel::ParseBatteryStatus(): ParseBatteryStatus: End of method");
-            if ((!ErrorCode) && (!OverchargedAlarm) && (!OvertemperatureAlarm) && (!RemainingCapacityAlarm) && (!RemainingTimeAlarm)) return true;
-            else return false;
+            if ((!ErrorCode) && (!OverchargedAlarm) && (!OvertemperatureAlarm) && (!RemainingCapacityAlarm) && (!RemainingTimeAlarm)) return 0;
+            else return myInt16Value;
         }
 
 
@@ -1007,134 +1008,136 @@ namespace Console_MVVMTesting.ViewModels
         //OCC(Bit 2) : Overcurrent During Charge (0x00000004)
         //COV(Bit 1) : Cell Overvoltage (0x00000002)
         //CUV(Bit 0) : Cell Undervoltage (0x00000001)
-        private bool ParseSafetyAlert(string mySafetyAlertStr)
+        private UInt32 ParseSafetyAlert(string mySafetyAlertStr)
         {
             _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): Start of method");
 
             bool result = false;
-            int myIntValue = Convert.ToInt32(mySafetyAlertStr, 16);
-            _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): myIntValue: {myIntValue}");
+            
+            UInt32 myInt32Value = Convert.ToUInt32(mySafetyAlertStr, 16);
+            _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): myInt32Value: {myInt32Value}");
 
-            bool Overcharge = Convert.ToBoolean(myIntValue & 0x00100000) ? true : false;
+            bool Overcharge = Convert.ToBoolean(myInt32Value & 0x00100000) ? true : false;
             if (Overcharge)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): Overcharge: {Overcharge}");
+                //result = SafetyAlertEnum.Overcharge | SafetyAlertEnum.;
                 result = false;
             }
 
-            bool ChargeTimeoutSuspend = Convert.ToBoolean(myIntValue & 0x00080000) ? true : false;
+            bool ChargeTimeoutSuspend = Convert.ToBoolean(myInt32Value & 0x00080000) ? true : false;
             if (ChargeTimeoutSuspend)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): ChargeTimeoutSuspend: {ChargeTimeoutSuspend}");
                 result = false;
             }
 
-            bool PrechargeTimeoutSuspend = Convert.ToBoolean(myIntValue & 0x00020000) ? true : false;
+            bool PrechargeTimeoutSuspend = Convert.ToBoolean(myInt32Value & 0x00020000) ? true : false;
             if (PrechargeTimeoutSuspend)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): PrechargeTimeoutSuspend: {PrechargeTimeoutSuspend}");
                 result = false;
             }
 
-            bool OvercurrentDuringDischargeLatch = Convert.ToBoolean(myIntValue & 0x00004000) ? true : false;
+            bool OvercurrentDuringDischargeLatch = Convert.ToBoolean(myInt32Value & 0x00004000) ? true : false;
             if (OvercurrentDuringDischargeLatch)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): OvercurrentDuringDischargeLatch: {OvercurrentDuringDischargeLatch}");
                 result = false;
             }
 
-            bool OvertemperatureFault = Convert.ToBoolean(myIntValue & 0x00002000) ? true : false;
+            bool OvertemperatureFault = Convert.ToBoolean(myInt32Value & 0x00002000) ? true : false;
             if (OvertemperatureFault)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): OvertemperatureFault: {OvertemperatureFault}");
                 result = false;
             }
 
-            bool AFEAlert = Convert.ToBoolean(myIntValue & 0x00001000) ? true : false;
+            bool AFEAlert = Convert.ToBoolean(myInt32Value & 0x00001000) ? true : false;
             if (AFEAlert)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): AFEAlert: {AFEAlert}");
                 result = false;
             }
 
-            bool UndertemperatureDuringDischarge = Convert.ToBoolean(myIntValue & 0x00000800) ? true : false;
+            bool UndertemperatureDuringDischarge = Convert.ToBoolean(myInt32Value & 0x00000800) ? true : false;
             if (UndertemperatureDuringDischarge)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): UndertemperatureDuringDischarge: {UndertemperatureDuringDischarge}");
                 result = false;
             }
 
-            bool UndertemperatureDuringCharge = Convert.ToBoolean(myIntValue & 0x00000400) ? true : false;
+            bool UndertemperatureDuringCharge = Convert.ToBoolean(myInt32Value & 0x00000400) ? true : false;
             if (UndertemperatureDuringCharge)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): UndertemperatureDuringCharge: {UndertemperatureDuringCharge}");
                 result = false;
             }
 
-            bool OvertemperatureDuringDischarge = Convert.ToBoolean(myIntValue & 0x00000200) ? true : false;
+            bool OvertemperatureDuringDischarge = Convert.ToBoolean(myInt32Value & 0x00000200) ? true : false;
             if (OvertemperatureDuringDischarge)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): OvertemperatureDuringDischarge: {OvertemperatureDuringDischarge}");
                 result = false;
             }
 
-            bool OvertemperatureDuringCharge = Convert.ToBoolean(myIntValue & 0x00000100) ? true : false;
+            bool OvertemperatureDuringCharge = Convert.ToBoolean(myInt32Value & 0x00000100) ? true : false;
             if (OvertemperatureDuringCharge)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): OvertemperatureDuringCharge: {OvertemperatureDuringCharge}");
                 result = false;
             }
 
-            bool ShortCircuitDuringDischargeLatch = Convert.ToBoolean(myIntValue & 0x00000080) ? true : false;
+            bool ShortCircuitDuringDischargeLatch = Convert.ToBoolean(myInt32Value & 0x00000080) ? true : false;
             if (ShortCircuitDuringDischargeLatch)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): ShortCircuitDuringDischargeLatch: {ShortCircuitDuringDischargeLatch}");
                 result = false;
             }
 
-            bool ShortCircuitDuringDischarge = Convert.ToBoolean(myIntValue & 0x00000040) ? true : false;
+            bool ShortCircuitDuringDischarge = Convert.ToBoolean(myInt32Value & 0x00000040) ? true : false;
             if (ShortCircuitDuringDischarge)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): ShortCircuitDuringDischarge: {ShortCircuitDuringDischarge}");
                 result = false;
             }
 
-            bool OverloadDuringDischargeLatch = Convert.ToBoolean(myIntValue & 0x00000020) ? true : false;
+            bool OverloadDuringDischargeLatch = Convert.ToBoolean(myInt32Value & 0x00000020) ? true : false;
             if (OverloadDuringDischargeLatch)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): OverloadDuringDischargeLatch: {OverloadDuringDischargeLatch}");
                 result = false;
             }
 
-            bool OverloadDuringDischarge = Convert.ToBoolean(myIntValue & 0x00000010) ? true : false;
+            bool OverloadDuringDischarge = Convert.ToBoolean(myInt32Value & 0x00000010) ? true : false;
             if (OverloadDuringDischarge)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): OverloadDuringDischarge: {OverloadDuringDischarge}");
                 result = false;
             }
 
-            bool OvercurrentDuringDischarge = Convert.ToBoolean(myIntValue & 0x00000008) ? true : false;
+            bool OvercurrentDuringDischarge = Convert.ToBoolean(myInt32Value & 0x00000008) ? true : false;
             if (OvercurrentDuringDischarge)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): OvercurrentDuringDischarge : {OvercurrentDuringDischarge }");
                 result = false;
             }
 
-            bool OvercurrentDuringCharge = Convert.ToBoolean(myIntValue & 0x00000004) ? true : false;
+            bool OvercurrentDuringCharge = Convert.ToBoolean(myInt32Value & 0x00000004) ? true : false;
             if (OvercurrentDuringCharge)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): OvercurrentDuringCharge : {OvercurrentDuringCharge }");
                 result = false;
             }
 
-            bool CellOvervoltage = Convert.ToBoolean(myIntValue & 0x00000002) ? true : false;
+            bool CellOvervoltage = Convert.ToBoolean(myInt32Value & 0x00000002) ? true : false;
             if (CellOvervoltage)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): CellOvervoltage : {CellOvervoltage }");
                 result = false;
             }
 
-            bool CellUndervoltage = Convert.ToBoolean(myIntValue & 0x00000001) ? true : false;
+            bool CellUndervoltage = Convert.ToBoolean(myInt32Value & 0x00000001) ? true : false;
             if (CellUndervoltage)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): CellUndervoltage : {CellUndervoltage }");
@@ -1142,7 +1145,8 @@ namespace Console_MVVMTesting.ViewModels
             }
 
             _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): End of method");
-            return result;
+            //return result;
+            return myInt32Value;
         }
 
 
@@ -1170,134 +1174,134 @@ namespace Console_MVVMTesting.ViewModels
         //OCC(Bit 2) : Overcurrent During Charge (0x00000004)
         //COV(Bit 1) : Cell Overvoltage (0x00000002)
         //CUV(Bit 0) : Cell Undervoltage (0x00000001)
-        private bool ParseSafetyStatus(string mySafetyStatusStr)
+        private UInt32 ParseSafetyStatus(string mySafetyStatusStr)
         {
             _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyStatus(): Start of method");
-            
-            bool result = false;
-            int myIntValue = Convert.ToInt32(mySafetyStatusStr, 16);
-            _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyStatus(): myIntValue: {myIntValue}");
 
-            bool Overcharge = Convert.ToBoolean(myIntValue & 0x00100000) ? true : false;
+            bool result = false;
+            UInt32 myInt32Value = Convert.ToUInt32(mySafetyStatusStr, 16);
+            _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyStatus(): myInt32Value: {myInt32Value}");
+
+            bool Overcharge = Convert.ToBoolean(myInt32Value & 0x00100000) ? true : false;
             if (Overcharge)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): Overcharge: {Overcharge}");
                 result = false;
             }
 
-            bool ChargeTimeout = Convert.ToBoolean(myIntValue & 0x00040000) ? true : false;
+            bool ChargeTimeout = Convert.ToBoolean(myInt32Value & 0x00040000) ? true : false;
             if (ChargeTimeout)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): ChargeTimeout: {ChargeTimeout}");
                 result = false;
             }
 
-            bool PrechargeTimeout = Convert.ToBoolean(myIntValue & 0x00010000) ? true : false;
+            bool PrechargeTimeout = Convert.ToBoolean(myInt32Value & 0x00010000) ? true : false;
             if (PrechargeTimeout)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): PrechargeTimeout: {PrechargeTimeout}");
                 result = false;
             }
 
-            bool OvercurrentDuringDischargeLatch = Convert.ToBoolean(myIntValue & 0x00004000) ? true : false;
+            bool OvercurrentDuringDischargeLatch = Convert.ToBoolean(myInt32Value & 0x00004000) ? true : false;
             if (OvercurrentDuringDischargeLatch)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): OvercurrentDuringDischargeLatch: {OvercurrentDuringDischargeLatch}");
                 result = false;
             }
 
-            bool OvertemperatureFault = Convert.ToBoolean(myIntValue & 0x00002000) ? true : false;
+            bool OvertemperatureFault = Convert.ToBoolean(myInt32Value & 0x00002000) ? true : false;
             if (OvertemperatureFault)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): OvertemperatureFault: {OvertemperatureFault}");
                 result = false;
             }
 
-            bool AFEAlert = Convert.ToBoolean(myIntValue & 0x00001000) ? true : false;
+            bool AFEAlert = Convert.ToBoolean(myInt32Value & 0x00001000) ? true : false;
             if (AFEAlert)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): AFEAlert: {AFEAlert}");
                 result = false;
             }
 
-            bool UndertemperatureDuringDischarge = Convert.ToBoolean(myIntValue & 0x00000800) ? true : false;
+            bool UndertemperatureDuringDischarge = Convert.ToBoolean(myInt32Value & 0x00000800) ? true : false;
             if (UndertemperatureDuringDischarge)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): UndertemperatureDuringDischarge: {UndertemperatureDuringDischarge}");
                 result = false;
             }
 
-            bool UndertemperatureDuringCharge = Convert.ToBoolean(myIntValue & 0x00000400) ? true : false;
+            bool UndertemperatureDuringCharge = Convert.ToBoolean(myInt32Value & 0x00000400) ? true : false;
             if (UndertemperatureDuringCharge)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): UndertemperatureDuringCharge: {UndertemperatureDuringCharge}");
                 result = false;
             }
 
-            bool OvertemperatureDuringDischarge = Convert.ToBoolean(myIntValue & 0x00000200) ? true : false;
+            bool OvertemperatureDuringDischarge = Convert.ToBoolean(myInt32Value & 0x00000200) ? true : false;
             if (OvertemperatureDuringDischarge)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): OvertemperatureDuringDischarge: {OvertemperatureDuringDischarge}");
                 result = false;
             }
 
-            bool OvertemperatureDuringCharge = Convert.ToBoolean(myIntValue & 0x00000100) ? true : false;
+            bool OvertemperatureDuringCharge = Convert.ToBoolean(myInt32Value & 0x00000100) ? true : false;
             if (OvertemperatureDuringCharge)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): OvertemperatureDuringCharge: {OvertemperatureDuringCharge}");
                 result = false;
             }
 
-            bool ShortCircuitDuringDischargeLatch = Convert.ToBoolean(myIntValue & 0x00000080) ? true : false;
+            bool ShortCircuitDuringDischargeLatch = Convert.ToBoolean(myInt32Value & 0x00000080) ? true : false;
             if (ShortCircuitDuringDischargeLatch)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): ShortCircuitDuringDischargeLatch: {ShortCircuitDuringDischargeLatch}");
                 result = false;
             }
 
-            bool ShortCircuitDuringDischarge = Convert.ToBoolean(myIntValue & 0x00000040) ? true : false;
+            bool ShortCircuitDuringDischarge = Convert.ToBoolean(myInt32Value & 0x00000040) ? true : false;
             if (ShortCircuitDuringDischarge)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): ShortCircuitDuringDischarge: {ShortCircuitDuringDischarge}");
                 result = false;
             }
 
-            bool OverloadDuringDischargeLatch = Convert.ToBoolean(myIntValue & 0x00000020) ? true : false;
+            bool OverloadDuringDischargeLatch = Convert.ToBoolean(myInt32Value & 0x00000020) ? true : false;
             if (OverloadDuringDischargeLatch)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): OverloadDuringDischargeLatch: {OverloadDuringDischargeLatch}");
                 result = false;
             }
 
-            bool OverloadDuringDischarge = Convert.ToBoolean(myIntValue & 0x00000010) ? true : false;
+            bool OverloadDuringDischarge = Convert.ToBoolean(myInt32Value & 0x00000010) ? true : false;
             if (OverloadDuringDischarge)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): OverloadDuringDischarge: {OverloadDuringDischarge}");
                 result = false;
             }
 
-            bool OvercurrentDuringDischarge = Convert.ToBoolean(myIntValue & 0x00000008) ? true : false;
+            bool OvercurrentDuringDischarge = Convert.ToBoolean(myInt32Value & 0x00000008) ? true : false;
             if (OvercurrentDuringDischarge)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): OvercurrentDuringDischarge: {OvercurrentDuringDischarge}");
                 result = false;
             }
 
-            bool OvercurrentDuringCharge = Convert.ToBoolean(myIntValue & 0x00000004) ? true : false;
+            bool OvercurrentDuringCharge = Convert.ToBoolean(myInt32Value & 0x00000004) ? true : false;
             if (OvercurrentDuringCharge)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): OvercurrentDuringCharge: {OvercurrentDuringCharge}");
                 result = false;
             }
 
-            bool CellOvervoltage = Convert.ToBoolean(myIntValue & 0x00000002) ? true : false;
+            bool CellOvervoltage = Convert.ToBoolean(myInt32Value & 0x00000002) ? true : false;
             if (CellOvervoltage)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): CellOvervoltage: {CellOvervoltage}");
                 result = false;
             }
 
-            bool CellUndervoltage = Convert.ToBoolean(myIntValue & 0x00000001) ? true : false;
+            bool CellUndervoltage = Convert.ToBoolean(myInt32Value & 0x00000001) ? true : false;
             if (CellUndervoltage)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): CellUndervoltage: {CellUndervoltage}");
@@ -1305,7 +1309,8 @@ namespace Console_MVVMTesting.ViewModels
             }
 
             _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyStatus(): End of method");
-            return result;
+            //return result;
+            return myInt32Value;
         }
 
 
@@ -1329,120 +1334,120 @@ namespace Console_MVVMTesting.ViewModels
         //SOCC(Bit 2) : SafetyOvercurrentInCharge (0x0004)
         //SOV(Bit 1) : SafetyCellOvervoltageFailure (0x0002)
         //SUV(Bit 0) : SafetyCellUndervoltageFailure (0x0001)
-        private bool ParsePFAlert(string myPFAlertStr)
+        private ushort ParsePFAlert(string myPFAlertStr)
         {
             _log.Log(consoleColor, $"TRSocketViewModel::ParsePFAlert(): Start of method");
             bool result = false;
 
-            int myIntValue = Convert.ToInt32(myPFAlertStr, 16);
-            _log.Log(consoleColor, $"TRSocketViewModel::ParsePFAlert(): myIntValue: {myIntValue}");
+            ushort myInt16Value = Convert.ToUInt16(myPFAlertStr, 16);
+            _log.Log(consoleColor, $"TRSocketViewModel::ParsePFAlert(): myInt16Value: {myInt16Value}");
 
-            bool SafetyOvertemperatureFETFailure = Convert.ToBoolean(myIntValue & 0x8000) ? true : false;
+            bool SafetyOvertemperatureFETFailure = Convert.ToBoolean(myInt16Value & 0x8000) ? true : false;
             if (SafetyOvertemperatureFETFailure)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): SafetyOvertemperatureFETFailure: {SafetyOvertemperatureFETFailure}");
                 result = false;
             }
 
-            bool OpenThermistorTS3Failure = Convert.ToBoolean(myIntValue & 0x4000) ? true : false;
+            bool OpenThermistorTS3Failure = Convert.ToBoolean(myInt16Value & 0x4000) ? true : false;
             if (OpenThermistorTS3Failure)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): OpenThermistorTS3Failure: {OpenThermistorTS3Failure}");
                 result = false;
             }
 
-            bool OpenThermistorTS2Failure = Convert.ToBoolean(myIntValue & 0x2000) ? true : false;
+            bool OpenThermistorTS2Failure = Convert.ToBoolean(myInt16Value & 0x2000) ? true : false;
             if (OpenThermistorTS2Failure)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): OpenThermistorTS2Failure: {OpenThermistorTS2Failure}");
                 result = false;
             }
 
-            bool OpenThermistorTS1Failure = Convert.ToBoolean(myIntValue & 0x1000) ? true : false;
+            bool OpenThermistorTS1Failure = Convert.ToBoolean(myInt16Value & 0x1000) ? true : false;
             if (OpenThermistorTS1Failure)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): OpenThermistorTS1Failure: {OpenThermistorTS1Failure}");
                 result = false;
             }
 
-            bool CompanionBQ769x0AFEXREADYFailure = Convert.ToBoolean(myIntValue & 0x0800) ? true : false;
+            bool CompanionBQ769x0AFEXREADYFailure = Convert.ToBoolean(myInt16Value & 0x0800) ? true : false;
             if (CompanionBQ769x0AFEXREADYFailure)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): CompanionBQ769x0AFEXREADYFailure: {CompanionBQ769x0AFEXREADYFailure}");
                 result = false;
             }
 
-            bool CompanionBQ769x0AFEOverrideFailure = Convert.ToBoolean(myIntValue & 0x0400) ? true : false;
+            bool CompanionBQ769x0AFEOverrideFailure = Convert.ToBoolean(myInt16Value & 0x0400) ? true : false;
             if (CompanionBQ769x0AFEOverrideFailure)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): CompanionBQ769x0AFEOverrideFailure: {CompanionBQ769x0AFEOverrideFailure}");
                 result = false;
             }
 
-            bool AFECommunicationFailure = Convert.ToBoolean(myIntValue & 0x0200) ? true : false;
+            bool AFECommunicationFailure = Convert.ToBoolean(myInt16Value & 0x0200) ? true : false;
             if (AFECommunicationFailure)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): AFECommunicationFailure: {AFECommunicationFailure}");
                 result = false;
             }
 
-            bool AFERegisterFailure = Convert.ToBoolean(myIntValue & 0x0100) ? true : false;
+            bool AFERegisterFailure = Convert.ToBoolean(myInt16Value & 0x0100) ? true : false;
             if (AFERegisterFailure)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): AFERegisterFailure: {AFERegisterFailure}");
                 result = false;
             }
 
-            bool DischargeFETFailure = Convert.ToBoolean(myIntValue & 0x0080) ? true : false;
+            bool DischargeFETFailure = Convert.ToBoolean(myInt16Value & 0x0080) ? true : false;
             if (DischargeFETFailure)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): DischargeFETFailure: {DischargeFETFailure}");
                 result = false;
             }
 
-            bool ChargeFETFailure = Convert.ToBoolean(myIntValue & 0x0040) ? true : false;
+            bool ChargeFETFailure = Convert.ToBoolean(myInt16Value & 0x0040) ? true : false;
             if (ChargeFETFailure)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): ChargeFETFailure: {ChargeFETFailure}");
                 result = false;
             }
 
-            bool VoltageImbalanceWhilePackIsAtRestFailure = Convert.ToBoolean(myIntValue & 0x0020) ? true : false;
+            bool VoltageImbalanceWhilePackIsAtRestFailure = Convert.ToBoolean(myInt16Value & 0x0020) ? true : false;
             if (VoltageImbalanceWhilePackIsAtRestFailure)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): VoltageImbalanceWhilePackIsAtRestFailure: {VoltageImbalanceWhilePackIsAtRestFailure}");
                 result = false;
             }
 
-            bool SafetyOvertemperatureCellFailure = Convert.ToBoolean(myIntValue & 0x0010) ? true : false;
+            bool SafetyOvertemperatureCellFailure = Convert.ToBoolean(myInt16Value & 0x0010) ? true : false;
             if (SafetyOvertemperatureCellFailure)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): SafetyOvertemperatureCellFailure: {SafetyOvertemperatureCellFailure}");
                 result = false;
             }
 
-            bool SafetyOvercurrentInDischarge = Convert.ToBoolean(myIntValue & 0x0008) ? true : false;
+            bool SafetyOvercurrentInDischarge = Convert.ToBoolean(myInt16Value & 0x0008) ? true : false;
             if (SafetyOvercurrentInDischarge)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): SafetyOvercurrentInDischarge: {SafetyOvercurrentInDischarge}");
                 result = false;
             }
 
-            bool SafetyOvercurrentInCharge = Convert.ToBoolean(myIntValue & 0x0004) ? true : false;
+            bool SafetyOvercurrentInCharge = Convert.ToBoolean(myInt16Value & 0x0004) ? true : false;
             if (SafetyOvercurrentInCharge)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): SafetyOvercurrentInCharge: {SafetyOvercurrentInCharge}");
                 result = false;
             }
 
-            bool SafetyCellOvervoltageFailure = Convert.ToBoolean(myIntValue & 0x0002) ? true : false;
+            bool SafetyCellOvervoltageFailure = Convert.ToBoolean(myInt16Value & 0x0002) ? true : false;
             if (SafetyCellOvervoltageFailure)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): SafetyCellOvervoltageFailure: {SafetyCellOvervoltageFailure}");
                 result = false;
             }
 
-            bool SafetyCellUndervoltageFailure = Convert.ToBoolean(myIntValue & 0x0001) ? true : false;
+            bool SafetyCellUndervoltageFailure = Convert.ToBoolean(myInt16Value & 0x0001) ? true : false;
             if (SafetyCellUndervoltageFailure)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): SafetyCellUndervoltageFailure: {SafetyCellUndervoltageFailure}");
@@ -1450,7 +1455,8 @@ namespace Console_MVVMTesting.ViewModels
             }
 
             _log.Log(consoleColor, $"TRSocketViewModel::ParsePFAlert(): End of method");
-            return result;
+            //return result;
+            return myInt16Value;
         }
 
 
@@ -1474,135 +1480,135 @@ namespace Console_MVVMTesting.ViewModels
         //SOCC(Bit 2) : Safety Overcurrent in Charge (0x00000004)
         //SOV(Bit 1) : Safety Cell Overvoltage Failure (0x00000002)
         //SUV(Bit 0) : Safety Cell Undervoltage Failure (0x00000001)
-        private bool ParsePFStatus(string myPFStatusStr)
+        private UInt32 ParsePFStatus(string myPFStatusStr)
         {
             _log.Log(consoleColor, $"TRSocketViewModel::ParsePFStatus(): Start of method");
             bool result = false;
 
 
-            int myIntValue = Convert.ToInt32(myPFStatusStr, 16);
-            _log.Log(consoleColor, $"TRSocketViewModel::ParsePFStatus(): myIntValue: {myIntValue}");
+            UInt32 myInt32Value = Convert.ToUInt32(myPFStatusStr, 16);
+            _log.Log(consoleColor, $"TRSocketViewModel::ParsePFStatus(): myInt32Value: {myInt32Value}");
 
-            bool DataFlashWearoutFailure = Convert.ToBoolean(myIntValue & 0x00020000) ? true : false;
+            bool DataFlashWearoutFailure = Convert.ToBoolean(myInt32Value & 0x00020000) ? true : false;
             if (DataFlashWearoutFailure)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): DataFlashWearoutFailure: {DataFlashWearoutFailure}");
                 result = false;
             }
 
-            bool InstructionFlashChecksumFailure = Convert.ToBoolean(myIntValue & 0x00010000) ? true : false;
+            bool InstructionFlashChecksumFailure = Convert.ToBoolean(myInt32Value & 0x00010000) ? true : false;
             if (InstructionFlashChecksumFailure)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): InstructionFlashChecksumFailure: {InstructionFlashChecksumFailure}");
                 result = false;
             }
 
-            bool SafetyOvertemperatureFETFailure = Convert.ToBoolean(myIntValue & 0x00008000) ? true : false;
+            bool SafetyOvertemperatureFETFailure = Convert.ToBoolean(myInt32Value & 0x00008000) ? true : false;
             if (SafetyOvertemperatureFETFailure)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): SafetyOvertemperatureFETFailure: {SafetyOvertemperatureFETFailure}");
                 result = false;
             }
 
-            bool OpenThermistorTS3Failure = Convert.ToBoolean(myIntValue & 0x00004000) ? true : false;
+            bool OpenThermistorTS3Failure = Convert.ToBoolean(myInt32Value & 0x00004000) ? true : false;
             if (OpenThermistorTS3Failure)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): OpenThermistorTS3Failure: {OpenThermistorTS3Failure}");
                 result = false;
             }
 
-            bool OpenThermistorTS2Failure = Convert.ToBoolean(myIntValue & 0x00020000) ? true : false;
+            bool OpenThermistorTS2Failure = Convert.ToBoolean(myInt32Value & 0x00020000) ? true : false;
             if (OpenThermistorTS2Failure)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): OpenThermistorTS2Failure: {OpenThermistorTS2Failure}");
                 result = false;
             }
 
-            bool OpenThermistorTS1Failure = Convert.ToBoolean(myIntValue & 0x00001000) ? true : false;
+            bool OpenThermistorTS1Failure = Convert.ToBoolean(myInt32Value & 0x00001000) ? true : false;
             if (OpenThermistorTS1Failure)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): OpenThermistorTS1Failure: {OpenThermistorTS1Failure}");
                 result = false;
             }
 
-            bool CompanionBQ769x0AFEXREADYFailure = Convert.ToBoolean(myIntValue & 0x00000800) ? true : false;
+            bool CompanionBQ769x0AFEXREADYFailure = Convert.ToBoolean(myInt32Value & 0x00000800) ? true : false;
             if (CompanionBQ769x0AFEXREADYFailure)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): CompanionBQ769x0AFEXREADYFailure: {CompanionBQ769x0AFEXREADYFailure}");
                 result = false;
             }
-            
-            bool CompanionBQ769x0AFEOverrideFailure = Convert.ToBoolean(myIntValue & 0x00000400) ? true : false;
+
+            bool CompanionBQ769x0AFEOverrideFailure = Convert.ToBoolean(myInt32Value & 0x00000400) ? true : false;
             if (CompanionBQ769x0AFEOverrideFailure)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): CompanionBQ769x0AFEOverrideFailure: {CompanionBQ769x0AFEOverrideFailure}");
                 result = false;
             }
 
-            bool AFECommunicationFailure = Convert.ToBoolean(myIntValue & 0x00000200) ? true : false;
+            bool AFECommunicationFailure = Convert.ToBoolean(myInt32Value & 0x00000200) ? true : false;
             if (AFECommunicationFailure)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): AFECommunicationFailure: {AFECommunicationFailure}");
                 result = false;
             }
 
-            bool AFERegisterFailure = Convert.ToBoolean(myIntValue & 0x00000100) ? true : false;
+            bool AFERegisterFailure = Convert.ToBoolean(myInt32Value & 0x00000100) ? true : false;
             if (AFERegisterFailure)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): AFERegisterFailure: {AFERegisterFailure}");
                 result = false;
             }
 
-            bool DischargeFETFailure = Convert.ToBoolean(myIntValue & 0x00000080) ? true : false;
+            bool DischargeFETFailure = Convert.ToBoolean(myInt32Value & 0x00000080) ? true : false;
             if (DischargeFETFailure)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): DischargeFETFailure: {DischargeFETFailure}");
                 result = false;
             }
 
-            bool ChargeFETFailure = Convert.ToBoolean(myIntValue & 0x00000040) ? true : false;
+            bool ChargeFETFailure = Convert.ToBoolean(myInt32Value & 0x00000040) ? true : false;
             if (ChargeFETFailure)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): ChargeFETFailure: {ChargeFETFailure}");
                 result = false;
             }
 
-            bool VoltageImbalanceWhilePackIsAtRestFailure = Convert.ToBoolean(myIntValue & 0x00000020) ? true : false;
+            bool VoltageImbalanceWhilePackIsAtRestFailure = Convert.ToBoolean(myInt32Value & 0x00000020) ? true : false;
             if (VoltageImbalanceWhilePackIsAtRestFailure)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): VoltageImbalanceWhilePackIsAtRestFailure: {VoltageImbalanceWhilePackIsAtRestFailure}");
                 result = false;
             }
 
-            bool SafetyOvertemperatureCellFailure = Convert.ToBoolean(myIntValue & 0x00000010) ? true : false;
+            bool SafetyOvertemperatureCellFailure = Convert.ToBoolean(myInt32Value & 0x00000010) ? true : false;
             if (SafetyOvertemperatureCellFailure)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): SafetyOvertemperatureCellFailure: {SafetyOvertemperatureCellFailure}");
                 result = false;
             }
 
-            bool SafetyOvercurrentInDischarge = Convert.ToBoolean(myIntValue & 0x00000008) ? true : false;
+            bool SafetyOvercurrentInDischarge = Convert.ToBoolean(myInt32Value & 0x00000008) ? true : false;
             if (SafetyOvercurrentInDischarge)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): SafetyOvercurrentInDischarge: {SafetyOvercurrentInDischarge}");
                 result = false;
             }
 
-            bool SafetyOvercurrentInCharge = Convert.ToBoolean(myIntValue & 0x00000004) ? true : false;
+            bool SafetyOvercurrentInCharge = Convert.ToBoolean(myInt32Value & 0x00000004) ? true : false;
             if (SafetyOvercurrentInCharge)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): SafetyOvercurrentInCharge: {SafetyOvercurrentInCharge}");
                 result = false;
             }
-            
-            bool SafetyCellOvervoltageFailure = Convert.ToBoolean(myIntValue & 0x00000002) ? true : false;
+
+            bool SafetyCellOvervoltageFailure = Convert.ToBoolean(myInt32Value & 0x00000002) ? true : false;
             if (SafetyCellOvervoltageFailure)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): SafetyCellOvervoltageFailure: {SafetyCellOvervoltageFailure}");
                 result = false;
             }
 
-            bool SafetyCellUndervoltageFailure = Convert.ToBoolean(myIntValue & 0x00000001) ? true : false;
+            bool SafetyCellUndervoltageFailure = Convert.ToBoolean(myInt32Value & 0x00000001) ? true : false;
             if (SafetyCellUndervoltageFailure)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): SafetyCellUndervoltageFailure: {SafetyCellUndervoltageFailure}");
@@ -1610,7 +1616,8 @@ namespace Console_MVVMTesting.ViewModels
             }
 
             _log.Log(consoleColor, $"TRSocketViewModel::ParsePFStatus(): End of method");
-            return result;
+            //return result;
+            return myInt32Value;
         }
 
 
@@ -1619,44 +1626,55 @@ namespace Console_MVVMTesting.ViewModels
         {
             _log.Log(consoleColor, $"TRSocketViewModel::CheckBatteryStatusAndAlarmsCommand(): Start of method  ({this.GetHashCode():x8})");
 
-            //foreach (Socket terminalSocket in _myListOfSockets)
-            //{
+            TRSocketStateMessage trssm = new();
+            trssm.MyStateName = "CheckBatteryStatusAndAlarmsCommand";
+            //Dictionary<IntPtr, Tuple<SafetyAlertEnum, SafetyStatusEnum, PFAlertEnum, PFStatusEnum>> batteryStatusAndAlarmsDict = new();
+            Dictionary<IntPtr, Tuple<UInt16, UInt16, UInt32, UInt32, UInt16, UInt32>> batteryStatusAndAlarmsDict = new();
 
-            string myResponse37_BMS_REG = this.SendToSocket(_myListOfSockets[0], ParseOutputData("37/BMS/REG"));
-            //_log.Log(consoleColor, $"TRSocketViewModel::CheckBatteryStatusAndAlarmsCommand(): myResponse37_BMS_REG:\n{myResponse37_BMS_REG}");
-            string myBatteryMode = this.ParseResponseString(myResponse37_BMS_REG, "Battery Mode");
-            _log.Log(consoleColor, $"TRSocketViewModel::CheckBatteryStatusAndAlarmsCommand(): myBatteryMode: {myBatteryMode}");
-            this.ParseBatteryMode(myBatteryMode);
+            if (_myListOfSockets.Count == 0)
+            {
+                batteryStatusAndAlarmsDict.Add((IntPtr)0, new Tuple<UInt16, UInt16, UInt32, UInt32, UInt16, UInt32>(0, 0, 0, 0, 0, 0));
+            }
 
-            string myBatteryStatus = this.ParseResponseString(myResponse37_BMS_REG, "Battery Status");
-            this.ParseBatteryStatus(myBatteryStatus);
+            foreach (Socket terminalSocket in _myListOfSockets)
+            {
+                string myResponse37_BMS_REG = this.SendToSocket(_myListOfSockets[0], ParseOutputData("37/BMS/REG"));
+                //_log.Log(consoleColor, $"TRSocketViewModel::CheckBatteryStatusAndAlarmsCommand(): myResponse37_BMS_REG:\n{myResponse37_BMS_REG}");
+                string myBatteryMode = this.ParseResponseString(myResponse37_BMS_REG, "Battery Mode");
+                _log.Log(consoleColor, $"TRSocketViewModel::CheckBatteryStatusAndAlarmsCommand(): myBatteryMode: {myBatteryMode}");
+                UInt16 BatteryMode = this.ParseBatteryMode(myBatteryMode);
 
+                string myBatteryStatus = this.ParseResponseString(myResponse37_BMS_REG, "Battery Status");
+                UInt16 BatteryStatus = this.ParseBatteryStatus(myBatteryStatus);
 
-            string mySafetyAlertStr = this.ParseResponseString(myResponse37_BMS_REG, "Safety Alert");
-            bool SafetyAlert = this.ParseSafetyAlert(mySafetyAlertStr);
+                string mySafetyAlertStr = this.ParseResponseString(myResponse37_BMS_REG, "Safety Alert");
+                UInt32 SafetyAlert = this.ParseSafetyAlert(mySafetyAlertStr);
 
-            string mySafetyStatusStr = this.ParseResponseString(myResponse37_BMS_REG, "Safety Status");
-            bool SafetyStatus = this.ParseSafetyStatus(mySafetyStatusStr);
+                string mySafetyStatusStr = this.ParseResponseString(myResponse37_BMS_REG, "Safety Status");
+                UInt32 SafetyStatus = this.ParseSafetyStatus(mySafetyStatusStr);
 
-            string myPFAlertStr = this.ParseResponseString(myResponse37_BMS_REG, "PF Alert");
-            bool PFAlert = this.ParsePFAlert(myPFAlertStr);
+                string myPFAlertStr = this.ParseResponseString(myResponse37_BMS_REG, "PF Alert");
+                UInt16 PFAlert = this.ParsePFAlert(myPFAlertStr);
 
-            string myPFStatusStr = this.ParseResponseString(myResponse37_BMS_REG, "PF Status");
-            bool PFStatus = this.ParsePFStatus(myPFStatusStr);
+                string myPFStatusStr = this.ParseResponseString(myResponse37_BMS_REG, "PF Status");
+                UInt32 PFStatus = this.ParsePFStatus(myPFStatusStr);
 
-            if ((SafetyAlert) && (SafetyStatus) && (PFAlert) && (PFStatus))
-                _log.Log(consoleColor, $"TRSocketViewModel::CheckBatteryStatusAndAlarmsCommand(): Status is OK");
-            else
-                _log.Log(consoleColor, $"TRSocketViewModel::CheckBatteryStatusAndAlarmsCommand(): Status is not OK");
-            //}
+                //if ((SafetyAlert) && (SafetyStatus) && (PFAlert) && (PFStatus))
+                //    _log.Log(consoleColor, $"TRSocketViewModel::CheckBatteryStatusAndAlarmsCommand(): Status is OK");
+                //else
+                //    _log.Log(consoleColor, $"TRSocketViewModel::CheckBatteryStatusAndAlarmsCommand(): Status is not OK");
 
+                Tuple<UInt16, UInt16, UInt32, UInt32, UInt16, UInt32> MyTuple = new(BatteryMode, BatteryStatus, SafetyAlert, SafetyStatus, PFAlert, PFStatus);
+                batteryStatusAndAlarmsDict.Add(terminalSocket.Handle, MyTuple);
+            }
+
+            trssm.BatteryStatusAndAlarmsDict = batteryStatusAndAlarmsDict;
             _log.Log(consoleColor, $"TRSocketViewModel::CheckBatteryStatusAndAlarmsCommand(): End of method  ({this.GetHashCode():x8})");
-            return new TRSocketStateMessage();
+            return trssm;
         }
 
 
-
-
+   
         #region Constructor
         public TRSocketViewModel(ILoggingService loggingService, IMessenger messenger)
         {
@@ -1673,18 +1691,6 @@ namespace Console_MVVMTesting.ViewModels
             _ipAddress = new IPAddress(0);
             commandQueue = new ConcurrentQueue<string>();
 
-
-            //LoggedInUserRequestMessage is requested from the ProductionViewModel
-            //_messenger.Register<TRSocketViewModel, LoggedInUserRequestMessage>(this, (r, m) =>
-            //{
-            //    m.Reply(r.GetTRSocketUser());
-            //});
-
-
-
-            //MyUser myUser = new MyUser { MyUserName = "TRSocketUserName" };
-            // Send a message from some other module
-            //_messenger.Send(new LoggedInUserChangedMessage(myUser));
 
             _messenger.Register<TRSocketViewModel, TRSocketInitStatusRequestMessage>(this, (myReceiver, myMessenger) =>
             {

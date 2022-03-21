@@ -15,32 +15,42 @@ namespace Console_MVVMTesting.Messages
         Error,
     }
 
-
-
-    public enum SafetyAlert
+    public enum BatteryModeEnum : UInt16
     {
-        Overcharge,
-        ChargeTimeoutSuspend,
-        PrechargeTimeoutSuspend,
-        OvercurrentDuringDischargeLatch,
-        OvertemperatureFault,
-        AFEAlert,
-        UndertemperatureDuringDischarge,
-        UndertemperatureDuringCharge,
-        OvertemperatureDuringDischarge,
-        OvertemperatureDuringCharge,
-        ShortCircuitDuringDischargeLatch,
-        ShortCircuitDuringDischarge,
-        OverloadDuringDischargeLatch,
-        OverloadDuringDischarge,
-        OvercurrentDuringDischarge,
-        OvercurrentDuringCharge,
-        CellOvervoltage,
-        CellUndervoltage,
+
     }
 
-    public enum SafetyStatus
+    public enum BatteryStatusEnum : UInt16
     {
+
+    }
+
+    public enum SafetyAlertEnum : UInt32
+    {
+        Overcharge = 0x00100000,
+        ChargeTimeoutSuspend = 0x00080000,
+        PrechargeTimeoutSuspend = 0x00020000,
+        OvercurrentDuringDischargeLatch = 0x00004000,
+        OvertemperatureFault = 0x00002000,
+        AFEAlert = 0x00001000,
+        UndertemperatureDuringDischarge = 0x00000800,
+        UndertemperatureDuringCharge = 0x00000400,
+        OvertemperatureDuringDischarge = 0x00000200,
+        OvertemperatureDuringCharge = 0x00000100,
+        ShortCircuitDuringDischargeLatch = 0x00000080,
+        ShortCircuitDuringDischarge = 0x00000040,
+        OverloadDuringDischargeLatch = 0x00000020,
+        OverloadDuringDischarge = 0x00000010,
+        OvercurrentDuringDischarge = 0x00000008,
+        OvercurrentDuringCharge = 0x00000004,
+        CellOvervoltage = 0x00000002,
+        CellUndervoltage = 0x00000001,
+        NoError = 0x00000000,
+    }
+
+    public enum SafetyStatusEnum : UInt32
+    {
+        NoError,
         Overcharge,
         ChargeTimeout,
         PrechargeTimeout,
@@ -61,8 +71,9 @@ namespace Console_MVVMTesting.Messages
         CellUndervoltage,
     }
 
-    public enum PFStatus
+    public enum PFStatusEnum : UInt32
     {
+        NoError,
         DataFlashWearoutFailure,
         InstructionFlashChecksumFailure,
         SafetyOvertemperatureFETFailure,
@@ -84,8 +95,9 @@ namespace Console_MVVMTesting.Messages
     }
 
 
-    public enum PFAlert
+    public enum PFAlertEnum : UInt16
     {
+        NoError,
         SafetyOvertemperatureFETFailure,
         OpenThermistorTS3Failure,
         OpenThermistorTS2Failure,
@@ -114,8 +126,11 @@ namespace Console_MVVMTesting.Messages
         //public int SocketHandle { get; set; }
         //public Socket mySocket { get; set; }
         //public decimal ACInVoltage { get; set; }
-        public Dictionary<IntPtr, Tuple<string, double, int>> MySocket { get; set; }
-        public Dictionary<IntPtr, string> MyInitSocket { get; set; }
+        public Dictionary<IntPtr, Tuple<string, double, int>> CheckPowerSupplyDict { get; set; }
+        public Dictionary<IntPtr, string> SocketInitDict { get; set; }
+        //public Dictionary<IntPtr, Tuple<SafetyAlertEnum, SafetyStatusEnum, PFAlertEnum, PFStatusEnum>> BatteryStatusAndAlarmsDict { get; set; }
+        //public Dictionary<IntPtr, Tuple<BatteryMode, BatteryStatus, SafetyAlertEnum, SafetyStatusEnum, PFAlertEnum, PFStatusEnum>> BatteryStatusAndAlarmsDict { get; set; }
+        public Dictionary<IntPtr, Tuple<UInt16, UInt16, UInt32, UInt32, UInt16, UInt32>> BatteryStatusAndAlarmsDict { get; set; }
 
 
         public TRSocketStateMessage(string myStateName, TRStatus trs)

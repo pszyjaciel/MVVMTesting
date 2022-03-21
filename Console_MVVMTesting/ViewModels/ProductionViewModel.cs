@@ -140,12 +140,12 @@ namespace Console_MVVMTesting.ViewModels
             // Run init of sockets in the LCSocketViewModule and request result
             // na powrocie musze dostac zainicjalizowane sokety
             TRSocketStateMessage trmsm = await _messenger.Send<TRSocketInitStatusRequestMessage>();
-            if (trmsm.MyInitSocket == null)
+            if (trmsm.SocketInitDict == null)
             {
                 return false;
             }
 
-            foreach (KeyValuePair<IntPtr, string> entry in trmsm.MyInitSocket)
+            foreach (KeyValuePair<IntPtr, string> entry in trmsm.SocketInitDict)
             {
                 _log.Log(consoleColor, $"ProductionViewModel::InitSocketsTaskAsync(): socket {entry.Key}: {entry.Value}");
             }
@@ -157,31 +157,42 @@ namespace Console_MVVMTesting.ViewModels
 
 
 
-        //CheckBatteryStatusAndAlarmsTaskAsync
         private async Task<bool> CheckBatteryStatusAndAlarmsTaskAsync()
         {
             _log.Log(consoleColor, "ProductionViewModel::CheckBatteryStatusAndAlarmsTaskAsync(): Start of Task");
-
+            bool rs = false;
             TRSocketStateMessage trmsm = await _messenger.Send<CheckBatteryStatusAndAlarmsRequestMessage>();
+            _log.Log(consoleColor, $"ProductionViewModel::CheckBatteryStatusAndAlarmsTaskAsync(): trmsm.MySocket.Keys.Count: {trmsm.BatteryStatusAndAlarmsDict.Keys.Count}");
+            if (trmsm.BatteryStatusAndAlarmsDict.Keys.Count > 0)
+            {
+                //BatteryMode, BatteryStatus, SafetyAlertEnum, SafetyStatusEnum, PFAlertEnum, PFStatusEnum
+                foreach (KeyValuePair<IntPtr, Tuple<UInt16, UInt16, UInt32, UInt32, UInt16, UInt32>> entry in trmsm.BatteryStatusAndAlarmsDict)
+                {
+                    //_log.Log(consoleColor, $"ProductionViewModel::CheckBatteryStatusAndAlarmsTaskAsync(): socket {entry.Key}: {entry.Value}");
+                    _log.Log(consoleColor, $"ProductionViewModel::CheckBatteryStatusAndAlarmsTaskAsync(): " +
+                        $"socket {entry.Key}: {entry.Value.Item1}, {entry.Value.Item2}, {entry.Value.Item3}, {entry.Value.Item4}, {entry.Value.Item5}, {entry.Value.Item6}");
 
-            await Task.Yield();
-
-
+                    if ((entry.Value.Item2 == 0) && (entry.Value.Item3 == 0) && (entry.Value.Item4 == 0) && (entry.Value.Item5 == 0) && (entry.Value.Item6 == 0))
+                    {
+                        rs = true;
+                    }
+                }
+            }
             _log.Log(consoleColor, "ProductionViewModel::CheckBatteryStatusAndAlarmsTaskAsync(): End of Task");
-            return true;
+            return rs;
         }
 
 
-            // 2. Make sure that PS is alive and power source is AC - OM command
-            private async Task<bool> CheckPowerSupplyTaskAsync()
+        // 2. Make sure that PS is alive and power source is AC - OM command
+        private async Task<bool> CheckPowerSupplyTaskAsync()
         {
             _log.Log(consoleColor, "ProductionViewModel::CheckPowerSupplyTaskAsync(): Start of Task");
 
             TRSocketStateMessage trmsm = await _messenger.Send<TRSocketCheckPowerSupplyRequestMessage>();
-            _log.Log(consoleColor, $"ProductionViewModel::CheckPowerSupplyTaskAsync(): trmsm.MySocket.Keys.Count: {trmsm.MySocket.Keys.Count}");
-            if (trmsm.MySocket.Keys.Count > 0)
+            _log.Log(consoleColor, $"ProductionViewModel::CheckPowerSupplyTaskAsync(): trmsm.MySocket.Keys.Count: {trmsm.CheckPowerSupplyDict.Keys.Count}");
+            if (trmsm.CheckPowerSupplyDict.Keys.Count > 0)
             {
-                foreach (KeyValuePair<IntPtr, Tuple<string, double, int>> entry in trmsm.MySocket)
+                foreach (KeyValuePair<IntPtr, Tuple<string, double, int>> entry in trmsm.CheckPowerSupplyDict)
                 {
                     _log.Log(consoleColor, $"ProductionViewModel::CheckPowerSupplyTaskAsync(): socket {entry.Key}: {entry.Value}");
                 }
