@@ -41,6 +41,7 @@ namespace Console_MVVMTesting.ViewModels
         private const string _connectionItem_Host = "127.0.0.1";
 
         private int _mySocketNativeErrorCode;
+        Dictionary<IntPtr, int> _mySocketErrorDict = new Dictionary<IntPtr, int>();
 
         private ConcurrentQueue<string> commandQueue;
         private IPAddress _ipAddress = null;
@@ -72,7 +73,25 @@ namespace Console_MVVMTesting.ViewModels
             set => SetProperty(ref _myTRSocketPrivateProperyName, value);
         }
 
+        public int GetLastError(Socket terminalSocket)
+        {
+            _log.Log(consoleColor, $"TRSocketViewModel::GetLastError(): socket: {terminalSocket.Handle}, " +
+                $"ThreadId: {Thread.CurrentThread.ManagedThreadId} - Start of method");
+           
+            int errorCode = 0;
+            foreach (KeyValuePair<IntPtr, int> item in _mySocketErrorDict)
+            {
+                if (item.Key == terminalSocket.Handle)
+                {
+                    errorCode = item.Value;
+                    break;
+                }
+            }
+            _log.Log(consoleColor, $"TRSocketViewModel::GetLastError(): socket: {terminalSocket.Handle}, " +
+                $"ThreadId: {Thread.CurrentThread.ManagedThreadId} - End of method");
 
+            return errorCode;
+        }
 
         public bool IsConnected(Socket terminalSocket)
         {
@@ -248,11 +267,10 @@ namespace Console_MVVMTesting.ViewModels
             string consoleColor = "LGREEN";     // kolbaki w innym kolorze
             //_log.Log(consoleColor, $"TRSocketViewModel::ConnectCallback(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : Start of method  ({this.GetHashCode():x8})");
 
+            // Retrieve the socket from the state object.  
+            Socket terminalSocket = (Socket)ar.AsyncState;
             try
             {
-                // Retrieve the socket from the state object.  
-                Socket terminalSocket = (Socket)ar.AsyncState;
-
                 // Complete the connection. Ends a pending asynchronous connection request.
                 terminalSocket.EndConnect(ar); // throws an exception if connecting fails
                                                // Exception thrown: 'System.Net.Internals.SocketExceptionFactory.ExtendedSocketException' in System.Private.CoreLib.dll
@@ -265,6 +283,9 @@ namespace Console_MVVMTesting.ViewModels
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ConnectCallback(): {se.NativeErrorCode} : {se.SocketErrorCode} : {se.Message}");
                 _mySocketNativeErrorCode = se.NativeErrorCode;
+
+                IntPtr socketHandle = terminalSocket.Handle;
+                _mySocketErrorDict.Add(socketHandle, se.NativeErrorCode);
             }
             catch (Exception ex)
             {
@@ -333,6 +354,12 @@ namespace Console_MVVMTesting.ViewModels
                 _log.Log(consoleColor, $"TRSocketViewModel::ConnectToSocket(): {terminalSocket.RemoteEndPoint} --> {terminalSocket.LocalEndPoint}");
             });
             MyTask.Wait();
+
+            if (!IsConnected(terminalSocket))
+            {
+                int error = this.GetLastError(terminalSocket);
+                _log.Log(consoleColor, $"TRSocketViewModel::ConnectToSocket(): error: {error}");
+            }
 
             _log.Log(consoleColor, $"TRSocketViewModel::ConnectToSocket(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : End of method");
             return IsConnected(terminalSocket);
@@ -1013,7 +1040,7 @@ namespace Console_MVVMTesting.ViewModels
             _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): Start of method");
 
             bool result = false;
-            
+
             UInt32 myInt32Value = Convert.ToUInt32(mySafetyAlertStr, 16);
             _log.Log(consoleColor, $"TRSocketViewModel::ParseSafetyAlert(): myInt32Value: {myInt32Value}");
 
@@ -1674,7 +1701,7 @@ namespace Console_MVVMTesting.ViewModels
         }
 
 
-   
+
         #region Constructor
         public TRSocketViewModel(ILoggingService loggingService, IMessenger messenger)
         {
