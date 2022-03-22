@@ -127,12 +127,6 @@ namespace Console_MVVMTesting.ViewModels
             _messenger.Send(new LoggedInUserChangedMessage(myUser));
             myWait.WaitOne();
 
-            // initialize-listener
-            _messenger.Register<EastTesterViewModel, EastTesterStatusRequestMessage>(this, (myReceiver, myMessenger) =>
-            {
-                myMessenger.Reply(myReceiver.EasyTesterInitAsync());
-            });
-
             _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): _messenger.Send(new LoggedInUserChangedMessage(myUser))");
             _log.Log(consoleColor, "EastTesterViewModel::SendLoggedInUserChangedMessage(): End of method");
         }
@@ -203,9 +197,13 @@ namespace Console_MVVMTesting.ViewModels
                 m.Reply(m.State);
             });
 
-    
-            Task MyTask = Task.Run(SendLoggedInUserChangedMessage);
-            MyTask.Wait();
+
+            // initialize load
+            _messenger.Register<EastTesterViewModel, EastTesterInitRequestMessage>(this, (myReceiver, myMessenger) =>
+            {
+                myMessenger.Reply(myReceiver.EasyTesterInitAsync());
+            });
+
 
             // shutdown-listener
             _messenger.Register<EastTesterViewModel, EastTesterShutdownRequestMessage>(this, (myReceiver, myMessenger) =>

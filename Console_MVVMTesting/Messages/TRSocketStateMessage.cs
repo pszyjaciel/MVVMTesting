@@ -127,7 +127,7 @@ namespace Console_MVVMTesting.Messages
         //public Socket mySocket { get; set; }
         //public decimal ACInVoltage { get; set; }
         public Dictionary<IntPtr, Tuple<string, double, int>> CheckPowerSupplyDict { get; set; }
-        public Dictionary<IntPtr, string> SocketInitDict { get; set; }
+        public Dictionary<IntPtr, Tuple<int, string>> SocketInitDict { get; set; }     // socket_handle, error_code, error_description
         //public Dictionary<IntPtr, Tuple<SafetyAlertEnum, SafetyStatusEnum, PFAlertEnum, PFStatusEnum>> BatteryStatusAndAlarmsDict { get; set; }
         //public Dictionary<IntPtr, Tuple<BatteryMode, BatteryStatus, SafetyAlertEnum, SafetyStatusEnum, PFAlertEnum, PFStatusEnum>> BatteryStatusAndAlarmsDict { get; set; }
         public Dictionary<IntPtr, Tuple<UInt16, UInt16, UInt32, UInt32, UInt16, UInt32>> BatteryStatusAndAlarmsDict { get; set; }
@@ -175,11 +175,11 @@ namespace Console_MVVMTesting.Messages
     }
 
 
-    internal class TRSocketInitStatusRequestMessage : AsyncRequestMessage<TRSocketStateMessage>
+    internal class TRSocketInitRequestMessage : AsyncRequestMessage<TRSocketStateMessage>
     {
-        public TRSocketInitStatusRequestMessage()
+        public TRSocketInitRequestMessage()
         {
-            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] TRSocketInitStatusRequestMessage::TRSocketInitStatusRequestMessage()  ({this.GetHashCode():x8})");
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] TRSocketInitRequestMessage::TRSocketInitRequestMessage()  ({this.GetHashCode():x8})");
         }
     }
 

@@ -41,7 +41,10 @@ namespace Console_MVVMTesting.ViewModels
         private const string _connectionItem_Host = "127.0.0.1";
 
         private int _mySocketNativeErrorCode;
-        Dictionary<IntPtr, int> _mySocketErrorDict = new Dictionary<IntPtr, int>();
+        //Dictionary<IntPtr, int> _mySocketErrorDict = new Dictionary<IntPtr, int>();
+        Dictionary<IntPtr, SocketException> _mySocketErrorDict = new Dictionary<IntPtr, SocketException>();
+
+
 
         private ConcurrentQueue<string> commandQueue;
         private IPAddress _ipAddress = null;
@@ -73,24 +76,28 @@ namespace Console_MVVMTesting.ViewModels
             set => SetProperty(ref _myTRSocketPrivateProperyName, value);
         }
 
-        public int GetLastError(Socket terminalSocket)
+        //public int GetLastError(Socket terminalSocket)
+        public SocketException GetLastError(Socket terminalSocket)
         {
             _log.Log(consoleColor, $"TRSocketViewModel::GetLastError(): socket: {terminalSocket.Handle}, " +
                 $"ThreadId: {Thread.CurrentThread.ManagedThreadId} - Start of method");
-           
+
+            SocketException se = null;
             int errorCode = 0;
-            foreach (KeyValuePair<IntPtr, int> item in _mySocketErrorDict)
+            foreach (KeyValuePair<IntPtr, SocketException> item in _mySocketErrorDict)
             {
                 if (item.Key == terminalSocket.Handle)
                 {
-                    errorCode = item.Value;
+                    errorCode = item.Value.NativeErrorCode;
+                    se = item.Value;
                     break;
                 }
             }
             _log.Log(consoleColor, $"TRSocketViewModel::GetLastError(): socket: {terminalSocket.Handle}, " +
                 $"ThreadId: {Thread.CurrentThread.ManagedThreadId} - End of method");
 
-            return errorCode;
+            //return errorCode;
+            return se;
         }
 
         public bool IsConnected(Socket terminalSocket)
@@ -282,10 +289,7 @@ namespace Console_MVVMTesting.ViewModels
             catch (SocketException se)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::ConnectCallback(): {se.NativeErrorCode} : {se.SocketErrorCode} : {se.Message}");
-                _mySocketNativeErrorCode = se.NativeErrorCode;
-
-                IntPtr socketHandle = terminalSocket.Handle;
-                _mySocketErrorDict.Add(socketHandle, se.NativeErrorCode);
+                _mySocketErrorDict.Add(terminalSocket.Handle, se);
             }
             catch (Exception ex)
             {
@@ -311,7 +315,6 @@ namespace Console_MVVMTesting.ViewModels
             catch (Exception ex)
             {
                 _log.Log(consoleColor, $"TRSocketViewModel::MyConnectAsync(): {ex.Message}");
-                //return false;
             }
 
             // waiting for complition
@@ -329,7 +332,8 @@ namespace Console_MVVMTesting.ViewModels
 
 
         #region ConnectToSocket
-        public bool ConnectToSocket(Socket terminalSocket)
+        // method returns an error code
+        public SocketException ConnectToSocket(Socket terminalSocket)
         {
             _log.Log(consoleColor, $"TRSocketViewModel::ConnectToSocket(): socket: {terminalSocket.Handle}, " +
                 $"ThreadId: {Thread.CurrentThread.ManagedThreadId} : Start of method  ({this.GetHashCode():x8})");
@@ -355,14 +359,21 @@ namespace Console_MVVMTesting.ViewModels
             });
             MyTask.Wait();
 
-            if (!IsConnected(terminalSocket))
-            {
-                int error = this.GetLastError(terminalSocket);
-                _log.Log(consoleColor, $"TRSocketViewModel::ConnectToSocket(): error: {error}");
-            }
+            SocketException se = this.GetLastError(terminalSocket);
+            return se;
 
-            _log.Log(consoleColor, $"TRSocketViewModel::ConnectToSocket(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : End of method");
-            return IsConnected(terminalSocket);
+            //if (se == null)
+            //{
+            //    _log.Log(consoleColor, $"TRSocketViewModel::ConnectToSocket():  ThreadId: {Thread.CurrentThread.ManagedThreadId} : End of method");
+            //    return 0;
+            //}
+            //else
+            //{
+            //    _log.Log(consoleColor, $"TRSocketViewModel::ConnectToSocket():  NativeErrorCode: {se.NativeErrorCode}, ThreadId: {Thread.CurrentThread.ManagedThreadId} : End of method");
+            //}
+
+            //return IsConnected(terminalSocket);
+            //return se.NativeErrorCode;
         }
         #endregion ConnectToSocket
 
@@ -687,8 +698,8 @@ namespace Console_MVVMTesting.ViewModels
             List<Socket> myListOfAvailableSockets = new List<Socket>();
             myListOfAvailableSockets.Add(new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp));
             myListOfAvailableSockets.Add(new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp));
-            myListOfAvailableSockets.Add(new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp));
-            myListOfAvailableSockets.Add(new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp));
+            //myListOfAvailableSockets.Add(new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp));
+            //myListOfAvailableSockets.Add(new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp));
 
             int numberOfAvailableSockets = myListOfAvailableSockets.Count;
             int numberOfInitializedSockets = 0;
@@ -696,22 +707,34 @@ namespace Console_MVVMTesting.ViewModels
 
             TRSocketStateMessage trssm = new();
             trssm.MyStateName = "TRSocketCheckPowerSupplyCommand";
-            Dictionary<IntPtr, string> MyInitSocketDict = new();
+            //Dictionary<IntPtr, string> MyInitSocketDict = new();
 
-            bool connectionResult = false;
+            Dictionary<IntPtr, Tuple<int, string>> MyInitSocketDict = new();
+
+            //bool connectionResult = false;
+            //int errorCode = -1;
+            SocketException se = null;
             foreach (Socket myAvailableSocket in myListOfAvailableSockets)
             {
                 if (!IsConnected(myAvailableSocket))
                 {
-                    connectionResult = this.ConnectToSocket(myAvailableSocket);
+                    //connectionResult = this.ConnectToSocket(myAvailableSocket);
+                    se = this.ConnectToSocket(myAvailableSocket);
                 }
-                if (connectionResult)
+                if (se != null)
+                {
+                    Tuple<int, string> myTuple = new Tuple<int, string>(se.NativeErrorCode, se.Message);   
+                    MyInitSocketDict.Add(myAvailableSocket.Handle, myTuple);
+                    trssm.SocketInitDict = MyInitSocketDict;
+                }
+                else
                 {
                     ///// receiving the hello message /////
                     string response = this.ReceiveFromSocket(myAvailableSocket);
-                    _log.Log(consoleColor, $"TRSocketViewModel::TRSocketInitAsync(): Socket {myAvailableSocket.Handle} got response: {response}");
+                    //_log.Log(consoleColor, $"TRSocketViewModel::TRSocketInitAsync(): Socket {myAvailableSocket.Handle} got response: {response}");
                     _myListOfSockets.Add(myAvailableSocket);
-                    MyInitSocketDict.Add(myAvailableSocket.Handle, response);
+                    Tuple<int, string> myTuple = new Tuple<int, string>(0, response);   // error_code is 0 in return
+                    MyInitSocketDict.Add(myAvailableSocket.Handle, myTuple);
                     trssm.SocketInitDict = MyInitSocketDict;
                     numberOfInitializedSockets++;
                 }
@@ -1719,7 +1742,7 @@ namespace Console_MVVMTesting.ViewModels
             commandQueue = new ConcurrentQueue<string>();
 
 
-            _messenger.Register<TRSocketViewModel, TRSocketInitStatusRequestMessage>(this, (myReceiver, myMessenger) =>
+            _messenger.Register<TRSocketViewModel, TRSocketInitRequestMessage>(this, (myReceiver, myMessenger) =>
             {
                 // musi zwracac wszyskie podlonczone sokety do ProductionViewModel
                 myMessenger.Reply(myReceiver.TRSocketInitAsync());

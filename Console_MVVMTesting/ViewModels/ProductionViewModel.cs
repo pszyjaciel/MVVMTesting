@@ -114,7 +114,7 @@ namespace Console_MVVMTesting.ViewModels
             bool rs;
 
             // Run load-init in the EastTesterViewModule and request result
-            EastTesterStateMessage etmsm = await _messenger.Send<EastTesterStatusRequestMessage>();
+            EastTesterStateMessage etmsm = await _messenger.Send<EastTesterInitRequestMessage>();
             _log.Log(consoleColor, $"ProductionViewModel::InitLoadsTaskAsync(): etmsm.MyStateName: {etmsm.MyStateName}, etmsm.etStatus: {etmsm.etStatus}");
 
             if (etmsm.etStatus != ETStatus.Success)
@@ -135,22 +135,17 @@ namespace Console_MVVMTesting.ViewModels
         private async Task<bool> InitSocketsTaskAsync()
         {
             _log.Log(consoleColor, "ProductionViewModel::InitSocketsTaskAsync(): Start of Task");
-
-            bool rs;
+            bool rs = true;
             // Run init of sockets in the LCSocketViewModule and request result
-            // na powrocie musze dostac zainicjalizowane sokety
-            TRSocketStateMessage trmsm = await _messenger.Send<TRSocketInitStatusRequestMessage>();
-            if (trmsm.SocketInitDict == null)
-            {
-                return false;
-            }
-
-            foreach (KeyValuePair<IntPtr, string> entry in trmsm.SocketInitDict)
+            TRSocketStateMessage trmsm = await _messenger.Send<TRSocketInitRequestMessage>();
+            foreach (KeyValuePair<IntPtr, Tuple<int, string>> entry in trmsm.SocketInitDict)
             {
                 _log.Log(consoleColor, $"ProductionViewModel::InitSocketsTaskAsync(): socket {entry.Key}: {entry.Value}");
+                if (entry.Value.Item1 != 0)
+                {
+                    rs = false;
+                }
             }
-            rs = true;
-
             _log.Log(consoleColor, "ProductionViewModel::InitSocketsTaskAsync(): End of Task");
             return rs;
         }
