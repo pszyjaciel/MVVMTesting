@@ -53,11 +53,11 @@ namespace Console_MVVMTesting.Messages
     }
 
 
-    internal class EastTesterStatusRequestMessage : AsyncRequestMessage<EastTesterStateMessage>
+    internal class EastTesterInitRequestMessage : AsyncRequestMessage<EastTesterStateMessage>
     {
-        public EastTesterStatusRequestMessage()
+        public EastTesterInitRequestMessage()
         {
-            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] EastTesterStatusRequestMessage::EastTesterStatusRequestMessage()  ({this.GetHashCode():x8})");
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] EastTesterInitRequestMessage::EastTesterInitRequestMessage()  ({this.GetHashCode():x8})");
         }
     }
 
