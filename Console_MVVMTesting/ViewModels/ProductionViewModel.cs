@@ -234,8 +234,8 @@ namespace Console_MVVMTesting.ViewModels
 
 
             // request value from LCSocketViewModel
-            MyUser myUser = _messenger.Send<LoggedInUserRequestMessage>();
-            _log.Log(consoleColor, $"ProductionViewModel::ProductionViewModel(): myUser._myName: {myUser.MyUserName}");
+            //MyUser myUser = _messenger.Send<LoggedInUserRequestMessage>();
+            //_log.Log(consoleColor, $"ProductionViewModel::ProductionViewModel(): myUser._myName: {myUser.MyUserName}");
 
 
             // Register a message in some module

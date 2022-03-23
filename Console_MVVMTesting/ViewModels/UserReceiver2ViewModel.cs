@@ -138,7 +138,7 @@ namespace Console_MVVMTesting.ViewModels
             //_log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): liurm.HasReceivedResponse: {liurm.HasReceivedResponse}");
             //_log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): liurm.Response: {liurm.Response}");
 
-            MyUser myUser = WeakReferenceMessenger.Default.Send<LoggedInUserRequestMessage>();
+            //MyUser myUser = WeakReferenceMessenger.Default.Send<LoggedInUserRequestMessage>();
 
             //PropertyChangedMessage _myEastTesterPrivateProperyName
             Post _myEastTesterPrivateProperyNameOld = new Post
