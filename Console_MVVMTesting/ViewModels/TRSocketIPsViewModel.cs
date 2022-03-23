@@ -151,17 +151,48 @@ namespace Console_MVVMTesting.ViewModels
 
 
         #region ResolveIp
-        private IPAddress ResolveIp(string host)
+        private IPAddress ResolveIp(string host2)
         {
-            _log.Log(consoleColor, $"TRSocketIPsViewModel::ResolveIp(): host: {host}, ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
+            _log.Log(consoleColor, $"TRSocketIPsViewModel::ResolveIp(): host: {host2}, ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
 
-            // Resolve IP from hostname; Keep only IPv4 in IPs array
-            IPAddress[] IPs = Dns.GetHostEntry(host).AddressList.Where(x => x.AddressFamily == AddressFamily.InterNetwork).ToArray();
-            _log.Log(consoleColor, $"TRSocketIPsViewModel::ResolveIp(): IPs.Length: {IPs.Length}");
+            string host = "127.0.0.1";
+            IPAddress[] IPs = null;
+            try
+            {
+                // Resolve IP from hostname; Keep only IPv4 in IPs array
+                IPs = Dns.GetHostEntry(host).AddressList.Where(x => x.AddressFamily == AddressFamily.InterNetwork).ToArray();
+                _log.Log(consoleColor, $"TRSocketIPsViewModel::ResolveIp(): IPs.Length: {IPs.Length}");
+            }
+            catch (SocketException se)
+            {
+                _log.Log(consoleColor, $"TRSocketIPsViewModel::ResolveIp(): se.NativeErrorCode: {se.NativeErrorCode}");
+                return IPs[0];
+            }
 
             foreach (IPAddress ipAddr in IPs)
             {
-                _log.Log(consoleColor, $"TRSocketIPsViewModel::ResolveIp(): ipAddr: {ipAddr}");
+                byte[] myAddressBytes = ipAddr.GetAddressBytes();
+                switch (myAddressBytes[0])
+                {
+                    case 10:
+                        _log.Log(consoleColor, $"TRSocketIPsViewModel::ResolveIp(): myByte: {10}");
+                        break;
+                    case 172:
+                        _log.Log(consoleColor, $"TRSocketIPsViewModel::ResolveIp(): myByte: {172}");
+                        break;
+                    case 192:
+                        _log.Log(consoleColor, $"TRSocketIPsViewModel::ResolveIp(): myByte: {192}");
+                        break;
+                    default:
+                        _log.Log(consoleColor, $"TRSocketIPsViewModel::ResolveIp(): myByte: {myAddressBytes[0]}");
+                        break;
+                }
+
+                foreach (byte myByte in myAddressBytes)
+                {
+                   //_log.Log(consoleColor, $"TRSocketIPsViewModel::ResolveIp(): myByte: {myByte}");
+                }
+                //_log.Log(consoleColor, $"TRSocketIPsViewModel::ResolveIp(): ipAddr: {ipAddr}");
             }
 
             IPAddress ip = null;
@@ -279,6 +310,7 @@ namespace Console_MVVMTesting.ViewModels
         #endregion ConnectCallback
 
 
+
         #region MyConnectAsync
         private async Task MyConnectAsync(EndPoint remoteEP, Socket terminalSocket)
         {
@@ -308,8 +340,8 @@ namespace Console_MVVMTesting.ViewModels
         #endregion MyConnectAsync
 
 
+
         #region ConnectToSocket
-        // method returns an error code
         public SocketException ConnectToSocket(Socket terminalSocket)
         {
             _log.Log(consoleColor, $"TRSocketIPsViewModel::ConnectToSocket(): socket: {terminalSocket.Handle}, " +
@@ -342,38 +374,39 @@ namespace Console_MVVMTesting.ViewModels
         #endregion ConnectToSocket
 
 
-        #region ConnectToHost
-        // method returns an error code
-        public SocketException ConnectToHost(string myHost)
-        {
-            _log.Log(consoleColor, $"TRSocketIPsViewModel::ConnectToHost(): myHost: {myHost}, " +
-                $"ThreadId: {Thread.CurrentThread.ManagedThreadId} : Start of method  ({this.GetHashCode():x8})");
 
-            Task MyTask = Task.Run(async () =>
-            {
-                int connectTry = 1;    // how many try to connect?
-                _ipAddress = ResolveIp(myHost);
-                EndPoint remoteEP = new IPEndPoint(_ipAddress, _connectionItem.Port);
-                do
-                {
-                    await this.MyConnectAsync(remoteEP);
-                    connectDone.WaitOne();
+        //#region ConnectToHost
+        //// method returns an error code
+        //public SocketException ConnectToHost(string myHost)
+        //{
+        //    _log.Log(consoleColor, $"TRSocketIPsViewModel::ConnectToHost(): myHost: {myHost}, " +
+        //        $"ThreadId: {Thread.CurrentThread.ManagedThreadId} : Start of method  ({this.GetHashCode():x8})");
 
-                    if (IsConnected() == false)
-                    {
-                        await Task.Delay(5000);
-                        connectTry--;
-                    }
-                } while ((IsConnected() == false) && (connectTry > 0));
+        //    Task MyTask = Task.Run(async () =>
+        //    {
+        //        int connectTry = 1;    // how many try to connect?
+        //        _ipAddress = ResolveIp(myHost);
+        //        EndPoint remoteEP = new IPEndPoint(_ipAddress, _connectionItem.Port);
+        //        do
+        //        {
+        //            await this.MyConnectAsync(remoteEP);
+        //            connectDone.WaitOne();
 
-                _log.Log(consoleColor, $"TRSocketIPsViewModel::ConnectToHost(): {terminalSocket.RemoteEndPoint} --> {terminalSocket.LocalEndPoint}");
-            });
-            MyTask.Wait();
+        //            if (IsConnected() == false)
+        //            {
+        //                await Task.Delay(5000);
+        //                connectTry--;
+        //            }
+        //        } while ((IsConnected() == false) && (connectTry > 0));
 
-            SocketException se = this.GetLastError();
-            return se;
-        }
-        #endregion ConnectToHost
+        //        _log.Log(consoleColor, $"TRSocketIPsViewModel::ConnectToHost(): {terminalSocket.RemoteEndPoint} --> {terminalSocket.LocalEndPoint}");
+        //    });
+        //    MyTask.Wait();
+
+        //    SocketException se = this.GetLastError();
+        //    return se;
+        //}
+        //#endregion ConnectToHost
 
 
         // To cancel a pending BeginReceive one can call the Close method.
