@@ -146,68 +146,41 @@ namespace Console_MVVMTesting.ViewModels
         #endregion Close
 
 
-        #region IsHostnameValid
-        /// <summary>
-        /// Checks hostname for invalid characters. 
-        /// Valid hostname characters are:
-        /// A-Z, a-z, 0-9, minus(-) and period(.)
-        /// 
-        /// See https://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address
-        /// </summary>
-        /// <param name="hostname"></param>
-        /// <returns></returns>
-        /// works in a new first-level Thread
-        private bool IsHostnameValid(string hostname)
-        {
-            //_log.Log(consoleColor, $"TRSocketViewModel::IsHostnameValid(): ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
-
-            bool valid = true;
-
-            string ValidIpAddressRegex = @"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$";
-            string ValidHostnameRegex = @"^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$";
-
-            Regex rgxIpAdress = new Regex(ValidIpAddressRegex);
-            Regex rgxHost = new Regex(ValidHostnameRegex);
-
-            valid = rgxIpAdress.IsMatch(hostname);
-            valid |= rgxHost.IsMatch(hostname);
-            if (valid)
-            {
-                if (Int32.TryParse(hostname, out int num))
-                    valid = false;
-            }
-            return valid;
-        }
-        #endregion IsHostnameValid
-
-
         #region ResolveIp
         private IPAddress ResolveIp(string host)
         {
-            //_log.Log(consoleColor, $"TRSocketViewModel::ResolveIp(): ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
-            IPAddress ip = null;
+            _log.Log(consoleColor, $"TRSocketViewModel::ResolveIp(): host: {host}, ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
 
-            if (IsHostnameValid(host))
+            // Resolve IP from hostname; Keep only IPv4 in IPs array
+            IPAddress[] IPs = Dns.GetHostEntry(host).AddressList.Where(x => x.AddressFamily == AddressFamily.InterNetwork).ToArray();
+            _log.Log(consoleColor, $"TRSocketViewModel::ResolveIp(): IPs.Length: {IPs.Length}");
+
+            foreach (IPAddress ipAddr in IPs)
             {
-                if (IPAddress.TryParse(host, out IPAddress ipAddress) == false)
+                _log.Log(consoleColor, $"TRSocketViewModel::ResolveIp(): ipAddr: {ipAddr}");
+            }
+
+            IPAddress ip = null;
+            bool rs = IPAddress.TryParse(host, out IPAddress ipAddress);
+            if (!rs)
+            {
+                foreach (IPAddress ipAddr in IPs)
                 {
-                    // Resolve IP from hostname
-                    IPAddress[] IPs = Dns.GetHostEntry(host).AddressList.Where(x => x.AddressFamily == AddressFamily.InterNetwork).ToArray(); // Keep only IPv4 in IPs array
-                    foreach (var ipAddr in IPs)
+                    if (ipAddr.ToString().StartsWith("169.254") == false) // Get rid of internal Windows IPs
                     {
-                        if (ipAddr.ToString().StartsWith("169.254") == false) // Get rid of internal Windows IPs
-                        {
-                            ip = ipAddr;
-                            break;
-                        }
-                    }
-                    if (ip is null)
-                    {
-                        ip = IPAddress.Parse(host);
+                        ip = ipAddr;
+                        break;
                     }
                 }
-                else
-                    ip = ipAddress;
+                if (ip is null)
+                {
+                    ip = IPAddress.Parse(host);
+                }
+            }
+            else
+            {
+                _log.Log(consoleColor, $"TRSocketViewModel::ResolveIp(): ipAddress: {ipAddress}");
+                ip = ipAddress;
             }
 
             return ip;
@@ -361,19 +334,6 @@ namespace Console_MVVMTesting.ViewModels
 
             SocketException se = this.GetLastError(terminalSocket);
             return se;
-
-            //if (se == null)
-            //{
-            //    _log.Log(consoleColor, $"TRSocketViewModel::ConnectToSocket():  ThreadId: {Thread.CurrentThread.ManagedThreadId} : End of method");
-            //    return 0;
-            //}
-            //else
-            //{
-            //    _log.Log(consoleColor, $"TRSocketViewModel::ConnectToSocket():  NativeErrorCode: {se.NativeErrorCode}, ThreadId: {Thread.CurrentThread.ManagedThreadId} : End of method");
-            //}
-
-            //return IsConnected(terminalSocket);
-            //return se.NativeErrorCode;
         }
         #endregion ConnectToSocket
 
@@ -723,7 +683,7 @@ namespace Console_MVVMTesting.ViewModels
                 }
                 if (se != null)
                 {
-                    Tuple<int, string> myTuple = new Tuple<int, string>(se.NativeErrorCode, se.Message);   
+                    Tuple<int, string> myTuple = new Tuple<int, string>(se.NativeErrorCode, se.Message);
                     MyInitSocketDict.Add(myAvailableSocket.Handle, myTuple);
                     trssm.SocketInitDict = MyInitSocketDict;
                 }
@@ -1739,7 +1699,7 @@ namespace Console_MVVMTesting.ViewModels
             _connectionItem.Host = _connectionItem_Host;
 
             _ipAddress = new IPAddress(0);
-            commandQueue = new ConcurrentQueue<string>();
+            //commandQueue = new ConcurrentQueue<string>();
 
 
             _messenger.Register<TRSocketViewModel, TRSocketInitRequestMessage>(this, (myReceiver, myMessenger) =>
