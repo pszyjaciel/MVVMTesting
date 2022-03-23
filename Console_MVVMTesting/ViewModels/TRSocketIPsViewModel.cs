@@ -36,9 +36,13 @@ namespace Console_MVVMTesting.ViewModels
         private const string consoleColor = "DGREEN";
 
         public ConnectionItem _connectionItem;
-        private const string _connectionItem_Name = "TR-connection";
-        private const int _connectionItem_Port = 42022;
-        private const string _connectionItem_Host = "127.0.0.1";
+        private const int _connectionItem_Port1 = 42022;
+        private const int _connectionItem_Port2 = 42022;
+        private const string _connectionItem_Name1 = "TR1";
+        private const string _connectionItem_Name2 = "TR2";
+        //private const string _connectionItem_Host = "127.0.0.1";
+        private const string _connectionItem_Host1 = "10.239.27.140";
+        private const string _connectionItem_Host2 = "10.239.27.141";
 
         private int _mySocketNativeErrorCode;
         //Dictionary<IntPtr, int> _mySocketErrorDict = new Dictionary<IntPtr, int>();
@@ -337,6 +341,39 @@ namespace Console_MVVMTesting.ViewModels
         }
         #endregion ConnectToSocket
 
+
+        #region ConnectToHost
+        // method returns an error code
+        public SocketException ConnectToHost(string myHost)
+        {
+            _log.Log(consoleColor, $"TRSocketIPsViewModel::ConnectToHost(): myHost: {myHost}, " +
+                $"ThreadId: {Thread.CurrentThread.ManagedThreadId} : Start of method  ({this.GetHashCode():x8})");
+
+            Task MyTask = Task.Run(async () =>
+            {
+                int connectTry = 1;    // how many try to connect?
+                _ipAddress = ResolveIp(myHost);
+                EndPoint remoteEP = new IPEndPoint(_ipAddress, _connectionItem.Port);
+                do
+                {
+                    await this.MyConnectAsync(remoteEP);
+                    connectDone.WaitOne();
+
+                    if (IsConnected() == false)
+                    {
+                        await Task.Delay(5000);
+                        connectTry--;
+                    }
+                } while ((IsConnected() == false) && (connectTry > 0));
+
+                _log.Log(consoleColor, $"TRSocketIPsViewModel::ConnectToHost(): {terminalSocket.RemoteEndPoint} --> {terminalSocket.LocalEndPoint}");
+            });
+            MyTask.Wait();
+
+            SocketException se = this.GetLastError();
+            return se;
+        }
+        #endregion ConnectToHost
 
 
         // To cancel a pending BeginReceive one can call the Close method.
@@ -1694,9 +1731,9 @@ namespace Console_MVVMTesting.ViewModels
             _messenger = messenger;
 
             _connectionItem = new ConnectionItem();
-            _connectionItem.Name = _connectionItem_Name;
-            _connectionItem.Port = _connectionItem_Port;
-            _connectionItem.Host = _connectionItem_Host;
+            _connectionItem.Name = _connectionItem_Name1;
+            _connectionItem.Port = _connectionItem_Port1;
+            _connectionItem.Host = _connectionItem_Host1;
 
             _ipAddress = new IPAddress(0);
             //commandQueue = new ConcurrentQueue<string>();
