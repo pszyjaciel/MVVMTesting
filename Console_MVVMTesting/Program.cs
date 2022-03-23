@@ -84,11 +84,15 @@ namespace Console_MVVMTesting
             services.AddTransient<EastTesterPage>();
             services.AddSingleton<EastTesterViewModel>();
 
-            services.AddTransient<LCSocketPage>();
-            services.AddSingleton<LCSocketViewModel>();
-
             services.AddTransient<TRSocketPage>();
-            services.AddSingleton<TRSocketViewModel>();
+            //services.AddSingleton<TRSocketViewModel>();
+            services.AddSingleton<TRSocketIPsViewModel>();
+
+
+            //services.AddTransient<LCSocketPage>();
+            //services.AddSingleton<LCSocketViewModel>();
+
+
 
             MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
                 $"Program::ConfigureServices(): end of method" +

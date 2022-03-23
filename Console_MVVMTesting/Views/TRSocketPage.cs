@@ -8,7 +8,8 @@ namespace Console_MVVMTesting.Views
 {
     internal class TRSocketPage : MyPage
     {
-        public TRSocketViewModel XamlTRSocketViewModel { get; private set; }
+        //public TRSocketViewModel XamlTRSocketViewModel { get; private set; }
+        public TRSocketIPsViewModel XamlTRSocketViewModel { get; private set; }
         
 
         public TRSocketPage()
@@ -17,7 +18,7 @@ namespace Console_MVVMTesting.Views
               $"TRSocketPage::TRSocketPage() " +
               $"({this.GetHashCode():x8})");
 
-            XamlTRSocketViewModel = Ioc.Default.GetService<TRSocketViewModel>();
+            XamlTRSocketViewModel = Ioc.Default.GetService<TRSocketIPsViewModel>();
             
         }
     }
