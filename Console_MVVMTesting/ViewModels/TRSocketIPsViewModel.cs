@@ -37,7 +37,7 @@ namespace Console_MVVMTesting.ViewModels
 
         //public ConnectionItem _connectionItem;
         private List<ConnectionItem> _connectionItems;
-        private List<Tuple<Socket, IPAddress>> _connectionItemList;
+        private List<Tuple<Socket, IPAddress, int>> _connectionItemList;
 
         private int _mySocketNativeErrorCode;
         //Dictionary<IntPtr, int> _mySocketErrorDict = new Dictionary<IntPtr, int>();
@@ -340,32 +340,35 @@ namespace Console_MVVMTesting.ViewModels
 
         #region ConnectToHost
         // method returns an error code
-        public SocketException ConnectToHost(IPAddress _ipAddress, Socket terminalSocket)
+
+        
+        //public SocketException ConnectToHost(IPAddress _ipAddress, Socket terminalSocket)
+        public SocketException ConnectToHost(Tuple<Socket, IPAddress, int> myTuple)
         {
-            _log.Log(consoleColor, $"TRSocketViewModel::ConnectToHost(): socket: {terminalSocket.Handle}, " +
+            _log.Log(consoleColor, $"TRSocketIPsViewModel::ConnectToHost(): socket: {myTuple.Item1.Handle}, " +
                 $"ThreadId: {Thread.CurrentThread.ManagedThreadId} : Start of method  ({this.GetHashCode():x8})");
 
             Task MyTask = Task.Run(async () =>
             {
                 int connectTry = 2;    // how many try to connect?
-                EndPoint remoteEP = new IPEndPoint(_ipAddress, _connectionItems[0].Port);
+                EndPoint remoteEP = new IPEndPoint(myTuple.Item2, myTuple.Item3);
                 do
                 {
-                    await this.MyConnectAsync(remoteEP, terminalSocket);
+                    await this.MyConnectAsync(remoteEP, myTuple.Item1);
                     connectDone.WaitOne(1000, true);
 
-                    if (terminalSocket.Connected == false)
+                    if (myTuple.Item1.Connected == false)
                     {
                         await Task.Delay(5000);
                         connectTry--;
                     }
-                } while ((terminalSocket.Connected == false) && (connectTry > 0));
+                } while ((myTuple.Item1.Connected == false) && (connectTry > 0));
 
-                _log.Log(consoleColor, $"TRSocketViewModel::ConnectToHost(): {terminalSocket.RemoteEndPoint} --> {terminalSocket.LocalEndPoint}");
+                _log.Log(consoleColor, $"TRSocketIPsViewModel::ConnectToHost(): {myTuple.Item1.RemoteEndPoint} --> {myTuple.Item1.LocalEndPoint}");
             });
             MyTask.Wait();
 
-            SocketException se = this.GetLastError(terminalSocket);
+            SocketException se = this.GetLastError(myTuple.Item1);
             return se;
         }
         #endregion ConnectToHost
@@ -723,36 +726,39 @@ namespace Console_MVVMTesting.ViewModels
         {
             _log.Log(consoleColor, $"TRSocketIPsViewModel::TRSocketInitAsync(): Start of method  ({this.GetHashCode():x8})");
 
-            _connectionItemList = new List<Tuple<Socket, IPAddress>>();
+            _connectionItemList = new List<Tuple<Socket, IPAddress, int>>();
             TRSocketStateMessage trssm = new TRSocketStateMessage { MyStateName = "TRSocketInitAsync" };
             
             bool rs;
-            IPAddress ipAddress = null;
-            Socket mySocket = null;
+            Socket mySocket;
             LingerOption lingerOption = new LingerOption(true, 5);
             foreach (ConnectionItem ci in _connectionItems)
             {
-                rs = IPAddress.TryParse(ci.Host, out ipAddress);
+                rs = IPAddress.TryParse(ci.Host, out IPAddress ipAddress);
                 _log.Log(consoleColor, $"TRSocketIPsViewModel::TRSocketInitAsync(): rs: {rs}");
                 if (!rs)
                     return trssm;
 
-                mySocket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                mySocket.SendTimeout = 500;
-                mySocket.ReceiveTimeout = 1000;
+                mySocket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp)
+                {
+                    SendTimeout = 500,
+                    ReceiveTimeout = 1000
+                };
                 mySocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Linger, lingerOption);
 
-                _connectionItemList.Add(new Tuple<Socket, IPAddress>(mySocket, ipAddress));
+                _connectionItemList.Add(new Tuple<Socket, IPAddress, int>(mySocket, ipAddress, ci.Port));
             }
+            _log.Log(consoleColor, $"TRSocketIPsViewModel::TRSocketInitAsync(): _connectionItemList.Count: {_connectionItemList.Count}");
+
 
             _myListOfSockets = new List<Socket>();
             Dictionary<IntPtr, Tuple<int, string>> MyInitSocketDict = new();
             SocketException se = null;
-            foreach (Tuple<Socket, IPAddress> myConnectionItem in _connectionItemList)
+            foreach (Tuple<Socket, IPAddress, int> myConnectionItem in _connectionItemList)
             {
                 if (!myConnectionItem.Item1.Connected)
                 {
-                    se = this.ConnectToHost(myConnectionItem.Item2, myConnectionItem.Item1);
+                    se = this.ConnectToHost(myConnectionItem);
                 }
                 if (se != null)
                 {
@@ -766,8 +772,7 @@ namespace Console_MVVMTesting.ViewModels
                     string response = this.ReceiveFromSocket(myConnectionItem.Item1);
                     _log.Log(consoleColor, $"TRSocketIPsViewModel::TRSocketInitAsync(): Socket {myConnectionItem.Item1.Handle} with address {myConnectionItem.Item1.RemoteEndPoint} got response: {response}");
                     _myListOfSockets.Add(myConnectionItem.Item1);
-                    Tuple<int, string> myTuple = new Tuple<int, string>(0, response);   // error_code is 0 in return
-                    MyInitSocketDict.Add(myConnectionItem.Item1.Handle, myTuple);
+                    MyInitSocketDict.Add(myConnectionItem.Item1.Handle, new Tuple<int, string>(0, response));   // error_code is 0 in return
                     trssm.SocketInitDict = MyInitSocketDict;
                 }
             }
@@ -1751,7 +1756,7 @@ namespace Console_MVVMTesting.ViewModels
             ConnectionItem _connectionItem2 = new ConnectionItem { Name = "TR2", Port = 42022, Host = "10.239.27.141" };
             _connectionItems.Add(_connectionItem2);
             ConnectionItem _connectionItem3 = new ConnectionItem { Name = "TR3", Port = 42022, Host = "10.239.27.142" };
-            _connectionItems.Add(_connectionItem3);
+            //_connectionItems.Add(_connectionItem3);
             ConnectionItem _connectionItem4 = new ConnectionItem { Name = "TR4", Port = 42022, Host = "10.239.27.143" };
             //_connectionItems.Add(_connectionItem4);
 

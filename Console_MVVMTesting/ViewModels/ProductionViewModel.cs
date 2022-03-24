@@ -82,16 +82,16 @@ namespace Console_MVVMTesting.ViewModels
             }
 
             //result = await this.CheckBatteryStatusAndAlarmsTaskAsync();
-            //if (!result)
-            //{
-            //    return;
-            //}
+            if (!result)
+            {
+                return;
+            }
 
-            //result = await this.CheckPowerSupplyTaskAsync();
-            //if (!result)
-            //{
-            //    return;
-            //}
+            result = await this.CheckPowerSupplyTaskAsync();
+            if (!result)
+            {
+                return;
+            }
 
 
             await Task.Delay(1000);
@@ -151,7 +151,7 @@ namespace Console_MVVMTesting.ViewModels
         }
 
 
-
+        // wywala
         private async Task<bool> CheckBatteryStatusAndAlarmsTaskAsync()
         {
             _log.Log(consoleColor, "ProductionViewModel::CheckBatteryStatusAndAlarmsTaskAsync(): Start of Task");
