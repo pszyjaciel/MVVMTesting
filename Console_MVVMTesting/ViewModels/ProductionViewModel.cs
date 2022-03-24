@@ -81,17 +81,17 @@ namespace Console_MVVMTesting.ViewModels
                 return;
             }
 
-            result = await this.CheckBatteryStatusAndAlarmsTaskAsync();
-            if (!result)
-            {
-                return;
-            }
+            //result = await this.CheckBatteryStatusAndAlarmsTaskAsync();
+            //if (!result)
+            //{
+            //    return;
+            //}
 
-            result = await this.CheckPowerSupplyTaskAsync();
-            if (!result)
-            {
-                return;
-            }
+            //result = await this.CheckPowerSupplyTaskAsync();
+            //if (!result)
+            //{
+            //    return;
+            //}
 
 
             await Task.Delay(1000);
