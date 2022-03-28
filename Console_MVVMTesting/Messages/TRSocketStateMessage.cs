@@ -130,7 +130,8 @@ namespace Console_MVVMTesting.Messages
         public Dictionary<IntPtr, Tuple<int, string>> SocketInitDict { get; set; }     // socket_handle, error_code, error_description
         //public Dictionary<IntPtr, Tuple<SafetyAlertEnum, SafetyStatusEnum, PFAlertEnum, PFStatusEnum>> BatteryStatusAndAlarmsDict { get; set; }
         //public Dictionary<IntPtr, Tuple<BatteryMode, BatteryStatus, SafetyAlertEnum, SafetyStatusEnum, PFAlertEnum, PFStatusEnum>> BatteryStatusAndAlarmsDict { get; set; }
-        public Dictionary<IntPtr, Tuple<UInt16, UInt16, UInt32, UInt32, UInt16, UInt32>> BatteryStatusAndAlarmsDict { get; set; }
+        public Dictionary<IntPtr, Tuple<UInt16, UInt16>> BatteryStatusDict { get; set; }
+        public Dictionary<IntPtr, Tuple<UInt32, UInt32, UInt16, UInt32>> BatteryAlarmsDict { get; set; }
 
 
         public TRSocketStateMessage(string myStateName, TRStatus trs)
@@ -143,34 +144,31 @@ namespace Console_MVVMTesting.Messages
 
         public TRSocketStateMessage(string myStateName)
         {
-            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
-              $"MyUser::MyUser(1) " +
-              $"({this.GetHashCode():x8})");
-
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}]  ({this.GetHashCode():x8})");
             MyStateName = myStateName;
         }
 
         public TRSocketStateMessage()
         {
-            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
-              $"MyUser::MyUser(2) " +
-              $"({this.GetHashCode():x8})");
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}]  ({this.GetHashCode():x8})");
         }
 
-        //public TRStatus Response()
-        //{
-        //    MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] MyStateMessage::Response()  ({this.GetHashCode():x8})");
-        //    return lcStatus;
-        //}
 
     }
 
-
-    internal class CheckBatteryStatusAndAlarmsRequestMessage : AsyncRequestMessage<TRSocketStateMessage>
+    internal class CheckBatteryStatusRequestMessage : AsyncRequestMessage<TRSocketStateMessage>
     {
-        public CheckBatteryStatusAndAlarmsRequestMessage()
+        public CheckBatteryStatusRequestMessage()
         {
-            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] CheckBatteryStatusAndAlarmsRequestMessage::CheckBatteryStatusAndAlarmsRequestMessage()  ({this.GetHashCode():x8})");
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] CheckBatteryStatusRequestMessage::CheckBatteryStatusRequestMessage()  ({this.GetHashCode():x8})");
+        }
+    }
+
+    internal class CheckBatteryAlarmsRequestMessage : AsyncRequestMessage<TRSocketStateMessage>
+    {
+        public CheckBatteryAlarmsRequestMessage()
+        {
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] CheckBatteryAlarmsRequestMessage::CheckBatteryAlarmsRequestMessage()  ({this.GetHashCode():x8})");
         }
     }
 

@@ -31,18 +31,13 @@ namespace Console_MVVMTesting.Messages
 
         public EastTesterStateMessage(string myStateName)
         {
-            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
-              $"MyUser::MyUser(1) " +
-              $"({this.GetHashCode():x8})");
-
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}]  ({this.GetHashCode():x8})");
             MyStateName = myStateName;
         }
 
         public EastTesterStateMessage()
         {
-            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
-              $"MyUser::MyUser(2) " +
-              $"({this.GetHashCode():x8})");
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}]  ({this.GetHashCode():x8})");
         }
 
         public ETStatus Response()
