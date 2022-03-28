@@ -12,7 +12,7 @@ namespace Console_MVVMTesting.Models
         private const string consoleColor = "LEMON";
 
         #region Property Name
-        public const string NamePropertyName = "Name";  // nazwa do poprawy
+        public const string NameProperty = "Name";  // nazwa do poprawy
         /// <summary>
         /// Free text name of connection
         /// </summary>
@@ -25,7 +25,7 @@ namespace Console_MVVMTesting.Models
                 if (value != _name)
                 {
                     _name = value;
-                    OnPropertyChanged(NamePropertyName);
+                    OnPropertyChanged(NameProperty);
 
                     //TerminalHeaderText = GetFormatedTerminalHeaderText();
                     //HelpHeaderText = GetFormatedHelpHeaderText();
@@ -40,7 +40,7 @@ namespace Console_MVVMTesting.Models
 
 
         #region Property Host
-        public const string PropertyNameHost = "Host";
+        public const string HostProperty = "Host";
         /// <summary>
         /// Host is either IpAddress or hostname
         /// </summary>
@@ -53,7 +53,7 @@ namespace Console_MVVMTesting.Models
                 if (value != _host)
                 {
                     _host = value;
-                    OnPropertyChanged(PropertyNameHost);
+                    OnPropertyChanged(HostProperty);
                     //TerminalHeaderText = GetFormatedTerminalHeaderText();
                     //HelpHeaderText = GetFormatedHelpHeaderText();
                 }
@@ -64,7 +64,7 @@ namespace Console_MVVMTesting.Models
 
 
         #region Property Port
-        public const string PortPropertyName = "Port";
+        public const string PortProperty = "Port";
         /// <summary>
         /// Port is the port number 0..65535
         /// </summary>
@@ -77,9 +77,7 @@ namespace Console_MVVMTesting.Models
                 if (value != _port)
                 {
                     _port = value;
-                    OnPropertyChanged(PortPropertyName);
-                    //TerminalHeaderText = GetFormatedTerminalHeaderText();
-                    //HelpHeaderText = GetFormatedHelpHeaderText();
+                    OnPropertyChanged(PortProperty);
                 }
             }
         }
@@ -89,7 +87,7 @@ namespace Console_MVVMTesting.Models
         
 
         #region Property Pinned
-        public const string PinnedPropertyName = "Pinned";
+        public const string PinnedProperty = "Pinned";
         /// <summary>
         /// Pinned means show as default
         /// </summary>
@@ -102,7 +100,7 @@ namespace Console_MVVMTesting.Models
                 if (value != _pinned)
                 {
                     _pinned = value;
-                    OnPropertyChanged(PinnedPropertyName);
+                    OnPropertyChanged(PinnedProperty);
                 }
             }
         }
@@ -113,7 +111,7 @@ namespace Console_MVVMTesting.Models
         
 
         #region Property ConnectTime
-        public const string ConnectTimePropertyName = "ConnectTime";
+        public const string ConnectTimeProperty = "ConnectTime";
         /// <summary>
         /// Timestamp of last connect
         /// </summary>
@@ -126,7 +124,7 @@ namespace Console_MVVMTesting.Models
                 if (value != _connectTime)
                 {
                     _connectTime = value;
-                    OnPropertyChanged(ConnectTimePropertyName);
+                    OnPropertyChanged(ConnectTimeProperty);
                 }
             }
         }
@@ -153,7 +151,7 @@ namespace Console_MVVMTesting.Models
 
 
 
-
+        #region Constructor
         public ConnectionItem()
         {
             MyUtils.MyConsoleWriteLine(consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
@@ -168,5 +166,6 @@ namespace Console_MVVMTesting.Models
             HelpSearches = new List<string>();
             TerminalCommands = new ObservableCollection<string>();
         }
+        #endregion Constructor
     }
 }
