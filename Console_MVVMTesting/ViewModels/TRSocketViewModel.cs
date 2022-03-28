@@ -1678,9 +1678,9 @@ namespace Console_MVVMTesting.ViewModels
                 batteryStatusAndAlarmsDict.Add(terminalSocket.Handle, MyTuple);
             }
 
-            trssm.BatteryStatusAndAlarmsDict = batteryStatusAndAlarmsDict;
+            //trssm.BatteryStatusAndAlarmsDict = batteryStatusAndAlarmsDict;
             _log.Log(consoleColor, $"TRSocketViewModel::CheckBatteryStatusAndAlarmsCommand(): End of method  ({this.GetHashCode():x8})");
-            return trssm;
+            return new();
         }
 
 
@@ -1719,10 +1719,10 @@ namespace Console_MVVMTesting.ViewModels
             });
 
 
-            _messenger.Register<TRSocketViewModel, CheckBatteryStatusAndAlarmsRequestMessage>(this, (myReceiver, myMessenger) =>
-            {
-                myMessenger.Reply(myReceiver.CheckBatteryStatusAndAlarmsCommand());
-            });
+            //_messenger.Register<TRSocketViewModel, CheckBatteryStatusAndAlarmsRequestMessage>(this, (myReceiver, myMessenger) =>
+            //{
+            //    myMessenger.Reply(myReceiver.CheckBatteryStatusAndAlarmsCommand());
+            //});
 
 
 

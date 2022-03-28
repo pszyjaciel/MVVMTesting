@@ -56,10 +56,10 @@ namespace Console_MVVMTesting.ViewModels
 
 
 
-        public MyUser GetCurrentUserAsync()
-        {
-            return new MyUser("from ProductionViewModel(): huj w dupe i kula wuep jebanemu putinowi");
-        }
+        //public MyUser GetCurrentUserAsync()
+        //{
+        //    return new MyUser("from ProductionViewModel(): huj w dupe i kula wuep jebanemu putinowi");
+        //}
 
 
         private async Task OnStartButtonExecute()
@@ -81,17 +81,22 @@ namespace Console_MVVMTesting.ViewModels
                 return;
             }
 
-            // na razie wywala
-            //result = await this.CheckBatteryStatusAndAlarmsTaskAsync();
-            //if (!result)
-            //{
-            //    return;
-            //}
+            result = await this.CheckBatteryStatusTaskAsync();
+            if (!result)
+            {
+                //return;
+            }
+
+            result = await this.CheckBatteryAlarmsTaskAsync();
+            if (!result)
+            {
+                //return;
+            }
 
             result = await this.CheckPowerSupplyTaskAsync();
             if (!result)
             {
-                return;
+                //return;
             }
 
 
@@ -129,17 +134,14 @@ namespace Console_MVVMTesting.ViewModels
             //}
 
 
-
-
             _log.Log(consoleColor, $"ProductionViewModel::OnStartButtonExecute(): End of method.");
-            _log.Log(consoleColor, $"ProductionViewModel::OnStartButtonExecute(): Now press [Enter].");
         }
 
 
 
         private async Task<bool> InitLoadsTaskAsync()
         {
-            _log.Log(consoleColor, "ProductionViewModel::InitLoadsTaskAsync(): Start of method");
+            _log.Log(consoleColor, "ProductionViewModel::InitLoadsTaskAsync(): Start of Task");
             bool rs;
 
             // Run load-init in the EastTesterViewModule and request result
@@ -156,7 +158,7 @@ namespace Console_MVVMTesting.ViewModels
                 rs = true;
             }
 
-            _log.Log(consoleColor, "ProductionViewModel::InitLoadsTaskAsync(): End of method");
+            _log.Log(consoleColor, "ProductionViewModel::InitLoadsTaskAsync(): End of Task");
             return rs;
         }
 
@@ -165,44 +167,75 @@ namespace Console_MVVMTesting.ViewModels
         {
             _log.Log(consoleColor, "ProductionViewModel::InitSocketsTaskAsync(): Start of Task");
             bool rs = true;
+
             // Run init of sockets in the LCSocketViewModule and request result
             TRSocketStateMessage trmsm = await _messenger.Send<TRSocketInitRequestMessage>();
             foreach (KeyValuePair<IntPtr, Tuple<int, string>> entry in trmsm.SocketInitDict)
             {
                 _log.Log(consoleColor, $"ProductionViewModel::InitSocketsTaskAsync(): socket {entry.Key}: {entry.Value}");
-                if (entry.Value.Item1 != 0)
-                {
-                    rs = false;
-                }
+                if (entry.Value.Item1 != 0) { rs = false; }
+                else { rs = true; }
             }
             _log.Log(consoleColor, "ProductionViewModel::InitSocketsTaskAsync(): End of Task");
             return rs;
         }
 
 
-        // wywala, ano..
-        private async Task<bool> CheckBatteryStatusAndAlarmsTaskAsync()
+        private async Task<bool> CheckBatteryStatusTaskAsync()
         {
-            _log.Log(consoleColor, "ProductionViewModel::CheckBatteryStatusAndAlarmsTaskAsync(): Start of Task");
+            _log.Log(consoleColor, "ProductionViewModel::CheckBatteryStatusTaskAsync(): Start of Task");
             bool rs = false;
-            TRSocketStateMessage trmsm = await _messenger.Send<CheckBatteryStatusAndAlarmsRequestMessage>();
-            _log.Log(consoleColor, $"ProductionViewModel::CheckBatteryStatusAndAlarmsTaskAsync(): trmsm.MySocket.Keys.Count: {trmsm.BatteryStatusAndAlarmsDict.Keys.Count}");
-            if (trmsm.BatteryStatusAndAlarmsDict.Keys.Count > 0)
+            TRSocketStateMessage trmsm = await _messenger.Send<CheckBatteryStatusRequestMessage>();
+            _log.Log(consoleColor, $"ProductionViewModel::CheckBatteryStatusTaskAsync(): trmsm.MySocket.Keys.Count: {trmsm.BatteryStatusDict.Keys.Count}");
+            if (trmsm.BatteryStatusDict.Keys.Count > 0)
             {
-                //BatteryMode, BatteryStatus, SafetyAlertEnum, SafetyStatusEnum, PFAlertEnum, PFStatusEnum
-                foreach (KeyValuePair<IntPtr, Tuple<UInt16, UInt16, UInt32, UInt32, UInt16, UInt32>> entry in trmsm.BatteryStatusAndAlarmsDict)
+                //BatteryMode, BatteryStatus
+                foreach (KeyValuePair<IntPtr, Tuple<UInt16, UInt16>> entry in trmsm.BatteryStatusDict)
                 {
-                    //_log.Log(consoleColor, $"ProductionViewModel::CheckBatteryStatusAndAlarmsTaskAsync(): socket {entry.Key}: {entry.Value}");
-                    _log.Log(consoleColor, $"ProductionViewModel::CheckBatteryStatusAndAlarmsTaskAsync(): " +
-                        $"socket {entry.Key}: {entry.Value.Item1}, {entry.Value.Item2}, {entry.Value.Item3}, {entry.Value.Item4}, {entry.Value.Item5}, {entry.Value.Item6}");
+                    _log.Log(consoleColor, $"ProductionViewModel::CheckBatteryStatusTaskAsync(): " +
+                        $"socket {entry.Key}: {entry.Value.Item1}, {entry.Value.Item2}");
 
-                    if ((entry.Value.Item2 == 0) && (entry.Value.Item3 == 0) && (entry.Value.Item4 == 0) && (entry.Value.Item5 == 0) && (entry.Value.Item6 == 0))
+                    //if ((entry.Value.Item1 == 0) && (entry.Value.Item2 == 0))
+                    if (entry.Value.Item2 == 0)
                     {
                         rs = true;
                     }
+                    else
+                    {
+                        //this.ParseBatteryStatus();
+                    }
                 }
             }
-            _log.Log(consoleColor, "ProductionViewModel::CheckBatteryStatusAndAlarmsTaskAsync(): End of Task");
+            _log.Log(consoleColor, "ProductionViewModel::CheckBatteryStatusTaskAsync(): End of Task");
+            return false;
+        }
+
+
+        private async Task<bool> CheckBatteryAlarmsTaskAsync()
+        {
+            _log.Log(consoleColor, "ProductionViewModel::CheckBatteryAlarmsTaskAsync(): Start of Task");
+            bool rs = false;
+            TRSocketStateMessage trmsm = await _messenger.Send<CheckBatteryAlarmsRequestMessage>();
+            _log.Log(consoleColor, $"ProductionViewModel::CheckBatteryAlarmsTaskAsync(): trmsm.MySocket.Keys.Count: {trmsm.BatteryAlarmsDict.Keys.Count}");
+            if (trmsm.BatteryAlarmsDict.Keys.Count > 0)
+            {
+                //SafetyAlertEnum, SafetyStatusEnum, PFAlertEnum, PFStatusEnum
+                foreach (KeyValuePair<IntPtr, Tuple<UInt32, UInt32, UInt16, UInt32>> entry in trmsm.BatteryAlarmsDict)
+                {
+                    _log.Log(consoleColor, $"ProductionViewModel::CheckBatteryAlarmsTaskAsync(): " +
+                        $"socket {entry.Key}: {entry.Value.Item1}, {entry.Value.Item2}, {entry.Value.Item3}, {entry.Value.Item4}");
+
+                    if ((entry.Value.Item1 == 0) && (entry.Value.Item2 == 0) && (entry.Value.Item3 == 0) && (entry.Value.Item4 == 0))
+                    {
+                        rs = true;
+                    }
+                    else
+                    {
+                        //this.ParseBatteryAlarms();
+                    }
+                }
+            }
+            _log.Log(consoleColor, "ProductionViewModel::CheckBatteryAlarmsTaskAsync(): End of Task");
             return rs;
         }
 
@@ -260,24 +293,6 @@ namespace Console_MVVMTesting.ViewModels
 
             //_messenger.Send(new LCCloseMessage());
             //_log.Log($"ProductionViewModel::ProductionViewModel(): LCCloseMessage()  ({GetHashCode():x8})");
-
-
-            // request value from LCSocketViewModel
-            //MyUser myUser = _messenger.Send<LoggedInUserRequestMessage>();
-            //_log.Log(consoleColor, $"ProductionViewModel::ProductionViewModel(): myUser._myName: {myUser.MyUserName}");
-
-
-            // Register a message in some module
-            _messenger.Register<LoggedInUserChangedMessage>(this, (r, m) =>
-            {
-                // Handle the message here, with r being the recipient and m being the
-                // input messenger. Using the recipient passed as input makes it so that
-                // the lambda expression doesn't capture "this", improving performance.
-
-                _log.Log(consoleColor, $"ProductionViewModel::ProductionViewModel():  r.GetType(): { r.GetType()}; m.Value: {m.Value}");
-
-            });
-
 
 
 
