@@ -81,11 +81,12 @@ namespace Console_MVVMTesting.ViewModels
                 return;
             }
 
+            // na razie wywala
             //result = await this.CheckBatteryStatusAndAlarmsTaskAsync();
-            if (!result)
-            {
-                return;
-            }
+            //if (!result)
+            //{
+            //    return;
+            //}
 
             result = await this.CheckPowerSupplyTaskAsync();
             if (!result)
@@ -94,13 +95,41 @@ namespace Console_MVVMTesting.ViewModels
             }
 
 
-            await Task.Delay(1000);
+            await Task.Delay(1500);
 
-            result = this.ShutdownTaskAsync();
+            result = await this.ShutdownTaskAsync();
             if (!result)
             {
                 return;
             }
+
+
+
+            // init sockets one more time 
+            //await Task.Delay(2000);
+
+            //result = await this.InitSocketsTaskAsync();
+            //if (!result)
+            //{
+            //    return;
+            //}
+
+            //result = await this.CheckPowerSupplyTaskAsync();
+            //if (!result)
+            //{
+            //    return;
+            //}
+
+            //await Task.Delay(1000);
+
+            //result = await this.ShutdownTaskAsync();
+            //if (!result)
+            //{
+            //    return;
+            //}
+
+
+
 
             _log.Log(consoleColor, $"ProductionViewModel::OnStartButtonExecute(): End of method.");
             _log.Log(consoleColor, $"ProductionViewModel::OnStartButtonExecute(): Now press [Enter].");
@@ -151,7 +180,7 @@ namespace Console_MVVMTesting.ViewModels
         }
 
 
-        // wywala
+        // wywala, ano..
         private async Task<bool> CheckBatteryStatusAndAlarmsTaskAsync()
         {
             _log.Log(consoleColor, "ProductionViewModel::CheckBatteryStatusAndAlarmsTaskAsync(): Start of Task");
@@ -197,14 +226,14 @@ namespace Console_MVVMTesting.ViewModels
         }
 
 
-        private bool ShutdownTaskAsync()
+        private async Task<bool> ShutdownTaskAsync()
         {
             // shutdown for loads
             EastTesterStateMessage etsm = _messenger.Send<EastTesterShutdownRequestMessage>();
             _log.Log(consoleColor, $"ProductionViewModel::IsShuttingDown.set: etsm.ETErrorNumber: {etsm.ETErrorNumber}");
 
             // shutdown for sockets
-            TRSocketStateMessage trssm = _messenger.Send<TRShutdownRequestMessage>();
+            TRSocketStateMessage trssm = await _messenger.Send<TRShutdownRequestMessage>();
             _log.Log(consoleColor, $"ProductionViewModel::IsShuttingDown.set: trssm.TRErrorNumber: {trssm.TRErrorNumber}");
 
             return true;

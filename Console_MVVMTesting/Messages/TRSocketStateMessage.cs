@@ -192,7 +192,7 @@ namespace Console_MVVMTesting.Messages
     }
 
 
-    internal class TRShutdownRequestMessage : RequestMessage<TRSocketStateMessage>
+    internal class TRShutdownRequestMessage : AsyncRequestMessage<TRSocketStateMessage>
     {
         public TRShutdownRequestMessage()
         {
