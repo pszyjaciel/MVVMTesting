@@ -122,9 +122,9 @@ namespace Console_MVVMTesting.ViewModels
 
             Task.Delay(2300);
 
-            MyUser myUser = new MyUser { MyUserName = "EastTesterUserName" };
+            //MyUser myUser = new MyUser { MyUserName = "EastTesterUserName" };
             // Send a message from some other module
-            _messenger.Send(new LoggedInUserChangedMessage(myUser));
+            //_messenger.Send(new LoggedInUserChangedMessage(myUser));
             myWait.WaitOne();
 
             _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): _messenger.Send(new LoggedInUserChangedMessage(myUser))");
