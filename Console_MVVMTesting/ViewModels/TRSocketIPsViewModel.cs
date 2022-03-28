@@ -717,6 +717,7 @@ namespace Console_MVVMTesting.ViewModels
         #endregion RunTRShutdownCommand
 
 
+        #region TRSocketInitAsync
         #region RunTRInitCommandMessage
         ///////////// INITIALIZING SOCKETS /////////////////
         // async doesn't work well with Parallel.ForEach: https://stackoverflow.com/a/23139769/7036047
