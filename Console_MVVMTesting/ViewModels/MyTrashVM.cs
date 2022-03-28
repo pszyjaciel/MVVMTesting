@@ -12,6 +12,23 @@ namespace Console_MVVMTesting.ViewModels
 }
 
 
+
+
+//private void RunCloseCommandMessage()
+//{
+//    _log.Log(consoleColor, $"TRSocketIPsViewModel::RunCloseCommandMessage(): Start of method  ({this.GetHashCode():x8})");
+
+//    List<Socket> myInitializedListOfSockets = new List<Socket>();
+//    Parallel.ForEach(_myListOfSockets, (mySocket) =>
+//    {
+//        this.Close(mySocket);
+//        _log.Log(consoleColor, $"TRSocketIPsViewModel::CloseAllSocketsParallel(): mySocket {mySocket.Handle}: {mySocket.Connected}");
+//    });
+
+//    _log.Log(consoleColor, $"TRSocketIPsViewModel::RunCloseCommandMessage(): End of method  ({this.GetHashCode():x8})");
+//}
+
+
 // obs: parallel call:
 // not really usefull with messenger, because too fast
 //Parallel.ForEach(myListOfAvailableSockets, (mySocket) =>
