@@ -653,27 +653,7 @@ namespace Console_MVVMTesting.ViewModels
 
 
         ////////////////// CLOSING SOCKETS /////////////////
-        private void RunCloseCommandMessage()
-        {
-            _log.Log(consoleColor, $"TRSocketIPsViewModel::RunCloseCommandMessage(): Start of method  ({this.GetHashCode():x8})");
-
-            List<Socket> myInitializedListOfSockets = new List<Socket>();
-            Parallel.ForEach(_myListOfSockets, (mySocket) =>
-            {
-                this.Close(mySocket);
-                _log.Log(consoleColor, $"TRSocketIPsViewModel::CloseAllSocketsParallel(): mySocket {mySocket.Handle}: {mySocket.Connected}");
-            });
-
-            _log.Log(consoleColor, $"TRSocketIPsViewModel::RunCloseCommandMessage(): End of method  ({this.GetHashCode():x8})");
-        }
-
-        private MyUser GetTRSocketUser()
-        {
-            _log.Log(consoleColor, $"TRSocketIPsViewModel::GetTRSocketUser()");
-            return new MyUser("MyTRSocketUser");
-        }
-
-        #region RunTRShutdownCommand
+         #region RunTRShutdownCommand
         private TRSocketStateMessage RunTRShutdownCommand()
         {
             _log.Log(consoleColor, $"TRSocketIPsViewModel::RunTRShutdownCommand(): Start of method  ({this.GetHashCode():x8})");
@@ -683,9 +663,6 @@ namespace Console_MVVMTesting.ViewModels
 
             bool shutDownResult = true;
             int numberOfDisconnectedSockets = 0;
-
-
-            //Parallel.ForEach(_myListOfSockets, (mySocket) => { });
 
             // obs: parallel call
             Parallel.ForEach(_myListOfSockets, (mySocket) =>
@@ -708,7 +685,7 @@ namespace Console_MVVMTesting.ViewModels
 
             TRSocketStateMessage trssm = new TRSocketStateMessage();
             trssm.TRErrorNumber = shutDownResult ? 0 : -1;      // error number can expand
-            trssm.MyStateName = "TRSocketIPsViewModel";
+            trssm.MyStateName = "RunTRShutdownCommand";
             trssm.trStatus = shutDownResult ? TRStatus.Success : TRStatus.Error;
 
             _log.Log(consoleColor, $"TRSocketIPsViewModel::RunTRShutdownCommand(): End of method  ({this.GetHashCode():x8})");
@@ -717,13 +694,25 @@ namespace Console_MVVMTesting.ViewModels
         #endregion RunTRShutdownCommand
 
 
+
         #region TRSocketInitAsync
+        //this method should not return any value until all sockets have been initialized
+        private async Task<TRSocketStateMessage> TRSocketShutdownAsync()
+        {
+            TRSocketStateMessage trssm = await Task.Run(RunTRShutdownCommand);
+            trssm.MyStateName = "TRSocketShutdownAsync";
+            return trssm;
+        }
+        #endregion TRSocketInitAsync
+
+
+
         #region RunTRInitCommandMessage
         ///////////// INITIALIZING SOCKETS /////////////////
         // async doesn't work well with Parallel.ForEach: https://stackoverflow.com/a/23139769/7036047
         // The whole idea behind Parallel.ForEach() is that you have a set of threads and each thread processes part of the collection.
         // This doesn't work with async-await, where you want to release the thread for the duration of the async call.
-        private TRSocketStateMessage TRSocketInitAsync()
+        private TRSocketStateMessage RunTRInitCommandMessage()
         {
             _log.Log(consoleColor, $"TRSocketIPsViewModel::TRSocketInitAsync(): Start of method  ({this.GetHashCode():x8})");
 
@@ -786,20 +775,16 @@ namespace Console_MVVMTesting.ViewModels
         #endregion RunTRInitCommandMessage
 
 
-        //#region TRSocketInitAsync
-        ////this method should not return any value until all sockets have been initialized
-        //private async Task<TRSocketStateMessage> TRSocketInitAsync()
-        //{
-        //    TRSocketStateMessage trssm = new TRSocketStateMessage();
-        //    bool rs = await Task.Run(RunTRInitCommandMessage);
-        //    trssm.TRErrorNumber = rs ? 0 : -1;      // error number can expand
-        //    trssm.MyStateName = "TRSocketInitAsync";
-        //    trssm.trStatus = rs ? TRStatus.Success : TRStatus.Error;
 
-        //    //return new TRSocketStateMessage { MyStateName = "TRSocketIPsViewModel", trStatus = rs ? TRStatus.Success : TRStatus.Error };
-        //    return trssm;
-        //}
-        //#endregion TRSocketInitAsync
+        #region TRSocketInitAsync
+        //this method should not return any value until all sockets have been initialized
+        private async Task<TRSocketStateMessage> TRSocketInitAsync()
+        {
+            TRSocketStateMessage trssm = await Task.Run(RunTRInitCommandMessage);
+            trssm.MyStateName = "TRSocketInitAsync";
+            return trssm;
+        }
+        #endregion TRSocketInitAsync
 
 
 
@@ -1773,7 +1758,7 @@ namespace Console_MVVMTesting.ViewModels
 
             _messenger.Register<TRSocketIPsViewModel, TRShutdownRequestMessage>(this, (myReceiver, myMessenger) =>
             {
-                myMessenger.Reply(myReceiver.RunTRShutdownCommand());       // pacz ShellViewModel::IsShuttingDown
+                myMessenger.Reply(myReceiver.TRSocketShutdownAsync());       // pacz ShellViewModel::IsShuttingDown
             });
 
             _messenger.Register<TRSocketIPsViewModel, TRSocketCheckPowerSupplyRequestMessage>(this, (myReceiver, myMessenger) =>
