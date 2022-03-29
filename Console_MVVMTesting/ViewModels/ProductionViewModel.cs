@@ -66,10 +66,15 @@ namespace Console_MVVMTesting.ViewModels
         {
             _log.Log(consoleColor, $"ProductionViewModel::OnStartButtonExecute(): Start of method.");
 
-            bool result;
+            bool result = true;
 
+            int myInt = this.GetNumberOfSetsTask();
+            if (myInt < 0)
+            {
+                return;
+            }
 
-            result = await this.InitLoadsTaskAsync();
+            //result = await this.InitLoadsTaskAsync();
             if (!result)
             {
                 return;
@@ -81,19 +86,19 @@ namespace Console_MVVMTesting.ViewModels
                 return;
             }
 
-            result = await this.CheckBatteryStatusTaskAsync();
+            //result = await this.CheckBatteryStatusTaskAsync();
             if (!result)
             {
                 //return;
             }
 
-            result = await this.CheckBatteryAlarmsTaskAsync();
+            //result = await this.CheckBatteryAlarmsTaskAsync();
             if (!result)
             {
                 //return;
             }
 
-            result = await this.CheckPowerSupplyTaskAsync();
+            //result = await this.CheckPowerSupplyTaskAsync();
             if (!result)
             {
                 //return;
@@ -137,6 +142,18 @@ namespace Console_MVVMTesting.ViewModels
             _log.Log(consoleColor, $"ProductionViewModel::OnStartButtonExecute(): End of method.");
         }
 
+
+        private int GetNumberOfSetsTask()
+        {
+            _log.Log(consoleColor, "ProductionViewModel::GetNumberOfSetsTask(): Start of Task");
+
+            int numberOfSets = 2;
+            _log.Log(consoleColor, $"ProductionViewModel::GetNumberOfSetsTask(): you wrote: {numberOfSets} sets.");
+            _messenger.Send(new NumberOfSetsValueChangedMessage(numberOfSets));
+
+            _log.Log(consoleColor, "ProductionViewModel::GetNumberOfSetsTask(): End of Task");
+            return numberOfSets;
+        }
 
 
         private async Task<bool> InitLoadsTaskAsync()
