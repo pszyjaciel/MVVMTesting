@@ -61,6 +61,24 @@ namespace Console_MVVMTesting.ViewModels
         }
 
 
+        #region XamlBatteryType
+        private string _batteryType;
+        public string XamlBatteryType
+        {
+            get { return _batteryType; }
+            set { SetProperty(ref _batteryType, value); }
+        }
+        #endregion XamlBatteryType
+
+        #region XamlNumberOfSets
+        private int _numberOfSets;
+        public int XamlNumberOfSets
+        {
+            get { return _numberOfSets; ; }
+            set { SetProperty(ref _numberOfSets, value); }
+        }
+        #endregion XamlNumberOfSets
+
 
         private Post _myEastTesterPrivateProperyName;
         public Post MyEastTesterPublicProperyName
@@ -166,6 +184,27 @@ namespace Console_MVVMTesting.ViewModels
         }
 
 
+        private void NumberOfSetsValueChangedMessageHandler(EastTesterViewModel recipient, NumberOfSetsValueChangedMessage message)
+        {
+            _log.Log(consoleColor, $"EastTesterViewModel::NumberOfSetsValueChangedMessageHandler()  Start of method");
+
+            XamlNumberOfSets = message.Value;
+            _log.Log(consoleColor, $"EastTesterViewModel::NumberOfSetsValueChangedMessageHandler() XamlNumberOfSets: {XamlNumberOfSets}");
+
+            _log.Log(consoleColor, $"EastTesterViewModel::NumberOfSetsValueChangedMessageHandler()  End of method");
+        }
+
+        private void BatteryTypeValueChangedMessageHandler(EastTesterViewModel recipient, BatteryTypeValueChangedMessage message)
+        {
+            _log.Log($"EastTesterViewModel::BatteryTypeValueChangedMessageHandler()  Start of method");
+
+            //XamlBatteryType = message.Value
+
+            _log.Log($"EastTesterViewModel::BatteryTypeValueChangedMessageHandler()  End of method");
+        }
+
+
+
         #region Constructor
         public EastTesterViewModel(ILoggingService loggingService, IMessenger messenger)
         {
@@ -210,6 +249,11 @@ namespace Console_MVVMTesting.ViewModels
             {
                 myMessenger.Reply(myReceiver.RunETShutdownCommand());       // pacz ShellViewModel::IsShuttingDown
             });
+
+
+            _messenger.Register<EastTesterViewModel, BatteryTypeValueChangedMessage>(this, BatteryTypeValueChangedMessageHandler);
+            _messenger.Register<EastTesterViewModel, NumberOfSetsValueChangedMessage>(this, NumberOfSetsValueChangedMessageHandler);
+
 
 
             _log.Log(consoleColor, $"EastTesterViewModel::EastTesterViewModel(): end of constructor  ({this.GetHashCode():x8})");
