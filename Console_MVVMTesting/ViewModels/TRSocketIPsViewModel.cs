@@ -38,6 +38,10 @@ namespace Console_MVVMTesting.ViewModels
         private const string _TR2Host = "10.239.27.141";
         private const string _TR3Host = "10.239.27.142";
         private const string _TR4Host = "10.239.27.143";
+        private const string _TR5Host = "10.239.27.144";
+        private const string _TR6Host = "10.239.27.145";
+        private const string _TR7Host = "10.239.27.146";
+        private const string _TR8Host = "10.239.27.147";
 
         private List<Tuple<Socket, IPAddress, ConnectionItem>> _connectionItemList;
 
@@ -62,6 +66,25 @@ namespace Console_MVVMTesting.ViewModels
 
         #endregion privates
 
+
+
+        #region XamlBatteryType
+        private string _batteryType;
+        public string XamlBatteryType
+        {
+            get { return _batteryType; }
+            set { SetProperty(ref _batteryType, value); }
+        }
+        #endregion XamlBatteryType
+
+        #region XamlNumberOfSets
+        private int _numberOfSets;
+        public int XamlNumberOfSets
+        {
+            get { return _numberOfSets; ; }
+            set { SetProperty(ref _numberOfSets, value); }
+        }
+        #endregion XamlNumberOfSets
 
 
         //private Post _myTRSocketPrivateProperyName;
@@ -1779,7 +1802,7 @@ namespace Console_MVVMTesting.ViewModels
 
 
 
-        private void InitConnectionItemList()
+        private void InitConnectionItemList(int numberOfSets)
         {
             _log.Log(consoleColor, $"TRSocketIPsViewModel::InitConnectionItemList(): Start of method");
 
@@ -1792,11 +1815,56 @@ namespace Console_MVVMTesting.ViewModels
             ConnectionItem _connectionItem2 = new ConnectionItem { Name = "TR2", Port = 42022, Host = _TR2Host };
             _connectionItems.Add(_connectionItem2);
             ConnectionItem _connectionItem3 = new ConnectionItem { Name = "TR3", Port = 42022, Host = _TR3Host };
-            //_connectionItems.Add(_connectionItem3);
+            _connectionItems.Add(_connectionItem3);
             ConnectionItem _connectionItem4 = new ConnectionItem { Name = "TR4", Port = 42022, Host = _TR4Host };
-            //_connectionItems.Add(_connectionItem4);
+            _connectionItems.Add(_connectionItem4);
+            ConnectionItem _connectionItem5 = new ConnectionItem { Name = "TR5", Port = 42022, Host = _TR5Host };
+            _connectionItems.Add(_connectionItem5);
+            ConnectionItem _connectionItem6 = new ConnectionItem { Name = "TR6", Port = 42022, Host = _TR6Host };
+            _connectionItems.Add(_connectionItem6);
+            ConnectionItem _connectionItem7 = new ConnectionItem { Name = "TR7", Port = 42022, Host = _TR7Host };
+            _connectionItems.Add(_connectionItem7);
+            ConnectionItem _connectionItem8 = new ConnectionItem { Name = "TR8", Port = 42022, Host = _TR8Host };
+            _connectionItems.Add(_connectionItem8);
 
-            //_log.Log(consoleColor, $"TRSocketIPsViewModel::InitConnectionItemList(): _connectionItems.Count: {_connectionItems.Count}");
+            _log.Log(consoleColor, $"TRSocketIPsViewModel::InitConnectionItemList(): _connectionItems.Count: {_connectionItems.Count}");
+
+            switch (numberOfSets)
+            {
+                case 0:
+                    _connectionItems.RemoveRange(0, 8);
+                    break;
+                case 1:
+                    _connectionItems.RemoveRange(1, 7);
+                    break;
+                case 2:
+                    _connectionItems.RemoveRange(2, 6);
+                    break;
+                case 3:
+                    _connectionItems.RemoveRange(3, 5);
+                    break;
+                case 4:
+                    _connectionItems.RemoveRange(4, 4);
+                    break;
+                case 5:
+                    _connectionItems.RemoveRange(5, 3);
+                    break;
+                case 6:
+                    _connectionItems.RemoveRange(6, 2);
+                    break;
+                case 7:
+                    _connectionItems.RemoveRange(7, 1);
+                    break;
+                case 8:
+                    _connectionItems.RemoveRange(8, 0);
+                    break;
+
+                default:
+                    break;
+            }
+
+            _log.Log(consoleColor, $"TRSocketIPsViewModel::InitConnectionItemList(): _connectionItems.Count: {_connectionItems.Count}");
+
 
             bool rs;
             Socket mySocket;
@@ -1858,6 +1926,49 @@ namespace Console_MVVMTesting.ViewModels
 
 
 
+        //todo: BatteryType as xaml-property
+        private void BatteryTypeValueChangedMessageHandler(TRSocketIPsViewModel recipient, BatteryTypeValueChangedMessage message)
+        {
+            _log.Log(consoleColor, $"TRSocketIPsViewModel::BatteryTypeValueChangedMessageHandler() ({this.GetHashCode():x8})  - Start of method");
+            _log.Log(consoleColor, $"TRSocketIPsViewModel::BatteryTypeValueChangedMessageHandler(): message.Value: {message.Value}");
+
+            XamlBatteryType = message.Value;
+
+            if (message.Value == "BAT 422 BS-1")
+            {
+                _log.Log(consoleColor, $"TRSocketIPsViewModel::BatteryTypeValueChangedMessageHandler(): todo1: set parameters.");
+            }
+            else if (message.Value == "BAT 422 BS-2")
+            {
+                _log.Log(consoleColor, $"TRSocketIPsViewModel::BatteryTypeValueChangedMessageHandler(): todo2: set parameters.");
+            }
+            else if (message.Value == "BAT 422 SB")
+            {
+                _log.Log(consoleColor, $"TRSocketIPsViewModel::BatteryTypeValueChangedMessageHandler(): todo3: set parameters.");
+            }
+            else
+            {
+                _log.Log(consoleColor, $"TRSocketIPsViewModel::BatteryTypeValueChangedMessageHandler(): got something else.");
+            }
+
+            _log.Log(consoleColor, $"TRSocketIPsViewModel::BatteryTypeValueChangedMessageHandler() ({this.GetHashCode():x8})  - End of method");
+        }
+
+
+        private void NumberOfSetsValueChangedMessageHandler(TRSocketIPsViewModel recipient, NumberOfSetsValueChangedMessage message)
+        {
+            _log.Log(consoleColor, $"TRSocketIPsViewModel::NumberOfSetsValueChangedMessageHandler() ({this.GetHashCode():x8})  - Start of method");
+
+            XamlNumberOfSets = message.Value;
+            _log.Log(consoleColor, $"TRSocketIPsViewModel::NumberOfSetsValueChangedMessageHandler() XamlNumberOfSets: {XamlNumberOfSets}");
+
+            this.InitConnectionItemList(XamlNumberOfSets);
+
+            _log.Log(consoleColor, $"TRSocketIPsViewModel::NumberOfSetsValueChangedMessageHandler() ({this.GetHashCode():x8})  - End of method");
+        }
+
+
+
         #region Constructor
         public TRSocketIPsViewModel(ILoggingService loggingService, IMessenger messenger)
         {
@@ -1865,8 +1976,6 @@ namespace Console_MVVMTesting.ViewModels
             _log.Log(consoleColor, $"TRSocketIPsViewModel::TRSocketIPsViewModel(): Start of constructor  ({this.GetHashCode():x8})");
 
             _messenger = messenger;
-
-            this.InitConnectionItemList();
 
 
             _messenger.Register<TRSocketIPsViewModel, TRSocketInitRequestMessage>(this, (myReceiver, myMessenger) =>
@@ -1885,7 +1994,6 @@ namespace Console_MVVMTesting.ViewModels
                 myMessenger.Reply(myReceiver.TRSocketCheckPowerSupplyCommand());       // pacz ShellViewModel::IsShuttingDown
             });
 
-
             _messenger.Register<TRSocketIPsViewModel, CheckBatteryStatusRequestMessage>(this, (myReceiver, myMessenger) =>
             {
                 myMessenger.Reply(myReceiver.TRCheckBatteryStatusAsync());
@@ -1896,7 +2004,11 @@ namespace Console_MVVMTesting.ViewModels
                 myMessenger.Reply(myReceiver.TRCheckBatteryAlarmsAsync());
             });
 
+            _messenger.Register<TRSocketIPsViewModel, BatteryTypeValueChangedMessage>(this, BatteryTypeValueChangedMessageHandler);
+            _messenger.Register<TRSocketIPsViewModel, NumberOfSetsValueChangedMessage>(this, NumberOfSetsValueChangedMessageHandler);
 
+
+            //this.InitConnectionItemList();
 
 
             _log.Log(consoleColor, $"TRSocketIPsViewModel::TRSocketIPsViewModel(): End of constructor  ({this.GetHashCode():x8})");
