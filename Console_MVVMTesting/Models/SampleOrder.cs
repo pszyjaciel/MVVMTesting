@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Console_MVVMTesting.Helpers;
+using System;
 using System.Collections.Generic;
 
 namespace Console_MVVMTesting.Models
@@ -8,9 +9,12 @@ namespace Console_MVVMTesting.Models
     // It is the model class we use to display data on pages like Grid, Chart, and  ListDetails.
     public class SampleOrder
     {
+        private readonly string _consoleColor = "DRED";
+
         public SampleOrder()
         {
-            //System.Diagnostics.Debug.WriteLine("[{0}] {1} ({2:x8})", DateTime.Now.ToString("HH:mm:ss.ff"), "SampleOrder::SampleOrder()", this.GetHashCode());
+            MyUtils.MyConsoleWriteLine(_consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+                $"SampleOrder::SampleOrder()  ({this.GetHashCode():x8})");
         }
 
         public long OrderID { get; set; }
@@ -43,10 +47,10 @@ namespace Console_MVVMTesting.Models
 
         public ICollection<SampleOrderDetail> Details { get; set; }
 
-        public override string ToString()
-        {
-            return $"{Company} {Status}";
-        }
+        //public override string ToString()
+        //{
+        //    return $"Company: {Company} - Status: {Status}";
+        //}
 
         public string ShortDescription => $"Order ID: {OrderID}";
     }

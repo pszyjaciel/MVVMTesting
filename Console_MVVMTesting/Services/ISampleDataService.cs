@@ -13,5 +13,7 @@ namespace Console_MVVMTesting.Services
         Task<IEnumerable<SampleOrder>> GetGridDataAsync();
 
         Task<IEnumerable<SampleOrder>> GetListDetailsDataAsync();
+
+        Task<IEnumerable<MySerialPort>> GetSerialPortsListDetailsDataAsync();
     }
 }

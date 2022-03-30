@@ -2,6 +2,7 @@
 using Console_MVVMTesting.Services;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Messaging;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -39,18 +40,30 @@ namespace Console_MVVMTesting.ViewModels
 
         public async Task OnNavigatedTo(object parameter)
         {
-            _log.Log(_consoleColor, $"ListLoadsViewModel::OnNavigatedTo()");
+            _log.Log(_consoleColor, $"ListLoadsViewModel::OnNavigatedTo() - start of method");
             XamlSampleItems.Clear();
 
             // Replace this with your actual data
-            System.Collections.Generic.IEnumerable<SampleOrder> data = await _sampleDataService.GetListDetailsDataAsync();
-            _log.Log(_consoleColor, $"ListLoadsViewModel::OnNavigatedTo(): data.Count(): {data.Count()}");
+            System.Collections.Generic.IEnumerable<SampleOrder> myAllSampleOrders = await _sampleDataService.GetListDetailsDataAsync();
+            _log.Log(_consoleColor, $"ListLoadsViewModel::OnNavigatedTo(): myAllSampleOrders.Count(): {myAllSampleOrders.Count()}");
 
-            foreach (SampleOrder item in data)
+            foreach (SampleOrder sampleOrder in myAllSampleOrders)
             {
-                _log.Log(_consoleColor, $"ListLoadsViewModel::OnNavigatedTo(): item: {item}");
-                XamlSampleItems.Add(item);
+                // pacz override ToString() w SampleOrder.cs
+                //_log.Log(_consoleColor, $"ListLoadsViewModel::OnNavigatedTo(): {sampleOrder.SymbolName} : {sampleOrder.Company} : {sampleOrder.OrderID} : {sampleOrder.OrderDate}");
+
+                foreach (SampleOrderDetail sod in sampleOrder.Details)
+                {
+                    //_log.Log(_consoleColor, $"ListLoadsViewModel::OnNavigatedTo(): {sod.ProductID} : {sod.ProductName} : {sod.Discount} : {sod.Quantity} of {sod.Total}");
+                }
+                XamlSampleItems.Add(sampleOrder);
             }
+
+            System.Collections.Generic.IEnumerable<MySerialPort> myAllAvailableSerialPorts = await _sampleDataService.GetSerialPortsListDetailsDataAsync();
+            _log.Log(_consoleColor, $"ListLoadsViewModel::OnNavigatedTo(): myAllAvailableSerialPorts.Count(): {myAllAvailableSerialPorts.Count()}");
+
+
+            _log.Log(_consoleColor, $"ListLoadsViewModel::OnNavigatedTo(): - end of method");
         }
 
         public void OnNavigatedFrom()
@@ -70,6 +83,19 @@ namespace Console_MVVMTesting.ViewModels
         }
 
 
+
+        private void CallOnNavigatedTo()
+        {
+            _log.Log(_consoleColor, $"ListLoadsViewModel::CallOnNavigatedTo() - start of method");
+
+            object myParam = null;
+            Task myTask = Task.Run(async () => await OnNavigatedTo(myParam));
+            myTask.Wait();
+
+            _log.Log(_consoleColor, $"ListLoadsViewModel::CallOnNavigatedTo() - end of method");
+        }
+
+
         #region Constructor
         public ListLoadsViewModel(ILoggingService loggingService, IMessenger messenger, ISampleDataService sampleDataService)
         {
@@ -77,6 +103,11 @@ namespace Console_MVVMTesting.ViewModels
             _log.Log(_consoleColor, $"ListLoadsViewModel::ListLoadsViewModel()");
             _messenger = messenger;
             _sampleDataService = sampleDataService;
+
+
+            // stont moge wywolac co chcem.
+            this.CallOnNavigatedTo();
+
         }
         #endregion Constructor
 

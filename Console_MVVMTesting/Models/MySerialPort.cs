@@ -7,11 +7,24 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Console_MVVMTesting
+namespace Console_MVVMTesting.Models
 {
     public class MySerialPort
     {
         private Semaphore _serialSemaphore;
+
+        public IEnumerable<string> itsStringProperties{ get; set; }
+
+        public char COMSymbol => (char)COMSymbolCode;
+        public int COMSymbolCode { get; set; }
+        public string COMSymbolName { get; set; }
+        public string COMPort { get; set; }
+        public bool COMStatus { get; set; }
+
+        //public override string ToString()
+        //{
+        //    return $"{COMPort} {COMStatus}";
+        //}
 
         public MySerialPort()
         {

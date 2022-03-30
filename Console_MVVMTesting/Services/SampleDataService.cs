@@ -1,4 +1,5 @@
-﻿using Console_MVVMTesting.Models;
+﻿using Console_MVVMTesting.Helpers;
+using Console_MVVMTesting.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,24 +17,37 @@ namespace Console_MVVMTesting.Services
     // 5. Models/SampleOrderDetail.cs
     public class SampleDataService : ISampleDataService
     {
-        private List<SampleOrder> _allOrders;
+        private const string _consoleColor = "DRED";
+
+        public IEnumerable<MySerialPort> _mySerialPorts { get; internal set; }
+
+        //        private List<SampleOrder> _allOrders;
 
         public SampleDataService()
         {
-            System.Diagnostics.Debug.WriteLine("[{0}] {1} ({2:x8})", DateTime.Now.ToString("HH:mm:ss.ff"), "SampleDataService::SampleDataService()", this.GetHashCode());
+            MyUtils.MyConsoleWriteLine(_consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+               $"SampleDataService::SampleDataService()  ({this.GetHashCode():x8})");
         }
 
         private static IEnumerable<SampleOrder> AllOrders()
         {
-            System.Diagnostics.Debug.WriteLine($"SampleDataService::AllOrders()");
+            MyUtils.MyConsoleWriteLine(_consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+                $"SampleDataService::AllOrders()");
+
             // The following is order summary data
             IEnumerable<SampleCompany> companies = AllCompanies();
+
+            MyUtils.MyConsoleWriteLine(_consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+                $"companies.Count: {companies.Count()}");
+
             return companies.SelectMany(c => c.Orders); // namespace System.Linq
         }
 
         private static IEnumerable<SampleCompany> AllCompanies()
         {
-            System.Diagnostics.Debug.WriteLine($"SampleDataService::AllCompanies()");
+            MyUtils.MyConsoleWriteLine(_consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+                $"SampleDataService::AllCompanies()");
+
             return new List<SampleCompany>()
             {
                 new SampleCompany()
@@ -505,11 +519,10 @@ namespace Console_MVVMTesting.Services
 
         public async Task<IEnumerable<SampleOrder>> GetContentGridDataAsync()
         {
-            System.Diagnostics.Debug.WriteLine($"SampleDataService::GetContentGridDataAsync()");
-            if (_allOrders == null)
-            {
-                _allOrders = new List<SampleOrder>(AllOrders());
-            }
+            MyUtils.MyConsoleWriteLine(_consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+                $"SampleDataService::GetContentGridDataAsync()");
+
+            List<SampleOrder> _allOrders = new List<SampleOrder>(AllOrders());
 
             await Task.CompletedTask;
             return _allOrders;
@@ -517,26 +530,135 @@ namespace Console_MVVMTesting.Services
 
         public async Task<IEnumerable<SampleOrder>> GetGridDataAsync()
         {
-            System.Diagnostics.Debug.WriteLine($"SampleDataService::GetGridDataAsync()");
-            if (_allOrders == null)
-            {
-                _allOrders = new List<SampleOrder>(AllOrders());
-            }
+            MyUtils.MyConsoleWriteLine(_consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+                $"SampleDataService::GetGridDataAsync()");
 
+            List<SampleOrder> _allOrders = new List<SampleOrder>(AllOrders());
             await Task.CompletedTask;
             return _allOrders;
         }
 
         public async Task<IEnumerable<SampleOrder>> GetListDetailsDataAsync()
         {
-            System.Diagnostics.Debug.WriteLine($"SampleDataService::GetListDetailsDataAsync()");
-            if (_allOrders == null)
-            {
-                _allOrders = new List<SampleOrder>(AllOrders());
-            }
+            MyUtils.MyConsoleWriteLine(_consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+                $"SampleDataService::GetListDetailsDataAsync()");
 
-            await Task.CompletedTask;
+            List<SampleOrder> _allOrders = new List<SampleOrder>(AllOrders());
+            MyUtils.MyConsoleWriteLine(_consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            $"_allOrders.Count: {_allOrders.Count}");
+
+            await Task.CompletedTask;       // fajne
             return _allOrders;
         }
+
+
+
+
+        private IEnumerable<MySerialPortCollection> AllSerialPorts()
+        {
+            MySerialPort msp1 = new MySerialPort();
+            msp1.COMPort = "COM1";
+            msp1.COMStatus = false;
+            msp1.COMSymbolCode = 0x0400;
+
+            MySerialPort msp2 = new MySerialPort();
+            msp2.COMPort = "COM2";
+            msp2.COMStatus = true;
+            msp2.COMSymbolCode = 0x0800;
+
+            List<MySerialPort> mspl1 = new List<MySerialPort>();
+            mspl1.Add(msp1);
+            mspl1.Add(msp2);
+
+
+
+            MySerialPort msp3 = new MySerialPort();
+            msp3.COMPort = "COM3";
+            msp3.COMStatus = true;
+            msp3.COMSymbolCode = 0x0500;
+
+            MySerialPort msp4 = new MySerialPort();
+            msp4.COMPort = "COM4";
+            msp4.COMStatus = false;
+            msp4.COMSymbolCode = 0x0c00;
+
+            List<MySerialPort> mspl2 = new List<MySerialPort>();
+            mspl2.Add(msp1);
+            mspl2.Add(msp2);
+            mspl2.Add(msp3);
+            mspl2.Add(msp4);
+
+
+            List<MySerialPortCollection> lmspc = new List<MySerialPortCollection>();
+
+            MySerialPortCollection mspc1 = new MySerialPortCollection();
+            mspc1.IdOfCollection = 1;
+            mspc1.NameOfCollection = "maj nejm of kolekszyn1";
+            mspc1.myPorts = mspl1;
+            lmspc.Add(mspc1);
+
+            MySerialPortCollection mspc2 = new MySerialPortCollection();
+            mspc2.IdOfCollection = 2;
+            mspc2.NameOfCollection = "maj nejm of kolekszyn2";
+            mspc2.myPorts = mspl2;
+            lmspc.Add(mspc2);
+
+            return lmspc;    
+        }
+
+
+        private IEnumerable<MySerialPort> AllAvailableSerialPorts()
+        {
+            MyUtils.MyConsoleWriteLine(_consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+                $"SampleDataService::AllAvailableSerialPorts()");
+
+
+            // The following is order summary data
+            IEnumerable<MySerialPortCollection> mscpEnum = AllSerialPorts();
+
+            MyUtils.MyConsoleWriteLine(_consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+                $"mscpEnum.Count: {mscpEnum.Count()}");
+
+            foreach (MySerialPortCollection mspc in mscpEnum)
+            {
+                MyUtils.MyConsoleWriteLine(_consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+                    $"{mspc.IdOfCollection} : {mspc.NameOfCollection}");
+
+                foreach (MySerialPort msp in mspc.myPorts)
+                {
+                    MyUtils.MyConsoleWriteLine(_consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+                        $"{msp.COMPort} : {msp.COMStatus}");
+                }
+            }
+
+            // Select gets a list of lists of MySerialPort
+            IEnumerable<IEnumerable<MySerialPort>> ports1 = mscpEnum.Select(p => p.myPorts);
+
+            MyUtils.MyConsoleWriteLine(_consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+                $"SampleDataService::AllAvailableSerialPorts(): ports1.Count(): {ports1.Count()} ");
+
+
+            // SelectMany flattens it to just a list of MySerialPort
+            IEnumerable<MySerialPort> ports2 = mscpEnum.SelectMany(p => p.myPorts);
+
+            MyUtils.MyConsoleWriteLine(_consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+                $"SampleDataService::AllAvailableSerialPorts(): ports2.Count(): {ports2.Count()} ");
+
+
+            return mscpEnum.SelectMany(c => c.myPorts); // namespace System.Linq
+        }
+
+        public async Task<IEnumerable<MySerialPort>> GetSerialPortsListDetailsDataAsync()
+        {
+            MyUtils.MyConsoleWriteLine(_consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+                            $"SampleDataService::GetSerialPortsListDetailsDataAsync()");
+
+            List<MySerialPort> _allAvailableSerialPorts = new List<MySerialPort>(AllAvailableSerialPorts());
+
+            await Task.CompletedTask;       // fajne
+            return _allAvailableSerialPorts;
+        }
+
+
     }
 }

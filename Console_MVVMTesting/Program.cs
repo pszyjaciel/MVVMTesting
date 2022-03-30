@@ -113,17 +113,13 @@ namespace Console_MVVMTesting
         /// ////////////////////////////////////
         static void Main(string[] args)
         {
-            MySerialPort msp = new MySerialPort();
-
             MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
                 $"==========> Program::Main(): start of program <========== " +
                 $"({typeof(SerialPortExtensions).GetHashCode():x8})");
 
-
             Ioc.Default.ConfigureServices(ConfigureMyServices());
             IActivationService activationService = Ioc.Default.GetService<IActivationService>();
             activationService.ActivateAsync(args);
-
 
 
             MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
