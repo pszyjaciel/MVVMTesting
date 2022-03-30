@@ -17,8 +17,6 @@ namespace Console_MVVMTesting.Services
         {
             MyUtils.MyConsoleWriteLine($"PageService::PageService()");
 
-            Configure<ProductionViewModel, ProductionPage>();
-
             Configure<UserReceiverViewModel, UserReceiverPage>();
             Configure<UserSenderViewModel, UserSenderPage>();
             Configure<UserReceiver2ViewModel, UserReceiver2Page>();
@@ -27,6 +25,9 @@ namespace Console_MVVMTesting.Services
             Configure<EastTesterViewModel, EastTesterPage>();
             Configure<LCSocketViewModel, LCSocketPage>();
             Configure<TRSocketViewModel, TRSocketPage>();
+            Configure<ListLoadsViewModel, ListLoadsPage>();
+
+            Configure<ProductionViewModel, ProductionPage>();
         }
 
         public Type GetPageType(string key)

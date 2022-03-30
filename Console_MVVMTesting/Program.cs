@@ -16,15 +16,16 @@ namespace Console_MVVMTesting
 {
     internal class Program
     {
-        public static ShellPage Content1 { get; internal set; }
-        public static EastTesterPage Content2 { get; internal set; }
-        public static LCSocketPage lcSocketPage { get; internal set; }
-        public static TRSocketPage trSocketPage { get; internal set; }
-        public static UserReceiverPage Content4 { get; internal set; }
-        public static UserSenderPage Content5 { get; internal set; }
-        public static UserReceiver2Page Content6 { get; internal set; }
-        public static UserSender2Page Content7 { get; internal set; }
-        public static ProductionPage Content8 { get; internal set; }
+        public static ShellPage myShellPage { get; internal set; }
+        public static EastTesterPage myEastTesterPage { get; internal set; }
+        public static LCSocketPage myLCSocketPage { get; internal set; }
+        public static TRSocketPage myTRSocketPage { get; internal set; }
+        public static UserReceiverPage myUserReceiverPage { get; internal set; }
+        public static UserSenderPage myUserSenderPage { get; internal set; }
+        public static UserReceiver2Page myUserReceiver2Page { get; internal set; }
+        public static UserSender2Page myUserSender2Page { get; internal set; }
+        public static ListLoadsPage myListLoadsPage { get; internal set; }
+        public static ProductionPage myProductionPage { get; internal set; }
 
 
 
@@ -62,12 +63,11 @@ namespace Console_MVVMTesting
             services.AddSingleton<IPageService, PageService>();     // pacztu
             services.AddSingleton<ILoggingService, LoggingService>();
             services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
+            services.AddSingleton<ISampleDataService, SampleDataService>();
 
+            
             services.AddTransient<ShellPage>();
             services.AddTransient<ShellViewModel>();
-
-            services.AddTransient<ProductionPage>();
-            services.AddSingleton<ProductionViewModel>();
 
             services.AddTransient<UserReceiverPage>();
             services.AddSingleton<UserReceiverViewModel>();
@@ -88,11 +88,15 @@ namespace Console_MVVMTesting
             //services.AddSingleton<TRSocketViewModel>();
             services.AddSingleton<TRSocketIPsViewModel>();
 
+            services.AddTransient<ListLoadsPage>();
+            services.AddSingleton<ListLoadsViewModel>();
 
             //services.AddTransient<LCSocketPage>();
             //services.AddSingleton<LCSocketViewModel>();
 
-
+            // production na koncu
+            services.AddTransient<ProductionPage>();
+            services.AddSingleton<ProductionViewModel>();
 
             MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
                 $"Program::ConfigureServices(): end of method" +

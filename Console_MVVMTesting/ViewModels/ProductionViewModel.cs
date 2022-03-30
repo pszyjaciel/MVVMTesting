@@ -80,11 +80,11 @@ namespace Console_MVVMTesting.ViewModels
                 return;
             }
 
-            result = await this.InitSocketsTaskAsync();
-            if (!result)
-            {
-                return;
-            }
+            //result = await this.InitSocketsTaskAsync();
+            //if (!result)
+            //{
+            //    return;
+            //}
 
             //result = await this.CheckBatteryStatusTaskAsync();
             if (!result)
@@ -105,13 +105,13 @@ namespace Console_MVVMTesting.ViewModels
             }
 
 
-            await Task.Delay(1500);
+            //await Task.Delay(1500);
 
-            result = await this.ShutdownTaskAsync();
-            if (!result)
-            {
-                return;
-            }
+            //result = await this.ShutdownTaskAsync();
+            //if (!result)
+            //{
+            //    return;
+            //}
 
 
 

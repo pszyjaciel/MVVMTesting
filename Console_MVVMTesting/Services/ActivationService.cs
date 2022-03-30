@@ -19,6 +19,7 @@ namespace Console_MVVMTesting.Services
         private UserSenderPage _userSenderPage = null;
         private UserReceiver2Page _userReceiver2Page = null;
         private UserSender2Page _userSender2Page = null;
+        private ListLoadsPage _listLoadsPage = null;
         private ProductionPage _productionPage = null;
 
 
@@ -43,31 +44,34 @@ namespace Console_MVVMTesting.Services
             InitializeAsync();
 
             _shellPage = Ioc.Default.GetService<ShellPage>();
-            Program.Content1 = _shellPage ?? new ShellPage();
+            Program.myShellPage = _shellPage ?? new ShellPage();
 
             _eastTesterPage = Ioc.Default.GetService<EastTesterPage>();
-            Program.Content2 = _eastTesterPage ?? new EastTesterPage();
+            Program.myEastTesterPage = _eastTesterPage ?? new EastTesterPage();
 
             _lcSocketPage = Ioc.Default.GetService<LCSocketPage>();
-            Program.lcSocketPage = _lcSocketPage ?? new LCSocketPage();
+            Program.myLCSocketPage = _lcSocketPage ?? new LCSocketPage();
 
             _trSocketPage = Ioc.Default.GetService<TRSocketPage>();
-            Program.trSocketPage = _trSocketPage ?? new TRSocketPage();
+            Program.myTRSocketPage = _trSocketPage ?? new TRSocketPage();
 
             _userReceiverPage = Ioc.Default.GetService<UserReceiverPage>();
-            Program.Content4 = _userReceiverPage ?? new UserReceiverPage();
+            Program.myUserReceiverPage = _userReceiverPage ?? new UserReceiverPage();
 
             _userSenderPage = Ioc.Default.GetService<UserSenderPage>();
-            Program.Content5 = _userSenderPage ?? new UserSenderPage();
+            Program.myUserSenderPage = _userSenderPage ?? new UserSenderPage();
 
             _userReceiver2Page = Ioc.Default.GetService<UserReceiver2Page>();
-            Program.Content6 = _userReceiver2Page ?? new UserReceiver2Page();
+            Program.myUserReceiver2Page = _userReceiver2Page ?? new UserReceiver2Page();
 
             _userSender2Page = Ioc.Default.GetService<UserSender2Page>();
-            Program.Content7 = _userSender2Page ?? new UserSender2Page();
+            Program.myUserSender2Page = _userSender2Page ?? new UserSender2Page();
 
             _productionPage = Ioc.Default.GetService<ProductionPage>();
-            Program.Content8 = _productionPage ?? new ProductionPage();
+            Program.myListLoadsPage= _listLoadsPage ?? new ListLoadsPage();
+
+            _productionPage = Ioc.Default.GetService<ProductionPage>();
+            Program.myProductionPage = _productionPage ?? new ProductionPage();
 
             // Depending on activationArgs one of ActivationHandlers or DefaultActivationHandler will navigate to the first page
             HandleActivationAsync(activationArgs);

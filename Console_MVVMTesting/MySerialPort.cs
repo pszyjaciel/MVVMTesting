@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Console_MVVMTesting
 {
-    class MySerialPort
+    public class MySerialPort
     {
         private Semaphore _serialSemaphore;
 
