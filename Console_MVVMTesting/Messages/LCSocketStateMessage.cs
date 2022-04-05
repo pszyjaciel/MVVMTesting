@@ -25,7 +25,8 @@ namespace Console_MVVMTesting.Messages
         //public Socket mySocket { get; set; }
         //public decimal ACInVoltage { get; set; }
         public Dictionary<IntPtr, Tuple<string, double, int>> MySocket { get; set; }
-
+        public Dictionary<IntPtr, Tuple<int, string>> SocketInitDict { get; set; }     // socket_handle, error_code, error_description
+        public Dictionary<IntPtr, Tuple<UInt16, UInt16>> BatteryStatusDict { get; set; }
 
 
         public LCSocketStateMessage(string myStateName, LCStatus lcs)
@@ -61,11 +62,11 @@ namespace Console_MVVMTesting.Messages
     }
 
 
-    internal class LCSocketInitStatusRequestMessage : AsyncRequestMessage<LCSocketStateMessage>
+    internal class LCSocketInitRequestMessage : AsyncRequestMessage<LCSocketStateMessage>
     {
-        public LCSocketInitStatusRequestMessage()
+        public LCSocketInitRequestMessage()
         {
-            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] LCSocketInitStatusRequestMessage::LCSocketInitStatusRequestMessage()  ({this.GetHashCode():x8})");
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] LCSocketInitRequestMessage::LCSocketInitRequestMessage()  ({this.GetHashCode():x8})");
         }
     }
 
@@ -77,8 +78,18 @@ namespace Console_MVVMTesting.Messages
         }
     }
 
+    internal class LCSocketCheckBatteryStatusRequestMessage : AsyncRequestMessage<LCSocketStateMessage>
+    {
+        public LCSocketCheckBatteryStatusRequestMessage()
+        {
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+                $"LCSocketCheckBatteryStatusRequestMessage::LCSocketCheckBatteryStatusRequestMessage()  " +
+                $"({this.GetHashCode():x8})");
+        }
+    }
 
-    internal class LCShutdownRequestMessage : RequestMessage<LCSocketStateMessage>
+
+    internal class LCShutdownRequestMessage : AsyncRequestMessage<LCSocketStateMessage>
     {
         public LCShutdownRequestMessage()
         {

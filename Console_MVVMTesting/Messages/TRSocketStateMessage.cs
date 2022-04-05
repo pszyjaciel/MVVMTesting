@@ -152,8 +152,6 @@ namespace Console_MVVMTesting.Messages
         {
             MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}]  ({this.GetHashCode():x8})");
         }
-
-
     }
 
     internal class CheckBatteryStatusRequestMessage : AsyncRequestMessage<TRSocketStateMessage>

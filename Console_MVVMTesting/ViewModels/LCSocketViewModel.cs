@@ -358,21 +358,21 @@ namespace Console_MVVMTesting.ViewModels
                 _log.Log(consoleColor, $"LCSocketViewModel::ReceiveCallBack(): socket {terminalSocket.Handle}, receivedBytes: {receivedBytes}");
 
                 // Connection error occured, as the server never returns 0 bytes
-                if (receivedBytes == 0)
-                {
-                    _log.Log(consoleColor, $"LCSocketViewModel::ReceiveCallBack(): socket {terminalSocket.Handle}: It looks like a connection error!");
-                    so.sb.Clear();   // clean the buffer
+                //if (receivedBytes == 0)
+                //{
+                //    _log.Log(consoleColor, $"LCSocketViewModel::ReceiveCallBack(): socket {terminalSocket.Handle}: It looks like a connection error!");
+                //    so.sb.Clear();   // clean the buffer
 
-                    // Signal that all bytes have been received.  
-                    receiveDone.Set();
-                    return;     // we will not close the connection!
-                }
+                //    // Signal that all bytes have been received.  
+                //    receiveDone.Set();
+                //    return;     // we will not close the connection!
+                //}
 
                 if (receivedBytes > 0)
                 {
                     // There might be more data, so store the data received so far.  
                     response = Encoding.ASCII.GetString(so.buffer, 0, receivedBytes);
-                    tmpResponse = response.Replace(heartbeat, "");        // get rid of the heartbeat
+                    //tmpResponse = response.Replace(heartbeat, "");        // get rid of the heartbeat
                     if (tmpResponse.EndsWith("\r\n"))
                     {
                         so.sb.Append(tmpResponse);
@@ -393,13 +393,16 @@ namespace Console_MVVMTesting.ViewModels
             {
                 _log.Log(consoleColor, $"LCSocketViewModel::ReceiveCallBack(): {ex.Message}");
             }
-            receiveDone.Set();
+            finally
+            {
+                receiveDone.Set();
+            }
             _log.Log(consoleColor, $"LCSocketViewModel::ReceiveCallBack(): ThreadId: {Thread.CurrentThread.ManagedThreadId} - End of method.");
         }
         #endregion ReceiveCallBack
 
 
-
+        // dopuszczalne tylko jedno wywolanie typu odpal i zapomnij
         #region ReceiveFromSocket
         public string ReceiveFromSocket(Socket terminalSocket)
         {
@@ -484,10 +487,10 @@ namespace Console_MVVMTesting.ViewModels
             }
             sendDone.WaitOne();
 
-            string response = this.ReceiveFromSocket(terminalSocket);
+            // string response = this.ReceiveFromSocket(terminalSocket);
 
             _log.Log(consoleColor, $"LCSocketViewModel::SendToSocket(): ThreadId: {Thread.CurrentThread.ManagedThreadId} - End of method.");
-            return response;
+            return "";
         }
         #endregion SendToSocket
 
@@ -617,9 +620,9 @@ namespace Console_MVVMTesting.ViewModels
 
             List<Socket> myListOfAvailableSockets = new List<Socket>();
             myListOfAvailableSockets.Add(new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp));
-            myListOfAvailableSockets.Add(new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp));
-            myListOfAvailableSockets.Add(new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp));
-            myListOfAvailableSockets.Add(new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp));
+            //myListOfAvailableSockets.Add(new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp));
+            //myListOfAvailableSockets.Add(new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp));
+            //myListOfAvailableSockets.Add(new Socket(_ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp));
 
             int numberOfAvailableSockets = myListOfAvailableSockets.Count;
             int numberOfInitializedSockets = 0;
@@ -664,13 +667,22 @@ namespace Console_MVVMTesting.ViewModels
         //this method should not return any value until all sockets have been initialized
         private async Task<LCSocketStateMessage> LCSocketInitAsync()
         {
+            _log.Log(consoleColor, $"LCSocketViewModel::LCSocketInitAsync() - start of method");
+
+            //public Dictionary<IntPtr, Tuple<int, string>> SocketInitDict { get; set; }     // socket_handle, error_code, error_description
+            Tuple<int, string> myTyple = new Tuple<int, string>(0, "");
+            Dictionary<IntPtr, Tuple<int, string>> myDictionary = new Dictionary<IntPtr, Tuple<int, string>>();
+
             LCSocketStateMessage lcssm = new LCSocketStateMessage();
+            lcssm.SocketInitDict = myDictionary;
+
             bool rs = await Task.Run(RunLCInitCommandMessage);
             lcssm.LCErrorNumber = rs ? 0 : -1;      // error number can expand
             lcssm.MyStateName = "LCSocketInitAsync";
             lcssm.lcStatus = rs ? LCStatus.Success : LCStatus.Error;
 
             //return new LCSocketStateMessage { MyStateName = "LCSocketViewModel", lcStatus = rs ? LCStatus.Success : LCStatus.Error };
+            _log.Log(consoleColor, $"LCSocketViewModel::LCSocketInitAsync() - end of method");
             return lcssm;
         }
         #endregion LCSocketInitAsync
@@ -792,12 +804,39 @@ namespace Console_MVVMTesting.ViewModels
             }
 
             lcssm.MySocket = MySocketDict;
-            
+
             _log.Log(consoleColor, $"LCSocketViewModel::LCSocketCheckPowerSupplyCommand(): End of method  ({this.GetHashCode():x8})");
             return lcssm;
         }
         #endregion LCSocketCheckPowerSupplyCommand
 
+
+        #region LCSocketCheckBatteryCommand
+        private LCSocketStateMessage LCSocketCheckBatteryCommand()
+        {
+            _log.Log(consoleColor, $"LCSocketViewModel::LCSocketCheckBatteryCommand(): Start of method  ({this.GetHashCode():x8})");
+
+            if (_myListOfSockets == null)
+            {
+                return new LCSocketStateMessage { LCErrorNumber = -1 };
+            }
+
+            Tuple<UInt16, UInt16> myTyple = new Tuple<UInt16, UInt16>(0, 0);
+            Dictionary<IntPtr, Tuple<UInt16, UInt16>> myDictionary = new Dictionary<IntPtr, Tuple<UInt16, UInt16>>();
+
+            //public Dictionary<IntPtr, Tuple<UInt16, UInt16>> BatteryStatusDict { get; set; }
+
+            LCSocketStateMessage lcssm = new LCSocketStateMessage();
+
+            //Tuple<int, string> myTuple = new Tuple<int, string>(-1, "");
+            //Dictionary<IntPtr, Tuple<int, string>> myDictionary = new Dictionary<IntPtr, Tuple<int, string>>(_myListOfSockets[0].Handle, myTuple);
+
+            lcssm.BatteryStatusDict = myDictionary;
+
+            _log.Log(consoleColor, $"LCSocketViewModel::LCSocketCheckBatteryCommand(): End of method  ({this.GetHashCode():x8})");
+            return lcssm;
+        }
+        #endregion LCSocketCheckBatteryCommand
 
 
         #region Constructor
@@ -818,18 +857,12 @@ namespace Console_MVVMTesting.ViewModels
 
 
             //LoggedInUserRequestMessage is requested from the ProductionViewModel
-            _messenger.Register<LCSocketViewModel, LoggedInUserRequestMessage>(this, (r, m) =>
-            {
-                m.Reply(r.GetLCSocketUser());
-            });
+            //_messenger.Register<LCSocketViewModel, LoggedInUserRequestMessage>(this, (r, m) =>
+            //{
+            //    m.Reply(r.GetLCSocketUser());
+            //});
 
-
-
-            //MyUser myUser = new MyUser { MyUserName = "LCSocketUserName" };
-            // Send a message from some other module
-            //_messenger.Send(new LoggedInUserChangedMessage(myUser));
-
-            _messenger.Register<LCSocketViewModel, LCSocketInitStatusRequestMessage>(this, (myReceiver, myMessenger) =>
+            _messenger.Register<LCSocketViewModel, LCSocketInitRequestMessage>(this, (myReceiver, myMessenger) =>
             {
                 // musi zwracac wszyskie podlonczone sokety do ProductionViewModel
                 myMessenger.Reply(myReceiver.LCSocketInitAsync());
@@ -843,6 +876,11 @@ namespace Console_MVVMTesting.ViewModels
             _messenger.Register<LCSocketViewModel, LCSocketCheckPowerSupplyRequestMessage>(this, (myReceiver, myMessenger) =>
             {
                 myMessenger.Reply(myReceiver.LCSocketCheckPowerSupplyCommand());       // pacz ShellViewModel::IsShuttingDown
+            });
+
+            _messenger.Register<LCSocketViewModel, LCSocketCheckBatteryStatusRequestMessage>(this, (myReceiver, myMessenger) =>
+            {
+                myMessenger.Reply(myReceiver.LCSocketCheckBatteryCommand());       // pacz ShellViewModel::IsShuttingDown
             });
 
 

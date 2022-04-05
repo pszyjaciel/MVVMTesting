@@ -80,13 +80,19 @@ namespace Console_MVVMTesting.ViewModels
                 return;
             }
 
-            //result = await this.InitSocketsTaskAsync();
+            result = await this.InitLCSocketsTaskAsync();
+            if (!result)
+            {
+                return;
+            }
+
+            //result = await this.InitTRSocketsTaskAsync();
             //if (!result)
             //{
             //    return;
             //}
 
-            //result = await this.CheckBatteryStatusTaskAsync();
+            result = await this.CheckBatteryStatusTaskAsync();
             if (!result)
             {
                 //return;
@@ -105,13 +111,13 @@ namespace Console_MVVMTesting.ViewModels
             }
 
 
-            //await Task.Delay(1500);
+            await Task.Delay(45000);
 
-            //result = await this.ShutdownTaskAsync();
-            //if (!result)
-            //{
-            //    return;
-            //}
+            result = await this.ShutdownTaskAsync();
+            if (!result)
+            {
+                return;
+            }
 
 
 
@@ -179,21 +185,38 @@ namespace Console_MVVMTesting.ViewModels
             return rs;
         }
 
-
-        private async Task<bool> InitSocketsTaskAsync()
+        private async Task<bool> InitLCSocketsTaskAsync()
         {
-            _log.Log(consoleColor, "ProductionViewModel::InitSocketsTaskAsync(): Start of Task");
+            _log.Log(consoleColor, "ProductionViewModel::InitLCSocketsTaskAsync(): Start of Task");
+            bool rs = true;
+
+            // Run init of sockets in the LCSocketViewModule and request result
+            LCSocketStateMessage trmsm = await _messenger.Send<LCSocketInitRequestMessage>();
+            foreach (KeyValuePair<IntPtr, Tuple<int, string>> entry in trmsm.SocketInitDict)
+            {
+                _log.Log(consoleColor, $"ProductionViewModel::InitLCSocketsTaskAsync(): socket {entry.Key}: {entry.Value}");
+                if (entry.Value.Item1 != 0) { rs = false; }
+                else { rs = true; }
+            }
+            _log.Log(consoleColor, "ProductionViewModel::InitLCSocketsTaskAsync(): End of Task");
+            return rs;
+        }
+
+
+        private async Task<bool> InitTRSocketsTaskAsync()
+        {
+            _log.Log(consoleColor, "ProductionViewModel::InitTRSocketsTaskAsync(): Start of Task");
             bool rs = true;
 
             // Run init of sockets in the LCSocketViewModule and request result
             TRSocketStateMessage trmsm = await _messenger.Send<TRSocketInitRequestMessage>();
             foreach (KeyValuePair<IntPtr, Tuple<int, string>> entry in trmsm.SocketInitDict)
             {
-                _log.Log(consoleColor, $"ProductionViewModel::InitSocketsTaskAsync(): socket {entry.Key}: {entry.Value}");
+                _log.Log(consoleColor, $"ProductionViewModel::InitTRSocketsTaskAsync(): socket {entry.Key}: {entry.Value}");
                 if (entry.Value.Item1 != 0) { rs = false; }
                 else { rs = true; }
             }
-            _log.Log(consoleColor, "ProductionViewModel::InitSocketsTaskAsync(): End of Task");
+            _log.Log(consoleColor, "ProductionViewModel::InitTRSocketsTaskAsync(): End of Task");
             return rs;
         }
 
@@ -202,18 +225,25 @@ namespace Console_MVVMTesting.ViewModels
         {
             _log.Log(consoleColor, "ProductionViewModel::CheckBatteryStatusTaskAsync(): Start of Task");
             bool rs = false;
-            TRSocketStateMessage trmsm = await _messenger.Send<CheckBatteryStatusRequestMessage>();
-            _log.Log(consoleColor, $"ProductionViewModel::CheckBatteryStatusTaskAsync(): trmsm.MySocket.Keys.Count: {trmsm.BatteryStatusDict.Keys.Count}");
-            if (trmsm.BatteryStatusDict.Keys.Count > 0)
+            LCSocketStateMessage lcssm = await _messenger.Send<LCSocketCheckBatteryStatusRequestMessage>();
+            //_log.Log(consoleColor, $"ProductionViewModel::CheckBatteryStatusTaskAsync(): trmsm.MySocket.Keys.Count: {lcssm.BatteryStatusDict.Keys.Count}");
+
+            IntPtr socketHandle;
+            UInt16 batteryMode;
+            UInt16 batteryStatus;
+            if (lcssm.BatteryStatusDict.Keys.Count > 0)
             {
                 //BatteryMode, BatteryStatus
-                foreach (KeyValuePair<IntPtr, Tuple<UInt16, UInt16>> entry in trmsm.BatteryStatusDict)
+                foreach (KeyValuePair<IntPtr, Tuple<UInt16, UInt16>> entry in lcssm.BatteryStatusDict)
                 {
-                    _log.Log(consoleColor, $"ProductionViewModel::CheckBatteryStatusTaskAsync(): " +
-                        $"socket {entry.Key}: {entry.Value.Item1}, {entry.Value.Item2}");
+                    socketHandle = entry.Key;
+                    batteryMode = entry.Value.Item1;
+                    batteryStatus = entry.Value.Item2;
 
-                    //if ((entry.Value.Item1 == 0) && (entry.Value.Item2 == 0))
-                    if (entry.Value.Item2 == 0)
+                    _log.Log(consoleColor, $"ProductionViewModel::CheckBatteryStatusTaskAsync(): " +
+                        $"socket {socketHandle}: {batteryMode}, {batteryStatus}");
+
+                    if (batteryStatus == 0)
                     {
                         rs = true;
                     }
@@ -285,6 +315,10 @@ namespace Console_MVVMTesting.ViewModels
             // shutdown for sockets
             TRSocketStateMessage trssm = await _messenger.Send<TRShutdownRequestMessage>();
             _log.Log(consoleColor, $"ProductionViewModel::IsShuttingDown.set: trssm.TRErrorNumber: {trssm.TRErrorNumber}");
+
+            LCSocketStateMessage lcssm = await _messenger.Send<LCShutdownRequestMessage>();
+            _log.Log(consoleColor, $"ProductionViewModel::IsShuttingDown.set: trssm.TRErrorNumber: {lcssm.LCErrorNumber}");
+
 
             return true;
         }

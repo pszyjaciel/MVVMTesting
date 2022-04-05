@@ -91,8 +91,8 @@ namespace Console_MVVMTesting
             services.AddTransient<ListLoadsPage>();
             services.AddSingleton<ListLoadsViewModel>();
 
-            //services.AddTransient<LCSocketPage>();
-            //services.AddSingleton<LCSocketViewModel>();
+            services.AddTransient<LCSocketPage>();
+            services.AddSingleton<LCSocketViewModel>();
 
             // production na koncu
             services.AddTransient<ProductionPage>();
@@ -132,6 +132,7 @@ namespace Console_MVVMTesting
 
             // jak nie poczekam, to nie zobacze wyniku..
             // pacz MyTask.Wait(); w ProductionViewModel zamiast tego ReadLine()
+            // albo await Task.Delay(35000); tamrze
             //Console.ReadLine();
 
         }
