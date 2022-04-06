@@ -81,32 +81,20 @@ namespace Console_MVVMTesting.ViewModels
             //    return;
             //}
 
-            //result = await this.InitLCSocketsTaskAsync();
-            //if (!result)
-            //{
-            //    return;
-            //}
+            result = await this.InitLCSocketsTaskAsync();
+            //if (!result) { return; }
 
-            result = await this.InitTRSocketsTaskAsync(numberOfSets);
-            if (!result)
-            {
-                //return;
-            }
+            //result = await this.InitTRSocketsTaskAsync(numberOfSets);
+            //if (!result) { return; }
 
             result = await this.TRSocketCheckBatteryStatusTaskAsync(numberOfSets);
-            if (!result)
-            {
-                //return;
-            }
+            //if (!result) { return; }
 
-            result = await this.TRSocketCheckBatteryAlarmsTaskAsync(numberOfSets);
+            //result = await this.TRSocketCheckBatteryAlarmsTaskAsync(numberOfSets);
             //if (!result) return;
 
             //result = await this.LCSocketCheckBatteryStatusTaskAsync();
-            //if (!result)
-            //{
-            //    //return;
-            //}
+            //if (!result) { return; }
 
             //result = await this.LCSocketCheckBatteryAlarmsTaskAsync();
             //if (!result)
