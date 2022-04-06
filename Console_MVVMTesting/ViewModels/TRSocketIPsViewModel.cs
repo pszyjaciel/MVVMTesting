@@ -914,9 +914,10 @@ namespace Console_MVVMTesting.ViewModels
         // async doesn't work well with Parallel.ForEach: https://stackoverflow.com/a/23139769/7036047
         // The whole idea behind Parallel.ForEach() is that you have a set of threads and each thread processes part of the collection.
         // This doesn't work with async-await, where you want to release the thread for the duration of the async call.
-        private TRSocketStateMessage TRInitCommand()
+        //private TRSocketStateMessage TRInitCommand()
+        internal async Task<TRSocketStateMessage> TRInitCommand()
         {
-            _log.Log(consoleColor, $"TRSocketIPsViewModel::TRInitCommand(): Start of method  ({this.GetHashCode():x8})");
+            System.Diagnostics.Debug.WriteLine(consoleColor, $"TRSocketIPsViewModel::TRInitCommand(): Start of method  ({this.GetHashCode():x8})");
 
             TRSocketStateMessage trssm = new TRSocketStateMessage { MyStateName = "TRInitCommand" };
 
@@ -940,26 +941,26 @@ namespace Console_MVVMTesting.ViewModels
                 {
                     ///// receiving the hello message /////
                     string response = this.ReceiveFromSocket(mySocket);
-                    //_log.Log(consoleColor, $"TRSocketIPsViewModel::TRInitCommand(): Socket {mySocket.Handle} response length: [{response.Length}]");
-                    //_log.Log(consoleColor, $"TRSocketIPsViewModel::TRInitCommand(): Socket {mySocket.Handle} with address {myConnectionItem.Item1.RemoteEndPoint} got response: {response}");
+                    //System.Diagnostics.Debug.WriteLine(consoleColor, $"TRSocketIPsViewModel::TRInitCommand(): Socket {mySocket.Handle} response length: [{response.Length}]");
+                    //System.Diagnostics.Debug.WriteLine(consoleColor, $"TRSocketIPsViewModel::TRInitCommand(): Socket {mySocket.Handle} with address {myConnectionItem.Item1.RemoteEndPoint} got response: {response}");
                     if (!response.Contains("Welcome"))
                     {
-                        //_log.Log(consoleColor, $"TRSocketIPsViewModel::TRInitCommand(): Socket {mySocket.Handle} does not contain 'Welcome' message");
+                        //System.Diagnostics.Debug.WriteLine(consoleColor, $"TRSocketIPsViewModel::TRInitCommand(): Socket {mySocket.Handle} does not contain 'Welcome' message");
                         MyInitSocketDict.Add(mySocket.Handle, new Tuple<int, string>(-1, "TRSocketIPsViewModel::TRInitCommand(): wrong response"));   // error_code is 0 in return
                     }
                     else
                     {
-                        //_log.Log(consoleColor, $"TRSocketIPsViewModel::TRInitCommand(): Socket {mySocket.Handle} with a good response");
+                        //System.Diagnostics.Debug.WriteLine(consoleColor, $"TRSocketIPsViewModel::TRInitCommand(): Socket {mySocket.Handle} with a good response");
                         MyInitSocketDict.Add(mySocket.Handle, new Tuple<int, string>(0, response));   // error_code is 0 in return
                     }
                     trssm.SocketInitDict = MyInitSocketDict;
                 }
-                Task.Delay(500);
+                await Task.Delay(500);
             }
-            _log.Log(consoleColor, $"TRSocketIPsViewModel::TRInitCommand(): trssm.TRErrorNumber: {trssm.TRErrorNumber}");
+            System.Diagnostics.Debug.WriteLine(consoleColor, $"TRSocketIPsViewModel::TRInitCommand(): trssm.TRErrorNumber: {trssm.TRErrorNumber}");
 
             // we are ready with initialize
-            _log.Log(consoleColor, $"TRSocketIPsViewModel::TRInitCommand(): End of method  ({this.GetHashCode():x8})");
+            System.Diagnostics.Debug.WriteLine(consoleColor, $"TRSocketIPsViewModel::TRInitCommand(): End of method  ({this.GetHashCode():x8})");
             return trssm;
         }
         #endregion RunTRInitCommandMessage
