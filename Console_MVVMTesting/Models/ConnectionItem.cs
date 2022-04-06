@@ -154,8 +154,8 @@ namespace Console_MVVMTesting.Models
         #region Constructor
         public ConnectionItem()
         {
-            MyUtils.MyConsoleWriteLine(consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
-                $"ConnectionItem::ConnectionItem()  ({this.GetHashCode():x8})");
+            //MyUtils.MyConsoleWriteLine(consoleColor, $"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
+            //    $"ConnectionItem::ConnectionItem()  ({this.GetHashCode():x8})");
 
             Name = "";
             Host = "";

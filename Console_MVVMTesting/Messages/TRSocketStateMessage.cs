@@ -130,8 +130,8 @@ namespace Console_MVVMTesting.Messages
         public Dictionary<IntPtr, Tuple<int, string>> SocketInitDict { get; set; }     // socket_handle, error_code, error_description
         //public Dictionary<IntPtr, Tuple<SafetyAlertEnum, SafetyStatusEnum, PFAlertEnum, PFStatusEnum>> BatteryStatusAndAlarmsDict { get; set; }
         //public Dictionary<IntPtr, Tuple<BatteryMode, BatteryStatus, SafetyAlertEnum, SafetyStatusEnum, PFAlertEnum, PFStatusEnum>> BatteryStatusAndAlarmsDict { get; set; }
-        public Dictionary<IntPtr, Tuple<UInt16, UInt16>> BatteryStatusDict { get; set; }
-        public Dictionary<IntPtr, Tuple<UInt32, UInt32, UInt16, UInt32>> BatteryAlarmsDict { get; set; }
+        public Dictionary<IntPtr, Tuple<UInt16, UInt16, string>> BatteryStatusDict { get; set; }
+        public Dictionary<IntPtr, Tuple<UInt32, UInt32, UInt16, UInt32, string>> BatteryAlarmsDict { get; set; }
 
 
         public TRSocketStateMessage(string myStateName, TRStatus trs)
@@ -162,11 +162,11 @@ namespace Console_MVVMTesting.Messages
         }
     }
 
-    internal class CheckBatteryAlarmsRequestMessage : AsyncRequestMessage<TRSocketStateMessage>
+    internal class TRSocketCheckBatteryAlarmsRequestMessage : AsyncRequestMessage<TRSocketStateMessage>
     {
-        public CheckBatteryAlarmsRequestMessage()
+        public TRSocketCheckBatteryAlarmsRequestMessage()
         {
-            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] CheckBatteryAlarmsRequestMessage::CheckBatteryAlarmsRequestMessage()  ({this.GetHashCode():x8})");
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] TRSocketCheckBatteryAlarmsRequestMessage::TRSocketCheckBatteryAlarmsRequestMessage()  ({this.GetHashCode():x8})");
         }
     }
 

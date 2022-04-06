@@ -6,6 +6,7 @@ using Microsoft.Toolkit.Mvvm.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -68,50 +69,61 @@ namespace Console_MVVMTesting.ViewModels
 
             bool result = true;
 
-            int myInt = this.GetNumberOfSetsTask();
-            if (myInt < 0)
+            int numberOfSets = this.GetNumberOfSetsTask();
+            if (numberOfSets < 0)
             {
                 return;
             }
 
             //result = await this.InitLoadsTaskAsync();
-            if (!result)
-            {
-                return;
-            }
-
-            result = await this.InitLCSocketsTaskAsync();
-            if (!result)
-            {
-                return;
-            }
-
-            //result = await this.InitTRSocketsTaskAsync();
             //if (!result)
             //{
             //    return;
             //}
 
-            result = await this.CheckBatteryStatusTaskAsync();
+            //result = await this.InitLCSocketsTaskAsync();
+            //if (!result)
+            //{
+            //    return;
+            //}
+
+            result = await this.InitTRSocketsTaskAsync(numberOfSets);
             if (!result)
             {
                 //return;
             }
 
-            //result = await this.CheckBatteryAlarmsTaskAsync();
+            result = await this.TRSocketCheckBatteryStatusTaskAsync(numberOfSets);
             if (!result)
             {
                 //return;
             }
+
+            result = await this.TRSocketCheckBatteryAlarmsTaskAsync(numberOfSets);
+            //if (!result) return;
+
+            //result = await this.LCSocketCheckBatteryStatusTaskAsync();
+            //if (!result)
+            //{
+            //    //return;
+            //}
+
+            //result = await this.LCSocketCheckBatteryAlarmsTaskAsync();
+            //if (!result)
+            //{
+            //return;
+            //}
 
             //result = await this.CheckPowerSupplyTaskAsync();
-            if (!result)
-            {
-                //return;
-            }
+            //if (!result)
+            //{
+            //return;
+            //}
 
 
-            await Task.Delay(45000);
+            _log.Log(consoleColor, $"ProductionViewModel::OnStartButtonExecute(): In the delay task - before.");
+            await Task.Delay(5000);
+            _log.Log(consoleColor, $"ProductionViewModel::OnStartButtonExecute(): In the delay task - and after.");
 
             result = await this.ShutdownTaskAsync();
             if (!result)
@@ -185,6 +197,7 @@ namespace Console_MVVMTesting.ViewModels
             return rs;
         }
 
+
         private async Task<bool> InitLCSocketsTaskAsync()
         {
             _log.Log(consoleColor, "ProductionViewModel::InitLCSocketsTaskAsync(): Start of Task");
@@ -203,27 +216,198 @@ namespace Console_MVVMTesting.ViewModels
         }
 
 
-        private async Task<bool> InitTRSocketsTaskAsync()
+        // initializes TR-Sockets
+        private async Task<bool> InitTRSocketsTaskAsync(int numberOfSets)
         {
-            _log.Log(consoleColor, "ProductionViewModel::InitTRSocketsTaskAsync(): Start of Task");
+            _log.Log("ProductionViewModel::InitTRSocketsTaskAsync(): Start of method");
             bool rs = true;
+            //XamlInitSocketsBackground = new SolidColorBrush(Colors.Yellow);
 
-            // Run init of sockets in the LCSocketViewModule and request result
+            // Run init of sockets in the TRSocketViewModule and request result
             TRSocketStateMessage trmsm = await _messenger.Send<TRSocketInitRequestMessage>();
+            _log.Log($"ProductionViewModel::InitTRSocketsTaskAsync(): trmsm.SocketInitDict.Keys.Count: {trmsm.SocketInitDict.Keys.Count}");
+
+            // check if number of initialized sets equals to numberOfSets
+            if (trmsm.SocketInitDict.Keys.Count != numberOfSets)
+            {
+                _log.Log($"ProductionViewModel::InitTRSocketsTaskAsync(): The number of listening sockets does not equal " +
+                    "to the number of sets you inserted.\n");
+                //await _userNotificationService.MessageDialogAsync("Initialization of sockets", $"The number of listening sockets does not equal\n" +
+                //    "to the number of sets you inserted.\n");
+                //XamlInitSocketsBackground = new SolidColorBrush(Colors.LightPink);
+                return false;
+            }
+
+            IntPtr socketHandle;
+            int intValue;
+            string strValue;
+
             foreach (KeyValuePair<IntPtr, Tuple<int, string>> entry in trmsm.SocketInitDict)
             {
-                _log.Log(consoleColor, $"ProductionViewModel::InitTRSocketsTaskAsync(): socket {entry.Key}: {entry.Value}");
-                if (entry.Value.Item1 != 0) { rs = false; }
-                else { rs = true; }
+                socketHandle = entry.Key;
+                intValue = entry.Value.Item1;
+                strValue = entry.Value.Item2;
+
+                _log.Log($"ProductionViewModel::InitTRSocketsTaskAsync(): socket {socketHandle}: {entry.Value}");
+                if (intValue != 0)
+                {
+                    //XamlInitSocketsBackground = new SolidColorBrush(Colors.LightPink);
+                    rs = false;
+                }
+                else
+                {
+                    //XamlInitSocketsBackground = new SolidColorBrush(Colors.PaleGreen);
+                    rs = true;
+                }
             }
-            _log.Log(consoleColor, "ProductionViewModel::InitTRSocketsTaskAsync(): End of Task");
+
+            if (!rs)
+            {
+                //await _userNotificationService.MessageDialogAsync("Initialization of sockets", $"Initializing failed.\n" +
+                //    "Check if TR/LC is running.\n" + "Check if OM-terminal gets response.\n");
+                _log.Log("ProductionViewModel::InitTRSocketsTaskAsync(): Initializing of TR-sockets failed.\n" +
+                    "Check if TR is running.\n" + "Check if OM-terminal gets response.\n");
+            }
+
+            _log.Log("ProductionViewModel::InitTRSocketsTaskAsync(): End of method");
             return rs;
         }
 
 
-        private async Task<bool> CheckBatteryStatusTaskAsync()
+
+        private async Task<bool> TRSocketCheckBatteryStatusTaskAsync(int numberOfSets)
         {
-            _log.Log(consoleColor, "ProductionViewModel::CheckBatteryStatusTaskAsync(): Start of Task");
+            _log.Log(consoleColor, "ProductionViewModel::TRSocketCheckBatteryStatusTaskAsync(): Start of Task");
+            //XamlCheckBatteryStatusAndAlarmsBackground = new SolidColorBrush(Colors.Yellow);
+
+            bool rs = false;
+            TRSocketStateMessage trmsm = await _messenger.Send<CheckBatteryStatusRequestMessage>();
+            _log.Log(consoleColor, $"ProductionViewModel::TRSocketCheckBatteryStatusTaskAsync(): trmsm.BatteryStatusDict.Keys.Count: {trmsm.BatteryStatusDict.Keys.Count}");
+
+            // check if OK-status for all batteries equals to numberOfSets
+            if (trmsm.BatteryStatusDict.Keys.Count != numberOfSets)
+            {
+                _log.Log(consoleColor, $"ProductionViewModel::TRSocketCheckBatteryStatusTaskAsync(): The OK-status of batteries does not equal to the number of sets you inserted.");
+                //XamlCheckBatteryStatusAndAlarmsBackground = new SolidColorBrush(Colors.LightPink);
+                //await _userNotificationService.MessageDialogAsync("Battery status", $"The OK-status of batteries does not equal to the number of sets you inserted.\n");
+                return false;
+            }
+
+            if (trmsm.BatteryStatusDict.Keys.Count > 0)
+            {
+                IntPtr socketNumber;
+                ushort batteryMode;
+                ushort batteryStatus;
+                string errorMessage;
+                foreach (KeyValuePair<IntPtr, Tuple<UInt16, UInt16, string>> entry in trmsm.BatteryStatusDict)  //BatteryMode, BatteryStatus, BatteryErrorMessage
+                {
+                    socketNumber = entry.Key;
+                    batteryMode = entry.Value.Item1;
+                    batteryStatus = entry.Value.Item2;
+                    errorMessage = entry.Value.Item3;
+
+                    _log.Log(consoleColor, $"ProductionViewModel::TRSocketCheckBatteryStatusTaskAsync(): " +
+                        $"socket {socketNumber}: {batteryMode:X4}, {batteryStatus:X4}, {errorMessage}");
+
+                    if (batteryStatus == 0)
+                    {
+                        //XamlCheckBatteryStatusAndAlarmsBackground = new SolidColorBrush(Colors.PaleGreen);
+                        rs = true;
+                    }
+                    else
+                    {
+                        //XamlCheckBatteryStatusAndAlarmsBackground = new SolidColorBrush(Colors.LightPink);
+                        _log.Log(consoleColor, "ProductionViewModel::TRSocketCheckBatteryStatusTaskAsync(): here we have to parse the error");
+                        //this.ParseBatteryStatus();
+                        //_userNotificationService.MessageDialogAsync("Battery status", $"Battery status failed with error:\n{errorMessage}\n" +
+                        //    "Check if battery is connected.\nCheck if OM gets response from battery.\n");
+                        rs = false;
+                    }
+                }
+            }
+            _log.Log("ProductionViewModel::TRSocketCheckBatteryStatusTaskAsync(): End of Task");
+            return rs;
+        }
+
+        private async Task<bool> TRSocketCheckBatteryAlarmsTaskAsync(int numberOfSets)
+        {
+            _log.Log(consoleColor, "ProductionViewModel::TRSocketCheckBatteryAlarmsTaskAsync(): Start of Task");
+            bool rs = false;
+            TRSocketStateMessage trmsm = await _messenger.Send<TRSocketCheckBatteryAlarmsRequestMessage>();
+
+            // check if no alarms has been notified for all numberOfSets
+            if (trmsm.BatteryAlarmsDict.Keys.Count != numberOfSets)
+            {
+                _log.Log(consoleColor, $"ProductionViewModel::TRSocketCheckBatteryAlarmsTaskAsync(): Could not determine all alarms for sets you inserted");
+                // _userNotificationService.MessageDialogAsync("Battery alarms", $"Could not determine all alarms for sets you inserted.\n");
+                //XamlCheckBatteryStatusAndAlarmsBackground = new SolidColorBrush(Colors.LightPink);
+                return false;
+            }
+
+            IntPtr mySocketHandle;
+            UInt32 SafetyAlertEnum;
+            UInt32 SafetyStatusEnum;
+            UInt16 PFAlertEnum;
+            UInt32 PFStatusEnum;
+            string BatteryError;
+
+            _log.Log(consoleColor, $"ProductionViewModel::TRSocketCheckBatteryAlarmsTaskAsync(): trmsm.MySocket.Keys.Count: {trmsm.BatteryAlarmsDict.Keys.Count}");
+            if (trmsm.BatteryAlarmsDict.Keys.Count > 0)
+            {
+                //SafetyAlertEnum, SafetyStatusEnum, PFAlertEnum, PFStatusEnum
+                foreach (KeyValuePair<IntPtr, Tuple<UInt32, UInt32, UInt16, UInt32, string>> entry in trmsm.BatteryAlarmsDict)
+                {
+                    mySocketHandle = entry.Key;
+                    SafetyAlertEnum = entry.Value.Item1;
+                    SafetyStatusEnum = entry.Value.Item2;
+                    PFAlertEnum = entry.Value.Item3;
+                    PFStatusEnum = entry.Value.Item4;
+                    BatteryError = entry.Value.Item5;
+
+                    _log.Log(consoleColor, $"ProductionViewModel::TRSocketCheckBatteryAlarmsTaskAsync(): " +
+                        $"socket {mySocketHandle}: {SafetyAlertEnum}, {SafetyStatusEnum}, {PFAlertEnum}, {PFStatusEnum}, {BatteryError}");
+
+                    if ((SafetyAlertEnum == 0) && (SafetyStatusEnum == 0) && (PFAlertEnum == 0) && (PFStatusEnum == 0) && (BatteryError.Equals("")))
+                    {
+                        rs = true;
+                    }
+                    else
+                    {
+                        //this.ParseBatteryAlarms();
+                    }
+                }
+            }
+            _log.Log(consoleColor, "ProductionViewModel::TRSocketCheckBatteryAlarmsTaskAsync(): End of Task");
+            return rs;
+        }
+
+
+        // 2. Make sure that PS is alive and power source is AC - OM command
+        private async Task<bool> TRSocketCheckPowerSupplyTaskAsync()
+        {
+            _log.Log("ProductionViewModel::TRSocketCheckPowerSupplyTaskAsync(): Start of Task");
+            //XamlCheckPowerSupplyBackground = new SolidColorBrush(Colors.Yellow);
+
+            TRSocketStateMessage trmsm = await _messenger.Send<TRSocketCheckPowerSupplyRequestMessage>();
+            _log.Log($"ProductionViewModel::TRSocketCheckPowerSupplyTaskAsync(): trmsm.MySocket.Keys.Count: {trmsm.CheckPowerSupplyDict.Keys.Count}");
+            if (trmsm.CheckPowerSupplyDict.Keys.Count > 0)
+            {
+                foreach (KeyValuePair<IntPtr, Tuple<string, double, int>> entry in trmsm.CheckPowerSupplyDict)
+                {
+                    _log.Log($"ProductionViewModel::TRSocketCheckPowerSupplyTaskAsync(): socket {entry.Key}: {entry.Value}");
+                }
+            }
+            //XamlCheckPowerSupplyBackground = new SolidColorBrush(Colors.PaleGreen);
+            _log.Log("ProductionViewModel::TRSocketCheckPowerSupplyTaskAsync(): End of Task");
+            return true;
+        }
+
+
+
+
+        private async Task<bool> LCSocketCheckBatteryStatusTaskAsync()
+        {
+            _log.Log(consoleColor, "ProductionViewModel::LCSocketCheckBatteryStatusTaskAsync(): Start of Task");
             bool rs = false;
             LCSocketStateMessage lcssm = await _messenger.Send<LCSocketCheckBatteryStatusRequestMessage>();
             //_log.Log(consoleColor, $"ProductionViewModel::CheckBatteryStatusTaskAsync(): trmsm.MySocket.Keys.Count: {lcssm.BatteryStatusDict.Keys.Count}");
@@ -240,7 +424,7 @@ namespace Console_MVVMTesting.ViewModels
                     batteryMode = entry.Value.Item1;
                     batteryStatus = entry.Value.Item2;
 
-                    _log.Log(consoleColor, $"ProductionViewModel::CheckBatteryStatusTaskAsync(): " +
+                    _log.Log(consoleColor, $"ProductionViewModel::LCSocketCheckBatteryStatusTaskAsync(): " +
                         $"socket {socketHandle}: {batteryMode}, {batteryStatus}");
 
                     if (batteryStatus == 0)
@@ -253,57 +437,12 @@ namespace Console_MVVMTesting.ViewModels
                     }
                 }
             }
-            _log.Log(consoleColor, "ProductionViewModel::CheckBatteryStatusTaskAsync(): End of Task");
+            _log.Log(consoleColor, "ProductionViewModel::LCSocketCheckBatteryStatusTaskAsync(): End of Task");
             return false;
         }
 
 
-        private async Task<bool> CheckBatteryAlarmsTaskAsync()
-        {
-            _log.Log(consoleColor, "ProductionViewModel::CheckBatteryAlarmsTaskAsync(): Start of Task");
-            bool rs = false;
-            TRSocketStateMessage trmsm = await _messenger.Send<CheckBatteryAlarmsRequestMessage>();
-            _log.Log(consoleColor, $"ProductionViewModel::CheckBatteryAlarmsTaskAsync(): trmsm.MySocket.Keys.Count: {trmsm.BatteryAlarmsDict.Keys.Count}");
-            if (trmsm.BatteryAlarmsDict.Keys.Count > 0)
-            {
-                //SafetyAlertEnum, SafetyStatusEnum, PFAlertEnum, PFStatusEnum
-                foreach (KeyValuePair<IntPtr, Tuple<UInt32, UInt32, UInt16, UInt32>> entry in trmsm.BatteryAlarmsDict)
-                {
-                    _log.Log(consoleColor, $"ProductionViewModel::CheckBatteryAlarmsTaskAsync(): " +
-                        $"socket {entry.Key}: {entry.Value.Item1}, {entry.Value.Item2}, {entry.Value.Item3}, {entry.Value.Item4}");
 
-                    if ((entry.Value.Item1 == 0) && (entry.Value.Item2 == 0) && (entry.Value.Item3 == 0) && (entry.Value.Item4 == 0))
-                    {
-                        rs = true;
-                    }
-                    else
-                    {
-                        //this.ParseBatteryAlarms();
-                    }
-                }
-            }
-            _log.Log(consoleColor, "ProductionViewModel::CheckBatteryAlarmsTaskAsync(): End of Task");
-            return rs;
-        }
-
-
-        // 2. Make sure that PS is alive and power source is AC - OM command
-        private async Task<bool> CheckPowerSupplyTaskAsync()
-        {
-            _log.Log(consoleColor, "ProductionViewModel::CheckPowerSupplyTaskAsync(): Start of Task");
-
-            TRSocketStateMessage trmsm = await _messenger.Send<TRSocketCheckPowerSupplyRequestMessage>();
-            _log.Log(consoleColor, $"ProductionViewModel::CheckPowerSupplyTaskAsync(): trmsm.MySocket.Keys.Count: {trmsm.CheckPowerSupplyDict.Keys.Count}");
-            if (trmsm.CheckPowerSupplyDict.Keys.Count > 0)
-            {
-                foreach (KeyValuePair<IntPtr, Tuple<string, double, int>> entry in trmsm.CheckPowerSupplyDict)
-                {
-                    _log.Log(consoleColor, $"ProductionViewModel::CheckPowerSupplyTaskAsync(): socket {entry.Key}: {entry.Value}");
-                }
-            }
-            _log.Log(consoleColor, "ProductionViewModel::CheckPowerSupplyTaskAsync(): End of Task");
-            return true;
-        }
 
 
         private async Task<bool> ShutdownTaskAsync()

@@ -62,7 +62,7 @@ namespace Console_MVVMTesting.ViewModels
         private ManualResetEvent receiveDone = new ManualResetEvent(false);
         private ManualResetEvent sendDone = new ManualResetEvent(false);
 
-        private List<Socket> _myListOfSockets;
+        //private List<Socket> _myListOfSockets;
 
         #endregion privates
 
@@ -319,8 +319,11 @@ namespace Console_MVVMTesting.ViewModels
             {
                 _log.Log(consoleColor, $"TRSocketIPsViewModel::ConnectCallback(): {ex.Message}");
             }
-            // Signal that the connection has been made.  (or not)
-            connectDone.Set();
+            finally
+            {
+                // Signal that the connection has been made.  (or not)
+                connectDone.Set();
+            }
             //_log.Log(consoleColor, $"TRSocketIPsViewModel::ConnectCallback(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : End of method.");
         }
         #endregion ConnectCallback
@@ -345,7 +348,8 @@ namespace Console_MVVMTesting.ViewModels
             // waiting for complition
             while (!result.IsCompleted)
             {
-                await Task.Yield();
+                _log.Log(consoleColor, $"TRSocketIPsViewModel::MyConnectAsync(): result.IsCompleted: {result.IsCompleted}");
+                await Task.Delay(100);
             }
 
             _log.Log(consoleColor, $"TRSocketIPsViewModel::MyConnectAsync(): terminalSocket.Handle: {terminalSocket.Handle}, result.IsCompleted: {result.IsCompleted}, _mySocketNativeErrorCode: {_mySocketNativeErrorCode}");
@@ -367,33 +371,44 @@ namespace Console_MVVMTesting.ViewModels
             _log.Log(consoleColor, $"TRSocketIPsViewModel::ConnectToHost(): socket: {myTuple.Item1.Handle}, " +
                 $"ThreadId: {Thread.CurrentThread.ManagedThreadId} : Start of method  ({this.GetHashCode():x8})");
 
+            SocketException se = null;
+            Socket mySocket = null;
+            IPAddress myIPAddress;
+            ConnectionItem myConnectionItem;
+
             Task MyTask = Task.Run(async () =>
             {
-                int connectTry = 2;    // how many try to connect?
-                EndPoint remoteEP = new IPEndPoint(myTuple.Item2, myTuple.Item3.Port);
+                mySocket = myTuple.Item1;
+                myIPAddress = myTuple.Item2;
+                myConnectionItem = myTuple.Item3;
+
+                int connectTry = 1;    // how many try to connect?
+                EndPoint remoteEP = new IPEndPoint(myIPAddress, myConnectionItem.Port);
                 do
                 {
-                    await this.MyConnectAsync(remoteEP, myTuple.Item1);
-                    connectDone.WaitOne();
+                    await this.MyConnectAsync(remoteEP, mySocket);
+                    connectDone.WaitOne(-1, false);
 
-                    if (myTuple.Item1.Connected == false)
+                    if (mySocket.Connected == false)
                     {
                         await Task.Delay(5000);
                         connectTry--;
                     }
-                } while ((myTuple.Item1.Connected == false) && (connectTry > 0));
+                } while ((mySocket.Connected == false) && (connectTry > 0));
 
-                _log.Log(consoleColor, $"TRSocketIPsViewModel::ConnectToHost(): {myTuple.Item1.RemoteEndPoint} --> {myTuple.Item1.LocalEndPoint}");
+                _log.Log(consoleColor, $"TRSocketIPsViewModel::ConnectToHost(): {mySocket.RemoteEndPoint} --> {mySocket.LocalEndPoint}");
             });
             MyTask.Wait();
 
-            SocketException se = this.GetLastError(myTuple.Item1);
+            if (mySocket is not null)
+            {
+                se = this.GetLastError(mySocket);
+            }
             return se;
         }
         #endregion ConnectToHost
 
 
-        // To cancel a pending BeginReceive one can call the Close method.
         #region ReceiveCallBack
         private void ReceiveCallBack(IAsyncResult ar)
         {
@@ -408,29 +423,99 @@ namespace Console_MVVMTesting.ViewModels
             string heartbeat = "@\r\n";
             try
             {
-                // the socket server returns 0x0d for a new line, and 0x0d 0x0a for end of message
                 int receivedBytes = terminalSocket.EndReceive(ar); //   Ends a pending asynchronous read.
                 _log.Log(consoleColor, $"TRSocketIPsViewModel::ReceiveCallBack(): socket {terminalSocket.Handle}, receivedBytes: {receivedBytes}");
-
-                // Connection error occured, as the server never returns 0 bytes
-                if (receivedBytes == 0)
-                {
-                    _log.Log(consoleColor, $"TRSocketIPsViewModel::ReceiveCallBack(): socket {terminalSocket.Handle}: It looks like a connection error!");
-                    so.sb.Clear();   // clean the buffer
-
-                    // Signal that all bytes have been received.  
-                    receiveDone.Set();
-                    return;     // we will not close the connection!
-                }
 
                 if (receivedBytes > 0)
                 {
                     // There might be more data, so store the data received so far.  
                     response = Encoding.ASCII.GetString(so.buffer, 0, receivedBytes);
                     tmpResponse = response.Replace(heartbeat, "");        // get rid of the heartbeat
+
+                    // the socket server returns 0x0d for a new line, and 0x0d 0x0a for end of message
                     if (tmpResponse.EndsWith("\r\n"))
                     {
                         so.sb.Append(tmpResponse);
+                        receiveDone.Set();
+                    }
+                    else
+                    {
+                        //  Get the rest of the data.  (recursion!)
+                        terminalSocket.BeginReceive(so.buffer, 0, StateObject.BufferSize, SocketFlags.None, new AsyncCallback(ReceiveCallBack), so);
+                    }
+                }
+                else
+                {
+                    return;
+                }
+            }
+            catch (SocketException se)
+            {
+                _log.Log(consoleColor, $"TRSocketIPsViewModel::ReceiveCallBack(): {se.NativeErrorCode} : {se.SocketErrorCode} : {se.Message}");
+            }
+            catch (Exception ex)
+            {
+                _log.Log(consoleColor, $"TRSocketIPsViewModel::ReceiveCallBack(): {ex.Message}");
+            }
+            _log.Log(consoleColor, $"TRSocketIPsViewModel::ReceiveCallBack(): ThreadId: {Thread.CurrentThread.ManagedThreadId} - End of method.");
+        }
+        #endregion ReceiveCallBack
+
+
+
+        // To cancel a pending BeginReceive one can call the Close method.
+        #region ReceiveCallBack
+        private void ReceiveCallBack2(IAsyncResult ar)
+        {
+            string consoleColor = "LGREEN";     // kolbaki w innym kolorze
+            _log.Log(consoleColor, $"TRSocketIPsViewModel::ReceiveCallBack(): ThreadId: {Thread.CurrentThread.ManagedThreadId} - Start of method.");
+
+            // Retrieve the state object and the client socket from the asynchronous state object.  
+            StateObject so = (StateObject)ar.AsyncState;
+            Socket terminalSocket = so.workSocket;
+
+            string response = "", tmpResponse = "";
+            string heartbeat = "@\r\n";
+            bool rs;
+            try
+            {
+                int receivedBytes = terminalSocket.EndReceive(ar); //   Ends a pending asynchronous read.
+                _log.Log(consoleColor, $"TRSocketIPsViewModel::ReceiveCallBack(): socket {terminalSocket.Handle}, receivedBytes: {receivedBytes}");
+
+                // this condition occurs if a connection is broken
+                if (receivedBytes == 0)
+                {
+                    //_log.Log($"TRSocketIPsViewModel::ReceiveCallBack(): socket {terminalSocket.Handle}: It looks like a connection error!");
+                    //so.sb.Clear();   // clean the buffer
+
+                    // Signal that all bytes have been received.  
+                    //rs = receiveDone.Set();
+                    //if (!rs)
+                    //{
+                    //    _log.Log(consoleColor, $"TRSocketIPsViewModel::ReceiveCallBack: receiveDone.Set() failed.");
+                    //}
+                    return;     // we exit, but we will not close the connection!
+                }
+
+                //if (receivedBytes == 3)
+                //{
+                //    _log.Log(consoleColor, $"TRSocketIPsViewModel::ReceiveCallBack: got 3 bytes (receivedBytes == 3).");
+                //    //  got hearthbeat, so try again.  (recursion!)
+                //    terminalSocket.BeginReceive(so.buffer, 0, StateObject.BufferSize, SocketFlags.None, new AsyncCallback(ReceiveCallBack), so);
+                //}
+
+                if (receivedBytes > 0)
+                {
+                    // There might be more data, so store the data received so far.  
+                    response = Encoding.ASCII.GetString(so.buffer, 0, receivedBytes);
+                    //_log.Log(consoleColor, $"TRSocketIPsViewModel::ReceiveCallBack(): response: {response}");
+
+                    //tmpResponse = response.Replace(heartbeat, "");        // get rid of the heartbeat
+
+                    // the socket server returns 0x0d for a new line, and 0x0d 0x0a for end of message
+                    if (response.EndsWith("\r\n"))
+                    {
+                        so.sb.Append(response);
                         receiveDone.Set();
                     }
                     else
@@ -448,13 +533,18 @@ namespace Console_MVVMTesting.ViewModels
             {
                 _log.Log(consoleColor, $"TRSocketIPsViewModel::ReceiveCallBack(): {ex.Message}");
             }
-            receiveDone.Set();
+            // we should not signal done when we have been called recursive!
+            //finally
+            //{
+            //    //receiveDone.Set();
+            //}
             _log.Log(consoleColor, $"TRSocketIPsViewModel::ReceiveCallBack(): ThreadId: {Thread.CurrentThread.ManagedThreadId} - End of method.");
         }
         #endregion ReceiveCallBack
 
 
 
+        // only one call of fire and forget
         #region ReceiveFromSocket
         public string ReceiveFromSocket(Socket terminalSocket)
         {
@@ -469,15 +559,35 @@ namespace Console_MVVMTesting.ViewModels
 
             try
             {
-                // Begin receiving the data from the remote device. ReceiveCallBack() exits only when socket closing.
+                // Begin receiving the data from the remote device.
                 terminalSocket.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReceiveCallBack), state);
+                receiveDone.WaitOne(-1, false);
             }
             catch (Exception e)
             {
                 _log.Log(consoleColor, e.ToString());
             }
 
-            receiveDone.WaitOne();
+
+            // check the length!
+            _log.Log(consoleColor, $"TRSocketIPsViewModel::ReceiveFromSocket(): state.sb: [{state.sb.Length}]");
+
+            //if ((state.sb.Length == 0) || (state.sb.Length == 3))
+            //if (state.sb.Length == 0)
+            //{
+            //    try
+            //    {
+            //        // Begin receiving the data from the remote device. 
+            //        terminalSocket.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReceiveCallBack), state);
+            //        receiveDone.WaitOne(300, false);
+            //    }
+            //    catch (Exception e)
+            //    {
+            //        _log.Log(consoleColor, e.ToString());
+            //    }
+            //}
+
+            //_log.Log(consoleColor, $"TRSocketIPsViewModel::ReceiveFromSocket(): on threadId {Thread.CurrentThread.ManagedThreadId} : state.sb.ToString(): {state.sb}");
 
             _log.Log(consoleColor, $"TRSocketIPsViewModel::ReceiveFromSocket(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : End of method");
             return state.sb.ToString();
@@ -537,7 +647,7 @@ namespace Console_MVVMTesting.ViewModels
             {
                 _log.Log(consoleColor, $"TRSocketIPsViewModel::SendToSocket(): {se.NativeErrorCode} : {se.SocketErrorCode}: {se.Message}");
             }
-            sendDone.WaitOne();
+            sendDone.WaitOne(-1, false);
 
             string response = this.ReceiveFromSocket(terminalSocket);
 
@@ -605,7 +715,7 @@ namespace Console_MVVMTesting.ViewModels
                     terminalSocket.BeginDisconnect(false, new AsyncCallback(DisconnectCallback), terminalSocket);
 
                     // Wait for the disconnect to complete.
-                    disconnectDone.WaitOne();
+                    disconnectDone.WaitOne(-1, false);
                     if (terminalSocket.Connected)
                     {
                         _log.Log(consoleColor, "TRSocketIPsViewModel::Disconnect(): We're still connected");
@@ -637,39 +747,139 @@ namespace Console_MVVMTesting.ViewModels
 
 
         ////////////////// CLOSING SOCKETS /////////////////
+
+
+
+        // reuse dziala tylko dla BeginDisconnect i EndDisconnect ale po kilku minutach, inaczej time_wait
+        // ale rzadnego close!
+
+        #region Disconnect
+        // https://docs.microsoft.com/en-us/dotnet/api/system.net.sockets.socket.begindisconnect?view=net-6.0
+        public async Task<bool> MyDisconnectAsync(Socket terminalSocket)
+        {
+            _log.Log($"TRSocketIPsViewModel::Disconnect(): socket: {terminalSocket.Handle} - Start of method");
+            bool result = false;
+
+            if (terminalSocket.Connected)
+            {
+                IAsyncResult rs = null;
+
+                try
+                {
+                    // Release the socket.
+                    // To ensure that all data is sent and received before the socket is closed, you should call Shutdown before calling the Disconnect method.
+                    terminalSocket.Shutdown(SocketShutdown.Both);   // Make sure to do this
+
+                    // Begins an asynchronous request to disconnect from a remote endpoint.
+                    // Disconnect() is usually only used when you plan to reuse the same socket.
+                    // It will block until the TIME_WAIT period expires (several minutes, it´s a OS-wide setting).
+                    // So usually you do a Shutdown() followed by a Close() on both sides.
+                    // public IAsyncResult BeginDisconnect(bool reuseSocket, AsyncCallback? callback, object? state)
+                    rs = terminalSocket.BeginDisconnect(true, new AsyncCallback(DisconnectCallback), terminalSocket);
+
+                    // Wait for the disconnect to complete.
+                    disconnectDone.WaitOne(-1, false);
+                    if (terminalSocket.Connected)
+                    {
+                        _log.Log("TRSocketIPsViewModel::Disconnect(): We're still connected");
+
+                    }
+                    else
+                    {
+                        _log.Log("TRSocketIPsViewModel::Disconnect(): We're disconnected");
+                        result = true;
+                    }
+                }
+                catch (SocketException se)
+                {
+                    _log.Log(consoleColor, $"TRSocketIPsViewModel::Disconnect(): socket {terminalSocket.Handle}: {se.SocketErrorCode} : {se.Message} ({se.NativeErrorCode})");
+
+                }
+                catch (Exception ex)
+                {
+                    _log.Log(consoleColor, $"TRSocketIPsViewModel::Disconnect(): {ex.Message}");
+                }
+
+                // waiting for complition
+                while (!rs.IsCompleted)
+                {
+                    await Task.Yield(); // ma byc
+                }
+
+            }
+            _log.Log($"TRSocketIPsViewModel::Disconnect(): End of method: result: {result}");
+            return result;
+        }
+        #endregion
+
+
+
+        public SocketException DisconnectFromHost(Tuple<Socket, IPAddress, ConnectionItem> myTuple)
+        {
+            _log.Log(consoleColor, $"TRSocketIPsViewModel::DisconnectFromHost(): socket: {myTuple.Item1.Handle}, " +
+                $"ThreadId: {Thread.CurrentThread.ManagedThreadId} : Start of method  ({this.GetHashCode():x8})");
+
+            Socket mySocket = myTuple.Item1;
+
+            SocketException se = null;
+            if (mySocket.Connected)
+            {
+                Task MyTask = Task.Run(async () =>
+                {
+                    await this.MyDisconnectAsync(mySocket);
+                    connectDone.WaitOne(-1, false);
+                });
+                MyTask.Wait();
+
+                se = this.GetLastError(myTuple.Item1);
+            }
+
+            _log.Log(consoleColor, $"TRSocketIPsViewModel::DisconnectFromHost(): socket: {mySocket.Handle}, " +
+                $"ThreadId: {Thread.CurrentThread.ManagedThreadId} : End of method  ({this.GetHashCode():x8})");
+            return se;
+        }
+
+
+
+
         #region RunTRShutdownCommand
         private TRSocketStateMessage RunTRShutdownCommand()
         {
             _log.Log(consoleColor, $"TRSocketIPsViewModel::RunTRShutdownCommand(): Start of method  ({this.GetHashCode():x8})");
 
-            if (_myListOfSockets == null)
-                return new TRSocketStateMessage { TRErrorNumber = -1 };
+            _log.Log(consoleColor, $"TRSocketIPsViewModel::RunTRShutdownCommand(): _connectionItemList.Count: {_connectionItemList.Count}");
+            Socket mySocket;
+            IntPtr mySocketHandle;
 
-            bool shutDownResult = true;
             int numberOfDisconnectedSockets = 0;
-
-            // obs: parallel call
-            Parallel.ForEach(_myListOfSockets, (mySocket) =>
+            bool shutDownResult = true;
+            SocketException se = null;
+            if (_connectionItemList is not null)
             {
-                bool rs = false;
-                rs = this.Disconnect(mySocket);
-                _log.Log(consoleColor, $"TRSocketIPsViewModel::RunTRShutdownCommand(): mySocket {mySocket.Handle}: {mySocket.Connected}");
-                if (rs)
+                foreach (Tuple<Socket, IPAddress, ConnectionItem> myConnectionItem in _connectionItemList)
                 {
-                    numberOfDisconnectedSockets++;
-                }
-            });
+                    mySocket = myConnectionItem.Item1;
+                    mySocketHandle = mySocket.Handle;
 
-            _log.Log(consoleColor, $"TRSocketIPsViewModel::RunTRShutdownCommand(): numberOfDisconnectedSockets: {numberOfDisconnectedSockets}, _myListOfSockets.Count: {_myListOfSockets.Count}");
-            if (numberOfDisconnectedSockets != _myListOfSockets.Count)
-            {
-                _log.Log(consoleColor, $"TRSocketIPsViewModel::RunTRShutdownCommand(): not all sockets have been shuted down properly.");
-                shutDownResult = false;
+                    se = DisconnectFromHost(myConnectionItem);
+                    if (se == null) numberOfDisconnectedSockets++;
+
+                    //myConnectionItem.Item1.Blocking
+                    myConnectionItem.Item1.Close(100);
+
+                    _log.Log(consoleColor, $"TRSocketIPsViewModel::RunTRShutdownCommand(): mySocket {mySocketHandle}: {mySocket.Connected}");
+                }
+
+                _log.Log(consoleColor, $"TRSocketIPsViewModel::RunTRShutdownCommand(): numberOfDisconnectedSockets: {numberOfDisconnectedSockets}, _connectionItemList.Count: {_connectionItemList.Count}");
+                if (numberOfDisconnectedSockets != _connectionItemList.Count)
+                {
+                    _log.Log(consoleColor, $"TRSocketIPsViewModel::RunTRShutdownCommand(): not all sockets have been shuted down properly.");
+                    shutDownResult = false;
+                }
             }
 
-            TRSocketStateMessage trssm = new TRSocketStateMessage();
+            TRSocketStateMessage trssm = new TRSocketStateMessage { MyStateName = "TRSocketIPsViewModel" };
             trssm.TRErrorNumber = shutDownResult ? 0 : -1;      // error number can expand
-            trssm.MyStateName = "RunTRShutdownCommand";
             trssm.trStatus = shutDownResult ? TRStatus.Success : TRStatus.Error;
 
             _log.Log(consoleColor, $"TRSocketIPsViewModel::RunTRShutdownCommand(): End of method  ({this.GetHashCode():x8})");
@@ -711,34 +921,40 @@ namespace Console_MVVMTesting.ViewModels
             TRSocketStateMessage trssm = new TRSocketStateMessage { MyStateName = "TRInitCommand" };
 
             Dictionary<IntPtr, Tuple<int, string>> MyInitSocketDict = new();
+            Socket mySocket;
             SocketException se = null;
             foreach (Tuple<Socket, IPAddress, ConnectionItem> myConnectionItem in _connectionItemList)
             {
-                if (!myConnectionItem.Item1.Connected)
+                mySocket = myConnectionItem.Item1;
+                if (!mySocket.Connected)
                 {
                     se = this.ConnectToHost(myConnectionItem);
                 }
                 if (se != null)
                 {
                     Tuple<int, string> myTuple = new Tuple<int, string>(se.NativeErrorCode, se.Message);
-                    MyInitSocketDict.Add(myConnectionItem.Item1.Handle, myTuple);
+                    MyInitSocketDict.Add(mySocket.Handle, myTuple);
                     trssm.SocketInitDict = MyInitSocketDict;
                 }
                 else
                 {
                     ///// receiving the hello message /////
-                    string response = this.ReceiveFromSocket(myConnectionItem.Item1);
-                    _log.Log(consoleColor, $"TRSocketIPsViewModel::TRInitCommand(): Socket {myConnectionItem.Item1.Handle} with address {myConnectionItem.Item1.RemoteEndPoint} got response: {response}");
+                    string response = this.ReceiveFromSocket(mySocket);
+                    //_log.Log(consoleColor, $"TRSocketIPsViewModel::TRInitCommand(): Socket {mySocket.Handle} response length: [{response.Length}]");
+                    //_log.Log(consoleColor, $"TRSocketIPsViewModel::TRInitCommand(): Socket {mySocket.Handle} with address {myConnectionItem.Item1.RemoteEndPoint} got response: {response}");
                     if (!response.Contains("Welcome"))
                     {
-                        MyInitSocketDict.Add(myConnectionItem.Item1.Handle, new Tuple<int, string>(-1, "TRSocketIPsViewModel::TRInitCommand(): wrong response"));   // error_code is 0 in return
+                        //_log.Log(consoleColor, $"TRSocketIPsViewModel::TRInitCommand(): Socket {mySocket.Handle} does not contain 'Welcome' message");
+                        MyInitSocketDict.Add(mySocket.Handle, new Tuple<int, string>(-1, "TRSocketIPsViewModel::TRInitCommand(): wrong response"));   // error_code is 0 in return
                     }
                     else
                     {
-                        MyInitSocketDict.Add(myConnectionItem.Item1.Handle, new Tuple<int, string>(0, response));   // error_code is 0 in return
+                        //_log.Log(consoleColor, $"TRSocketIPsViewModel::TRInitCommand(): Socket {mySocket.Handle} with a good response");
+                        MyInitSocketDict.Add(mySocket.Handle, new Tuple<int, string>(0, response));   // error_code is 0 in return
                     }
                     trssm.SocketInitDict = MyInitSocketDict;
                 }
+                Task.Delay(500);
             }
             _log.Log(consoleColor, $"TRSocketIPsViewModel::TRInitCommand(): trssm.TRErrorNumber: {trssm.TRErrorNumber}");
 
@@ -854,7 +1070,7 @@ namespace Console_MVVMTesting.ViewModels
         // ICC(Bit 0) : Internal Charge Controller
         private UInt16 ParseBatteryMode(string myBatteryMode)
         {
-            _log.Log(consoleColor, $"TRSocketIPsViewModel::ParseBatteryMode(): myBatteryStatus: {myBatteryMode}");
+            //_log.Log(consoleColor, $"TRSocketIPsViewModel::ParseBatteryMode(): myBatteryStatus: {myBatteryMode}");
 
             UInt16 myInt16Value = Convert.ToUInt16(myBatteryMode, 16);
             _log.Log(consoleColor, $"TRSocketIPsViewModel::ParseBatteryMode(): myInt16Value: {myInt16Value}");
@@ -907,7 +1123,7 @@ namespace Console_MVVMTesting.ViewModels
                 _log.Log(consoleColor, $"TRSocketIPsViewModel::ParseBatteryStatus(): InternalChargeController: Function not supported");
 
 
-            _log.Log(consoleColor, $"TRSocketIPsViewModel::ParseBatteryMode(): ParseBatteryStatus: End of method");
+            //_log.Log(consoleColor, $"TRSocketIPsViewModel::ParseBatteryMode(): ParseBatteryStatus: End of method");
             return myInt16Value;
         }
 
@@ -929,7 +1145,7 @@ namespace Console_MVVMTesting.ViewModels
         //      EC3:0 (Bits 3–0): Error Code
         private UInt16 ParseBatteryStatus(string myBatteryStatus)
         {
-            _log.Log(consoleColor, $"TRSocketIPsViewModel::ParseBatteryStatus(): myBatteryStatus: {myBatteryStatus}");
+            //_log.Log(consoleColor, $"TRSocketIPsViewModel::ParseBatteryStatus(): myBatteryStatus: {myBatteryStatus}");
 
             UInt16 myInt16Value = Convert.ToUInt16(myBatteryStatus, 16);
             _log.Log(consoleColor, $"TRSocketIPsViewModel::ParseBatteryStatus(): myInt16Value: {myInt16Value}");
@@ -1009,7 +1225,7 @@ namespace Console_MVVMTesting.ViewModels
                 }
             }
 
-            _log.Log(consoleColor, $"TRSocketIPsViewModel::ParseBatteryStatus(): ParseBatteryStatus: End of method");
+            //_log.Log(consoleColor, $"TRSocketIPsViewModel::ParseBatteryStatus(): ParseBatteryStatus: End of method");
             if ((!ErrorCode) && (!OverchargedAlarm) && (!OvertemperatureAlarm) && (!RemainingCapacityAlarm) && (!RemainingTimeAlarm)) return 0;
             else return myInt16Value;
         }
@@ -1038,7 +1254,7 @@ namespace Console_MVVMTesting.ViewModels
         //CUV(Bit 0) : Cell Undervoltage (0x00000001)
         private UInt32 ParseSafetyAlert(string mySafetyAlertStr)
         {
-            _log.Log(consoleColor, $"TRSocketIPsViewModel::ParseSafetyAlert(): Start of method");
+            //_log.Log(consoleColor, $"TRSocketIPsViewModel::ParseSafetyAlert(): Start of method");
 
             bool result = false;
 
@@ -1172,8 +1388,7 @@ namespace Console_MVVMTesting.ViewModels
                 result = false;
             }
 
-            _log.Log(consoleColor, $"TRSocketIPsViewModel::ParseSafetyAlert(): End of method");
-            //return result;
+            //_log.Log(consoleColor, $"TRSocketIPsViewModel::ParseSafetyAlert(): End of method");
             return myInt32Value;
         }
 
@@ -1204,7 +1419,7 @@ namespace Console_MVVMTesting.ViewModels
         //CUV(Bit 0) : Cell Undervoltage (0x00000001)
         private UInt32 ParseSafetyStatus(string mySafetyStatusStr)
         {
-            _log.Log(consoleColor, $"TRSocketIPsViewModel::ParseSafetyStatus(): Start of method");
+            //_log.Log(consoleColor, $"TRSocketIPsViewModel::ParseSafetyStatus(): Start of method");
 
             bool result = false;
             UInt32 myInt32Value = Convert.ToUInt32(mySafetyStatusStr, 16);
@@ -1336,8 +1551,7 @@ namespace Console_MVVMTesting.ViewModels
                 result = false;
             }
 
-            _log.Log(consoleColor, $"TRSocketIPsViewModel::ParseSafetyStatus(): End of method");
-            //return result;
+            //_log.Log(consoleColor, $"TRSocketIPsViewModel::ParseSafetyStatus(): End of method");
             return myInt32Value;
         }
 
@@ -1364,7 +1578,7 @@ namespace Console_MVVMTesting.ViewModels
         //SUV(Bit 0) : SafetyCellUndervoltageFailure (0x0001)
         private ushort ParsePFAlert(string myPFAlertStr)
         {
-            _log.Log(consoleColor, $"TRSocketIPsViewModel::ParsePFAlert(): Start of method");
+            //_log.Log(consoleColor, $"TRSocketIPsViewModel::ParsePFAlert(): Start of method");
             bool result = false;
 
             ushort myInt16Value = Convert.ToUInt16(myPFAlertStr, 16);
@@ -1482,8 +1696,7 @@ namespace Console_MVVMTesting.ViewModels
                 result = false;
             }
 
-            _log.Log(consoleColor, $"TRSocketIPsViewModel::ParsePFAlert(): End of method");
-            //return result;
+            //_log.Log(consoleColor, $"TRSocketIPsViewModel::ParsePFAlert(): End of method");
             return myInt16Value;
         }
 
@@ -1510,7 +1723,7 @@ namespace Console_MVVMTesting.ViewModels
         //SUV(Bit 0) : Safety Cell Undervoltage Failure (0x00000001)
         private UInt32 ParsePFStatus(string myPFStatusStr)
         {
-            _log.Log(consoleColor, $"TRSocketIPsViewModel::ParsePFStatus(): Start of method");
+            //_log.Log(consoleColor, $"TRSocketIPsViewModel::ParsePFStatus(): Start of method");
             bool result = false;
 
 
@@ -1643,8 +1856,7 @@ namespace Console_MVVMTesting.ViewModels
                 result = false;
             }
 
-            _log.Log(consoleColor, $"TRSocketIPsViewModel::ParsePFStatus(): End of method");
-            //return result;
+            //_log.Log(consoleColor, $"TRSocketIPsViewModel::ParsePFStatus(): End of method");
             return myInt32Value;
         }
 
@@ -1655,14 +1867,15 @@ namespace Console_MVVMTesting.ViewModels
             _log.Log(consoleColor, $"TRSocketIPsViewModel::CheckBatteryStatusCommand(): Start of method  ({this.GetHashCode():x8})");
 
             UInt16 BatteryMode = 0xffff, BatteryStatus = 0xffff;
+            string BatteryError;
 
             TRSocketStateMessage trssm = new();
             trssm.MyStateName = "CheckBatteryStatusCommand";
-            Dictionary<IntPtr, Tuple<UInt16, UInt16>> batteryStatusDict = new();    // BatteryMode, BatteryStatus
+            Dictionary<IntPtr, Tuple<UInt16, UInt16, string>> batteryStatusDict = new();    // BatteryMode, BatteryStatus
 
             if (_connectionItemList.Count == 0)
             {
-                batteryStatusDict.Add((IntPtr)0, new Tuple<UInt16, UInt16>(BatteryMode, BatteryStatus));
+                batteryStatusDict.Add((IntPtr)0, new Tuple<UInt16, UInt16, string>(BatteryMode, BatteryStatus, ""));
                 trssm.BatteryStatusDict = batteryStatusDict;
                 _log.Log(consoleColor, $"TRSocketIPsViewModel::CheckBatteryStatusCommand(): End of method  ({this.GetHashCode():x8})");
                 return trssm;
@@ -1673,26 +1886,35 @@ namespace Console_MVVMTesting.ViewModels
             {
                 BatteryMode = 0xffff;
                 BatteryStatus = 0xffff;
+                BatteryError = "";
 
                 string myResponse37_BMS_REG = this.SendToSocket(myConnectionItem.Item1, ParseOutputData("37/BMS/REG"));
                 //_log.Log(consoleColor, $"TRSocketIPsViewModel::CheckBatteryStatusCommand(): socket {myConnectionItem.Item1.Handle} {myConnectionItem.Item1.RemoteEndPoint} : {myResponse37_BMS_REG}");
 
                 string myBatteryMode = this.ParseResponseString(myResponse37_BMS_REG, "Battery Mode");
-                if (myBatteryMode != String.Empty)
+                if (myBatteryMode != String.Empty)  // found 'Battery Mode'
                 {
-                    //_log.Log(consoleColor, $"TRSocketIPsViewModel::CheckBatteryStatusCommand(): socket {myConnectionItem.Item1.Handle} on IP {myConnectionItem.Item1.RemoteEndPoint} replies with myBatteryMode: {myBatteryMode}");
+                    _log.Log(consoleColor, $"TRSocketIPsViewModel::CheckBatteryStatusCommand(): socket {myConnectionItem.Item1.Handle} on IP {myConnectionItem.Item1.RemoteEndPoint} replies with myBatteryMode: {myBatteryMode}");
                     BatteryMode = this.ParseBatteryMode(myBatteryMode);
                 }
 
                 string myBatteryStatus = this.ParseResponseString(myResponse37_BMS_REG, "Battery Status");
-                if (myBatteryMode != String.Empty)
+                if (myBatteryMode != String.Empty)  // found 'Battery Status'
                 {
-                    //_log.Log(consoleColor, $"TRSocketIPsViewModel::CheckBatteryStatusCommand(): socket {myConnectionItem.Item1.Handle} on IP {myConnectionItem.Item1.RemoteEndPoint} replies with myBatteryStatus: {myBatteryStatus}");
+                    _log.Log(consoleColor, $"TRSocketIPsViewModel::CheckBatteryStatusCommand(): socket {myConnectionItem.Item1.Handle} on IP {myConnectionItem.Item1.RemoteEndPoint} replies with myBatteryStatus: {myBatteryStatus}");
                     BatteryStatus = this.ParseBatteryStatus(myBatteryStatus);
                 }
 
-                Tuple<UInt16, UInt16> MyTuple = new(BatteryMode, BatteryStatus);
+                if ((myBatteryMode == String.Empty) || (myBatteryStatus == String.Empty))
+                {
+                    BatteryError = myResponse37_BMS_REG;
+                }
+
+                Tuple<UInt16, UInt16, string> MyTuple = new(BatteryMode, BatteryStatus, BatteryError);
                 batteryStatusDict.Add(myConnectionItem.Item1.Handle, MyTuple);
+
+                // nie wiem jak, wjenc robje jak umiem
+                Task.Delay(300);
             }
 
             trssm.BatteryStatusDict = batteryStatusDict;
@@ -1719,19 +1941,22 @@ namespace Console_MVVMTesting.ViewModels
 
             UInt32 SafetyAlert = 0xffffffff, SafetyStatus = 0xffffffff, PFStatus = 0xffffffff;
             UInt16 PFAlert = 0xffff;
+            string BatteryError = "";
 
             TRSocketStateMessage trssm = new();
             trssm.MyStateName = "CheckBatteryAlarmsCommand";
             //Dictionary<IntPtr, Tuple<SafetyAlertEnum, SafetyStatusEnum, PFAlertEnum, PFStatusEnum>> batteryStatusAndAlarmsDict = new();
-            Dictionary<IntPtr, Tuple<UInt32, UInt32, UInt16, UInt32>> batteryAlarmsDict = new();
+            Dictionary<IntPtr, Tuple<UInt32, UInt32, UInt16, UInt32, string>> batteryAlarmsDict = new();
 
             if (_connectionItemList.Count == 0)
             {
-                batteryAlarmsDict.Add((IntPtr)0, new Tuple<UInt32, UInt32, UInt16, UInt32>(SafetyAlert, SafetyStatus, PFAlert, PFStatus));
+                batteryAlarmsDict.Add((IntPtr)0, new Tuple<UInt32, UInt32, UInt16, UInt32, string>(SafetyAlert, SafetyStatus, PFAlert, PFStatus, BatteryError));
                 trssm.BatteryAlarmsDict = batteryAlarmsDict;
                 _log.Log(consoleColor, $"TRSocketIPsViewModel::CheckBatteryAlarmsCommand(): End of method  ({this.GetHashCode():x8})");
                 return trssm;
             }
+
+            Socket mySocket;
 
             _log.Log(consoleColor, $"TRSocketIPsViewModel::CheckBatteryAlarmsCommand(): _connectionItemList.Count {_connectionItemList.Count}");
             foreach (Tuple<Socket, IPAddress, ConnectionItem> myConnectionItem in _connectionItemList)
@@ -1740,50 +1965,59 @@ namespace Console_MVVMTesting.ViewModels
                 SafetyStatus = 0xffffffff;
                 PFAlert = 0xffff;
                 PFStatus = 0xffffffff;
+                BatteryError = "";
+                mySocket = myConnectionItem.Item1;
 
-                string myResponse37_BMS_REG = this.SendToSocket(myConnectionItem.Item1, ParseOutputData("37/BMS/REG"));
-                //_log.Log(consoleColor, $"TRSocketIPsViewModel::CheckBatteryAlarmsCommand(): socket {myConnectionItem.Item1.Handle} {myConnectionItem.Item1.RemoteEndPoint} : {myResponse37_BMS_REG}");
+                string myResponse37_BMS_REG = this.SendToSocket(mySocket, ParseOutputData("37/BMS/REG"));
+                //_log.Log(consoleColor, $"TRSocketIPsViewModel::CheckBatteryAlarmsCommand(): socket {mySocket.Handle} {mySocket.RemoteEndPoint} : {myResponse37_BMS_REG}");
 
                 string mySafetyAlertStr = this.ParseResponseString(myResponse37_BMS_REG, "Safety Alert");
                 if (mySafetyAlertStr != String.Empty)
                 {
-                    //_log.Log(consoleColor, $"TRSocketIPsViewModel::CheckBatteryAlarmsCommand(): socket {myConnectionItem.Item1.Handle} on IP {myConnectionItem.Item1.RemoteEndPoint} replies with mySafetyAlertStr: {mySafetyAlertStr}");
+                    _log.Log(consoleColor, $"TRSocketIPsViewModel::CheckBatteryAlarmsCommand(): socket {mySocket.Handle} on IP {mySocket.RemoteEndPoint} replies with mySafetyAlertStr: {mySafetyAlertStr}");
                     SafetyAlert = this.ParseSafetyAlert(mySafetyAlertStr);
                 }
 
                 string mySafetyStatusStr = this.ParseResponseString(myResponse37_BMS_REG, "Safety Status");
                 if (mySafetyStatusStr != String.Empty)
                 {
-                    //_log.Log(consoleColor, $"TRSocketIPsViewModel::CheckBatteryAlarmsCommand(): socket {myConnectionItem.Item1.Handle} on IP {myConnectionItem.Item1.RemoteEndPoint} replies with mySafetyStatusStr: {mySafetyStatusStr}");
+                    _log.Log(consoleColor, $"TRSocketIPsViewModel::CheckBatteryAlarmsCommand(): socket {mySocket.Handle} on IP {mySocket.RemoteEndPoint} replies with mySafetyStatusStr: {mySafetyStatusStr}");
                     SafetyStatus = this.ParseSafetyStatus(mySafetyStatusStr);
                 }
 
                 string myPFAlertStr = this.ParseResponseString(myResponse37_BMS_REG, "PF Alert");
                 if (myPFAlertStr != String.Empty)
                 {
-                    //_log.Log(consoleColor, $"TRSocketIPsViewModel::CheckBatteryAlarmsCommand(): socket {myConnectionItem.Item1.Handle} on IP {myConnectionItem.Item1.RemoteEndPoint} replies with myPFAlertStr: {myPFAlertStr}");
+                    _log.Log(consoleColor, $"TRSocketIPsViewModel::CheckBatteryAlarmsCommand(): socket {mySocket.Handle} on IP {mySocket.RemoteEndPoint} replies with myPFAlertStr: {myPFAlertStr}");
                     PFAlert = this.ParsePFAlert(myPFAlertStr);
                 }
 
                 string myPFStatusStr = this.ParseResponseString(myResponse37_BMS_REG, "PF Status");
                 if (myPFStatusStr != String.Empty)
                 {
-                    //_log.Log(consoleColor, $"TRSocketIPsViewModel::CheckBatteryAlarmsCommand(): socket {myConnectionItem.Item1.Handle} on IP {myConnectionItem.Item1.RemoteEndPoint} replies with myPFStatusStr: {myPFStatusStr}");
+                    _log.Log(consoleColor, $"TRSocketIPsViewModel::CheckBatteryAlarmsCommand(): socket {mySocket.Handle} on IP {mySocket.RemoteEndPoint} replies with myPFStatusStr: {myPFStatusStr}");
                     PFStatus = this.ParsePFStatus(myPFStatusStr);
                 }
 
-                Tuple<UInt32, UInt32, UInt16, UInt32> MyTuple = new(SafetyAlert, SafetyStatus, PFAlert, PFStatus);
-                batteryAlarmsDict.Add(myConnectionItem.Item1.Handle, MyTuple);
-                
+                if ((SafetyAlert != 0) || (SafetyStatus != 0) || (PFAlert != 0) || (PFStatus != 0))
+                {
+                    BatteryError = myResponse37_BMS_REG;
+                }
+
+                Tuple<UInt32, UInt32, UInt16, UInt32, string> MyTuple = new(SafetyAlert, SafetyStatus, PFAlert, PFStatus, BatteryError);
+                batteryAlarmsDict.Add(mySocket.Handle, MyTuple);
+
+                // nie wiem jak, wjenc robje jak umiem
+                Task.Delay(300);
                 //_log.Log(consoleColor, $"ipo foreach");
             }
 
             trssm.BatteryAlarmsDict = batteryAlarmsDict;
             _log.Log(consoleColor, $"TRSocketIPsViewModel::CheckBatteryAlarmsCommand(): End of method  ({this.GetHashCode():x8})");
             return trssm;
-
         }
         #endregion CheckBatteryAlarmsCommand
+
 
 
         #region TRCheckBatteryAlarmsAsync
@@ -1801,7 +2035,9 @@ namespace Console_MVVMTesting.ViewModels
 
 
 
-
+        /// <summary>
+        /// here we create a connection list with x-numberOfSets
+        /// </summary>
         private void InitConnectionItemList(int numberOfSets)
         {
             _log.Log(consoleColor, $"TRSocketIPsViewModel::InitConnectionItemList(): Start of method");
@@ -1827,7 +2063,7 @@ namespace Console_MVVMTesting.ViewModels
             ConnectionItem _connectionItem8 = new ConnectionItem { Name = "TR8", Port = 42022, Host = _TR8Host };
             _connectionItems.Add(_connectionItem8);
 
-            _log.Log(consoleColor, $"TRSocketIPsViewModel::InitConnectionItemList(): _connectionItems.Count: {_connectionItems.Count}");
+            //_log.Log(consoleColor, $"TRSocketIPsViewModel::InitConnectionItemList(): _connectionItems.Count: {_connectionItems.Count}");
 
             switch (numberOfSets)
             {
@@ -1864,7 +2100,6 @@ namespace Console_MVVMTesting.ViewModels
             }
 
             _log.Log(consoleColor, $"TRSocketIPsViewModel::InitConnectionItemList(): _connectionItems.Count: {_connectionItems.Count}");
-
 
             bool rs;
             Socket mySocket;
@@ -1955,6 +2190,9 @@ namespace Console_MVVMTesting.ViewModels
         }
 
 
+        /// <summary>
+        /// here we create a list of new sockets
+        /// </summary>
         private void NumberOfSetsValueChangedMessageHandler(TRSocketIPsViewModel recipient, NumberOfSetsValueChangedMessage message)
         {
             _log.Log(consoleColor, $"TRSocketIPsViewModel::NumberOfSetsValueChangedMessageHandler() ({this.GetHashCode():x8})  - Start of method");
@@ -1977,6 +2215,8 @@ namespace Console_MVVMTesting.ViewModels
 
             _messenger = messenger;
 
+            // creates a list of sockets
+            _messenger.Register<TRSocketIPsViewModel, NumberOfSetsValueChangedMessage>(this, NumberOfSetsValueChangedMessageHandler);
 
             _messenger.Register<TRSocketIPsViewModel, TRSocketInitRequestMessage>(this, (myReceiver, myMessenger) =>
              {
@@ -1999,13 +2239,13 @@ namespace Console_MVVMTesting.ViewModels
                 myMessenger.Reply(myReceiver.TRCheckBatteryStatusAsync());
             });
 
-            _messenger.Register<TRSocketIPsViewModel, CheckBatteryAlarmsRequestMessage>(this, (myReceiver, myMessenger) =>
+            _messenger.Register<TRSocketIPsViewModel, TRSocketCheckBatteryAlarmsRequestMessage>(this, (myReceiver, myMessenger) =>
             {
                 myMessenger.Reply(myReceiver.TRCheckBatteryAlarmsAsync());
             });
 
             _messenger.Register<TRSocketIPsViewModel, BatteryTypeValueChangedMessage>(this, BatteryTypeValueChangedMessageHandler);
-            _messenger.Register<TRSocketIPsViewModel, NumberOfSetsValueChangedMessage>(this, NumberOfSetsValueChangedMessageHandler);
+
 
 
             //this.InitConnectionItemList();
