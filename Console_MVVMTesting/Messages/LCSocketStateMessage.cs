@@ -20,7 +20,7 @@ namespace Console_MVVMTesting.Messages
         public string MyStateName { get; set; }
         public LCStatus lcStatus { get; set; }
         public int LCErrorNumber { get; set; }
-        
+
         //public int SocketHandle { get; set; }
         //public Socket mySocket { get; set; }
         //public decimal ACInVoltage { get; set; }
@@ -39,18 +39,13 @@ namespace Console_MVVMTesting.Messages
 
         public LCSocketStateMessage(string myStateName)
         {
-            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
-              $"MyUser::MyUser(1) " +
-              $"({this.GetHashCode():x8})");
-
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}]  ({this.GetHashCode():x8})");
             MyStateName = myStateName;
         }
 
         public LCSocketStateMessage()
         {
-            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}] " +
-              $"MyUser::MyUser(2) " +
-              $"({this.GetHashCode():x8})");
+            MyUtils.MyConsoleWriteLine($"[{DateTime.Now.ToString("HH:mm:ss.ff")}]  ({this.GetHashCode():x8})");
         }
 
         //public LCStatus Response()
