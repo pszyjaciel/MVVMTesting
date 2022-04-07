@@ -26,7 +26,7 @@ namespace Console_MVVMTesting.ViewModels
         private readonly ILoggingService _log;
         private readonly IMessenger _messenger;
         private bool _isBusy;
-        private const string consoleColor = "DYELLOW";
+        private const string consoleColor = "DCYAN";
 
 
         public bool IsBusy

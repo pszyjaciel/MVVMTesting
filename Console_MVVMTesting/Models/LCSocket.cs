@@ -1,4 +1,5 @@
-﻿using Console_MVVMTesting.Messages;
+﻿using Console_MVVMTesting.Helpers;
+using Console_MVVMTesting.Messages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,10 +14,9 @@ namespace Console_MVVMTesting.Models
 {
     internal class LCSocket
     {
-        private readonly object consoleColor = "DWHITE";
+        private readonly string consoleColor = "DWHITE";
         internal List<Socket> myListOfSockets { get; private set; }
 
-        private ConnectionItem _connectionItem;
         private List<Tuple<Socket, IPAddress, ConnectionItem>> _connectionItemList;
 
         private ManualResetEvent connectDone = new ManualResetEvent(false);
@@ -24,7 +24,7 @@ namespace Console_MVVMTesting.Models
         private ManualResetEvent receiveDone = new ManualResetEvent(false);
         private ManualResetEvent sendDone = new ManualResetEvent(false);
 
-        internal IPAddress ipAddress { get; private set; }
+        //internal IPAddress ipAddress { get; private set; }
 
         private const string _LC1Host = "10.239.27.140";
         private const string _LC2Host = "10.239.27.141";
@@ -35,11 +35,11 @@ namespace Console_MVVMTesting.Models
         private const string _LC7Host = "10.239.27.146";
         private const string _LC8Host = "10.239.27.147";
 
-  
+
 
         public bool IsConnected(Socket terminalSocket)
         {
-            System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::IsConnected(): socket: {terminalSocket.Handle}, ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
+            MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::IsConnected(): socket: {terminalSocket.Handle}, ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
 
             bool result = (terminalSocket is not null) ? terminalSocket.Connected : false;
             return result;
@@ -60,7 +60,7 @@ namespace Console_MVVMTesting.Models
         /// works in a new first-level Thread
         private bool IsHostnameValid(string hostname)
         {
-            //System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::IsHostnameValid(): ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
+            //MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::IsHostnameValid(): ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
 
             bool valid = true;
 
@@ -87,7 +87,7 @@ namespace Console_MVVMTesting.Models
         #region ResolveIp
         private IPAddress ResolveIp(string host)
         {
-            //System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::ResolveIp(): ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
+            //MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::ResolveIp(): ThreadId: {Thread.CurrentThread.ManagedThreadId}.");
             IPAddress ip = null;
 
             if (IsHostnameValid(host))
@@ -126,7 +126,7 @@ namespace Console_MVVMTesting.Models
         /// </summary>
         public void Close(Socket terminalSocket)    // pacz na _cancellationTokenSource1
         {
-            System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::Close(): socket: { terminalSocket.Handle}");
+            MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::Close(): socket: { terminalSocket.Handle}");
             if (!IsConnected(terminalSocket)) return;
 
             try
@@ -136,22 +136,22 @@ namespace Console_MVVMTesting.Models
             }
             catch (SocketException se)
             {
-                System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::Close():  {se.SocketErrorCode}: {se.Message}");
+                MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::Close():  {se.SocketErrorCode}: {se.Message}");
             }
             catch (ObjectDisposedException ode)
             {
-                System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::Close():  {ode.ObjectName}: {ode.Message}");
+                MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::Close():  {ode.ObjectName}: {ode.Message}");
             }
             catch (Exception e)
             {
-                System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::Close():  {e.HResult}: {e.Message}");
+                MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::Close():  {e.HResult}: {e.Message}");
             }
             finally
             {
                 //cts.Dispose();
                 //_ctsDisposed1 = true;
             }
-            //System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::Close(): ThreadId: {Thread.CurrentThread.ManagedThreadId}  End of method.");
+            //MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::Close(): ThreadId: {Thread.CurrentThread.ManagedThreadId}  End of method.");
         }
         #endregion Close
 
@@ -162,29 +162,29 @@ namespace Console_MVVMTesting.Models
         private void DisconnectCallback(IAsyncResult ar)
         {
             string consoleColor = "LGREEN";     // kolbaki w innym kolorze
-            System.Diagnostics.Debug.WriteLine(consoleColor, "LCSocketViewModel::DisconnectCallback(): Start of method");
+            MyUtils.MyConsoleWriteLine(consoleColor, "LCSocket::DisconnectCallback(): Start of method");
 
             // Complete the disconnect request.
             Socket client = (Socket)ar.AsyncState;
-            System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::DisconnectCallback(): socket: {client.Handle}");
+            MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::DisconnectCallback(): socket: {client.Handle}");
 
             try
             {
                 client.EndDisconnect(ar);  // Ends a pending asynchronous disconnect request.
                                            //client.Close();     // nie za bardzo..
-                System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::DisconnectCallback: The terminal is disconnected!");
+                MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::DisconnectCallback: The terminal is disconnected!");
             }
             catch (SocketException se)
             {
-                System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::DisconnectCallback: {se.ErrorCode}: {se.Message}");
+                MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::DisconnectCallback: {se.ErrorCode}: {se.Message}");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::DisconnectCallback: {ex.Message}");
+                MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::DisconnectCallback: {ex.Message}");
             }
             // Signal that the disconnect is complete.
             disconnectDone.Set();
-            System.Diagnostics.Debug.WriteLine(consoleColor, "LCSocketViewModel::DisconnectCallback(): End of method");
+            MyUtils.MyConsoleWriteLine(consoleColor, "LCSocket::DisconnectCallback(): End of method");
         }
         #endregion
 
@@ -194,7 +194,7 @@ namespace Console_MVVMTesting.Models
         // https://docs.microsoft.com/en-us/dotnet/api/system.net.sockets.socket.begindisconnect?view=net-6.0
         public bool Disconnect(Socket terminalSocket)
         {
-            System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::Disconnect(): socket: {terminalSocket.Handle} - Start of method");
+            MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::Disconnect(): socket: {terminalSocket.Handle} - Start of method");
             bool result = false;
 
             if (terminalSocket.Connected)
@@ -218,28 +218,28 @@ namespace Console_MVVMTesting.Models
                     disconnectDone.WaitOne();
                     if (terminalSocket.Connected)
                     {
-                        System.Diagnostics.Debug.WriteLine(consoleColor, "LCSocketViewModel::Disconnect(): We're still connected");
+                        MyUtils.MyConsoleWriteLine(consoleColor, "LCSocket::Disconnect(): We're still connected");
                         result = false;
                     }
                     else
                     {
-                        System.Diagnostics.Debug.WriteLine(consoleColor, "LCSocketViewModel::Disconnect(): We're disconnected");
+                        MyUtils.MyConsoleWriteLine(consoleColor, "LCSocket::Disconnect(): We're disconnected");
                         result = true;
                     }
                 }
                 catch (SocketException se)
                 {
-                    System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::Disconnect(): {se.SocketErrorCode} : {se.Message}");
+                    MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::Disconnect(): {se.SocketErrorCode} : {se.Message}");
                     result = false;
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::Disconnect(): {ex.Message}");
+                    MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::Disconnect(): {ex.Message}");
                     result = false;
                 }
 
             }
-            System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::Disconnect(): End of method: result: {result}");
+            MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::Disconnect(): End of method: result: {result}");
             return result;
         }
         #endregion
@@ -251,26 +251,26 @@ namespace Console_MVVMTesting.Models
         private void SendCallBack(IAsyncResult ar)
         {
             string consoleColor = "LGREEN";     // kolbaki w innym kolorze
-            System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::SendCallBack(): ThreadId: {Thread.CurrentThread.ManagedThreadId} - Start of method.");
+            MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::SendCallBack(): ThreadId: {Thread.CurrentThread.ManagedThreadId} - Start of method.");
 
             // Retrieve the socket from the state object.  
             Socket terminalSocket = (Socket)ar.AsyncState;
-            System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::SendCallBack: socket: {terminalSocket.Handle}");
+            MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::SendCallBack: socket: {terminalSocket.Handle}");
 
             try
             {
                 // Complete sending the data to the remote device.  
                 int bytesSend = terminalSocket.EndSend(ar);
-                System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::SendCallBack: bytesSend: {bytesSend}");
+                MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::SendCallBack: bytesSend: {bytesSend}");
 
                 // Signal that all bytes have been sent.  
                 sendDone.Set();
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::SendCallBack: {ex.Message}");
+                MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::SendCallBack: {ex.Message}");
             }
-            System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::SendCallBack(): ThreadId: {Thread.CurrentThread.ManagedThreadId} - End of method.");
+            MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::SendCallBack(): ThreadId: {Thread.CurrentThread.ManagedThreadId} - End of method.");
         }
         #endregion SendCallBack
 
@@ -282,7 +282,7 @@ namespace Console_MVVMTesting.Models
             if (terminalSocket == null) return String.Empty;
             if (IsConnected(terminalSocket) is false) return String.Empty;
 
-            System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::SendToSocket(): socket: {terminalSocket.Handle}, ThreadId: {Thread.CurrentThread.ManagedThreadId} - Start of method.");
+            MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::SendToSocket(): socket: {terminalSocket.Handle}, ThreadId: {Thread.CurrentThread.ManagedThreadId} - Start of method.");
 
             //MyUtils.DisplayStringInBytes(text);
 
@@ -296,13 +296,13 @@ namespace Console_MVVMTesting.Models
             }
             catch (SocketException se)
             {
-                System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::SendToSocket(): {se.NativeErrorCode} : {se.SocketErrorCode}: {se.Message}");
+                MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::SendToSocket(): {se.NativeErrorCode} : {se.SocketErrorCode}: {se.Message}");
             }
             sendDone.WaitOne();
 
             // string response = this.ReceiveFromSocket(terminalSocket);
 
-            System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::SendToSocket(): ThreadId: {Thread.CurrentThread.ManagedThreadId} - End of method.");
+            MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::SendToSocket(): ThreadId: {Thread.CurrentThread.ManagedThreadId} - End of method.");
             return "";
         }
         #endregion SendToSocket
@@ -314,95 +314,123 @@ namespace Console_MVVMTesting.Models
         private void ConnectCallback(IAsyncResult ar)
         {
             string consoleColor = "LGREEN";     // kolbaki w innym kolorze
-            //System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::ConnectCallback(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : Start of method  ({this.GetHashCode():x8})");
+            MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::ConnectCallback(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : Start of method  ({this.GetHashCode():x8})");
+
+            // Retrieve the socket from the state object.  
+            Socket terminalSocket = (Socket)ar.AsyncState;
 
             try
             {
-                // Retrieve the socket from the state object.  
-                Socket terminalSocket = (Socket)ar.AsyncState;
-
                 // Complete the connection. Ends a pending asynchronous connection request.
                 terminalSocket.EndConnect(ar); // throws an exception if connecting fails
                                                // Exception thrown: 'System.Net.Internals.SocketExceptionFactory.ExtendedSocketException' in System.Private.CoreLib.dll
 
-                _connectionItem.ConnectTime = DateTime.Now;
-                System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::ConnectCallback(): socket: { terminalSocket.Handle} " +
+                //connectionItem.ConnectTime = DateTime.Now;
+                MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::ConnectCallback(): socket: { terminalSocket.Handle} " +
                     $"connected to {terminalSocket.LocalEndPoint}");
+                
+
+                // Signal that the connection has been made.  (or not)
+                connectDone.Set();
             }
             catch (SocketException se)
             {
-                System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::ConnectCallback(): {se.SocketErrorCode} : {se.Message}");
+                MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::ConnectCallback(): {se.SocketErrorCode} : {se.Message}");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::ConnectCallback(): {ex.Message}");
+                MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::ConnectCallback(): {ex.Message}");
             }
-            // Signal that the connection has been made.  (or not)
-            connectDone.Set();
-            //System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::ConnectCallback(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : End of method.");
+
+            MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::ConnectCallback(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : End of method.");
         }
         #endregion ConnectCallback
 
 
 
-        #region MyConnectAsync
-        private async Task<bool> MyConnectAsync(EndPoint remoteEP, Socket terminalSocket)
+        //#region MyConnectAsync
+        //private async Task<bool> MyConnectAsync(EndPoint remoteEP, Socket terminalSocket)
+        //{
+        //    MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::MyConnectAsync(): socket: {terminalSocket.Handle}, ThreadId: {Thread.CurrentThread.ManagedThreadId} : Start of method  ({this.GetHashCode():x8})");
+
+        //    IAsyncResult result = null;
+        //    try
+        //    {
+        //        result = terminalSocket.BeginConnect(remoteEP, new AsyncCallback(ConnectCallback), terminalSocket);
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::MyConnectAsync(): {ex.Message}");
+        //        return false;
+        //    }
+
+        //    // waiting for complition
+        //    while (!result.IsCompleted)
+        //    {
+        //        await Task.Yield();
+        //    }
+
+        //    MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::MyConnectAsync(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : End of method.");
+        //    return (result is not null) ? result.IsCompleted : false;
+        //}
+        //#endregion MyConnectAsync
+
+
+        internal bool writeDot(IAsyncResult ar)
         {
-            System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::MyConnectAsync(): socket: {terminalSocket.Handle}, ThreadId: {Thread.CurrentThread.ManagedThreadId} : Start of method  ({this.GetHashCode():x8})");
-
-            IAsyncResult result = null;
-            try
+            int i = 0;
+            while (ar.IsCompleted == false)
             {
-                result = terminalSocket.BeginConnect(remoteEP, new AsyncCallback(ConnectCallback), terminalSocket);
-
+                if (i++ > 20)
+                {
+                    Console.WriteLine("Przekroczono czas polaczenia z serwerem.");
+                    return false;
+                }
+                Console.Write(".");
+                Thread.Sleep(100);
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::MyConnectAsync(): {ex.Message}");
-                return false;
-            }
-
-            // waiting for complition
-            while (!result.IsCompleted)
-            {
-                await Task.Yield();
-            }
-
-            System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::MyConnectAsync(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : End of method.");
-            return (result is not null) ? result.IsCompleted : false;
+            return true;
         }
-        #endregion MyConnectAsync
-
 
 
         #region ConnectToSocket
-        public bool ConnectToSocket(Socket terminalSocket)
+        public async Task<bool> ConnectToSocket(Socket terminalSocket)
         {
-            System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::ConnectToSocket(): socket: {terminalSocket.Handle}, " +
+            MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::ConnectToSocket(): socket: {terminalSocket.Handle}, " +
                 $"ThreadId: {Thread.CurrentThread.ManagedThreadId} : Start of method  ({this.GetHashCode():x8})");
 
-            Task MyTask = Task.Run(async () =>
+            int connectTry = 1;    // how many try to connect?
+
+            IPAddress ipAddress;
+            foreach (Tuple<Socket, IPAddress, ConnectionItem> connectionItem in _connectionItemList)
             {
-                int connectTry = 3;    // how many try to connect?
-                ipAddress = ResolveIp(_connectionItem.Host);
-                EndPoint remoteEP = new IPEndPoint(ipAddress, _connectionItem.Port);
+                ipAddress = ResolveIp(connectionItem.Item3.Host);
+                EndPoint remoteEP = new IPEndPoint(ipAddress, connectionItem.Item3.Port);
                 do
                 {
-                    await this.MyConnectAsync(remoteEP, terminalSocket);
+                    IAsyncResult asyncConnect = terminalSocket.BeginConnect(remoteEP, new AsyncCallback(ConnectCallback), terminalSocket);
+                    MyUtils.MyConsoleWriteLine(consoleColor, $"TRSocket::ConnectToHost(): connectDone.WaitOne()");
                     connectDone.WaitOne();
 
-                    if (IsConnected(terminalSocket) == false)
+                    MyUtils.MyConsoleWriteLine(consoleColor, $"TRSocket::ConnectToHost(): Lacze sie.");
+                    if (writeDot(asyncConnect) == true)
+                    {
+                        Thread.Sleep(100);
+                    }
+
+                    if (terminalSocket.Connected == false)
                     {
                         await Task.Delay(5000);
                         connectTry--;
                     }
+
                 } while ((IsConnected(terminalSocket) == false) && (connectTry > 0));
 
-                System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::ConnectToSocket(): {terminalSocket.RemoteEndPoint} --> {terminalSocket.LocalEndPoint}");
-            });
-            MyTask.Wait();
+                MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::ConnectToSocket(): {terminalSocket.RemoteEndPoint} --> {terminalSocket.LocalEndPoint}");
+            }
 
-            System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::ConnectToSocket(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : End of method");
+            MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::ConnectToSocket(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : End of method");
             return IsConnected(terminalSocket);
         }
         #endregion ConnectToSocket
@@ -414,7 +442,7 @@ namespace Console_MVVMTesting.Models
         private void ReceiveCallBack(IAsyncResult ar)
         {
             string consoleColor = "LGREEN";     // kolbaki w innym kolorze
-            System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::ReceiveCallBack(): ThreadId: {Thread.CurrentThread.ManagedThreadId} - Start of method.");
+            MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::ReceiveCallBack(): ThreadId: {Thread.CurrentThread.ManagedThreadId} - Start of method.");
 
             // Retrieve the state object and the client socket from the asynchronous state object.  
             StateObject so = (StateObject)ar.AsyncState;
@@ -426,12 +454,12 @@ namespace Console_MVVMTesting.Models
             {
                 // the socket server returns 0x0d for a new line, and 0x0d 0x0a for end of message
                 int receivedBytes = terminalSocket.EndReceive(ar); //   Ends a pending asynchronous read.
-                System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::ReceiveCallBack(): socket {terminalSocket.Handle}, receivedBytes: {receivedBytes}");
+                MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::ReceiveCallBack(): socket {terminalSocket.Handle}, receivedBytes: {receivedBytes}");
 
                 // Connection error occured, as the server never returns 0 bytes
                 //if (receivedBytes == 0)
                 //{
-                //    System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::ReceiveCallBack(): socket {terminalSocket.Handle}: It looks like a connection error!");
+                //    MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::ReceiveCallBack(): socket {terminalSocket.Handle}: It looks like a connection error!");
                 //    so.sb.Clear();   // clean the buffer
 
                 //    // Signal that all bytes have been received.  
@@ -458,17 +486,17 @@ namespace Console_MVVMTesting.Models
             }
             catch (SocketException se)
             {
-                System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::ReceiveCallBack(): {se.NativeErrorCode} : {se.SocketErrorCode} : {se.Message}");
+                MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::ReceiveCallBack(): {se.NativeErrorCode} : {se.SocketErrorCode} : {se.Message}");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::ReceiveCallBack(): {ex.Message}");
+                MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::ReceiveCallBack(): {ex.Message}");
             }
             finally
             {
                 receiveDone.Set();
             }
-            System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::ReceiveCallBack(): ThreadId: {Thread.CurrentThread.ManagedThreadId} - End of method.");
+            MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::ReceiveCallBack(): ThreadId: {Thread.CurrentThread.ManagedThreadId} - End of method.");
         }
         #endregion ReceiveCallBack
 
@@ -478,7 +506,7 @@ namespace Console_MVVMTesting.Models
         #region ReceiveFromSocket
         public string ReceiveFromSocket(Socket terminalSocket)
         {
-            System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::ReceiveFromSocket(): " +
+            MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::ReceiveFromSocket(): " +
                 $"socket: {terminalSocket.Handle} " +
                 $"ThreadId: {Thread.CurrentThread.ManagedThreadId} : Start of method  ({this.GetHashCode():x8})");
 
@@ -494,12 +522,12 @@ namespace Console_MVVMTesting.Models
             }
             catch (Exception e)
             {
-                System.Diagnostics.Debug.WriteLine(consoleColor, e.ToString());
+                MyUtils.MyConsoleWriteLine(consoleColor, e.ToString());
             }
 
             receiveDone.WaitOne();
 
-            System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::ReceiveFromSocket(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : End of method");
+            MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::ReceiveFromSocket(): ThreadId: {Thread.CurrentThread.ManagedThreadId} : End of method");
             return state.sb.ToString();
         }
         #endregion ReceiveFromSocket
@@ -507,41 +535,43 @@ namespace Console_MVVMTesting.Models
 
 
 
-        #region RunLCInitCommandMessage
+        #region RunLCInitCommand
         ///////////// INITIALIZING SOCKETS /////////////////
         // async doesn't work well with Parallel.ForEach: https://stackoverflow.com/a/23139769/7036047
         // The whole idea behind Parallel.ForEach() is that you have a set of threads and each thread processes part of the collection.
         // This doesn't work with async-await, where you want to release the thread for the duration of the async call.
-        //private bool RunLCInitCommandMessage()
-        internal async Task<LCSocketStateMessage> RunLCInitCommandMessage()
+        //private bool RunLCInitCommand()
+        internal async Task<LCSocketStateMessage> RunLCInitCommand()
         {
-            System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::RunLCInitCommandMessage(): Start of method  ({this.GetHashCode():x8})");
+            MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::RunLCInitCommand(): Start of method  ({this.GetHashCode():x8})");
 
             bool initResult = true;
+            IPAddress ipAddress;
 
             List<Socket> myListOfAvailableSockets = new List<Socket>();
-            myListOfAvailableSockets.Add(new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp));
-            //myListOfAvailableSockets.Add(new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp));
-            //myListOfAvailableSockets.Add(new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp));
-            //myListOfAvailableSockets.Add(new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp));
+            foreach (Tuple<Socket, IPAddress, ConnectionItem> ci in _connectionItemList)
+            {
+                ipAddress = ci.Item2;
+                myListOfAvailableSockets.Add(new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp));
+            }
 
             int numberOfAvailableSockets = myListOfAvailableSockets.Count;
             int numberOfInitializedSockets = 0;
             myListOfSockets = new List<Socket>();
 
             // obs: parallel call:
-            Parallel.ForEach(myListOfAvailableSockets, (mySocket) =>
+            Parallel.ForEach(myListOfAvailableSockets, async (mySocket) =>
             {
                 bool rs = false;
                 if (!IsConnected(mySocket))
                 {
-                    rs = this.ConnectToSocket(mySocket);
+                    rs = await this.ConnectToSocket(mySocket);
                 }
                 if (rs)
                 {
                     ///// receiving the hello message /////
                     string response = this.ReceiveFromSocket(mySocket);
-                    System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::RunLCInitCommandMessage(): Socket { mySocket.Handle} got response: {response}");
+                    MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::RunLCInitCommand(): Socket { mySocket.Handle} got response: {response}");
 
                     myListOfSockets.Add(mySocket);
                     numberOfInitializedSockets++;
@@ -550,12 +580,12 @@ namespace Console_MVVMTesting.Models
 
             await Task.Delay(300);
 
-            System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::RunLCInitCommandMessage(): myListOfSockets.Count: {myListOfSockets.Count}");
+            MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::RunLCInitCommand(): myListOfSockets.Count: {myListOfSockets.Count}");
 
 
             if (numberOfInitializedSockets != numberOfAvailableSockets)
             {
-                System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::RunLCInitCommandMessage(): not all sockets have been initialized");
+                MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::RunLCInitCommand(): not all sockets have been initialized");
                 initResult = false;
             }
 
@@ -566,10 +596,10 @@ namespace Console_MVVMTesting.Models
             lcssm.SocketInitDict = myDictionary;
 
             // we are ready with initialize
-            System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::RunLCInitCommandMessage(): End of method with initResult: {initResult}  ({this.GetHashCode():x8})");
+            MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::RunLCInitCommand(): End of method with initResult: {initResult}  ({this.GetHashCode():x8})");
             return lcssm;
         }
-        #endregion RunLCInitCommandMessage
+        #endregion RunLCInitCommand
 
 
 
@@ -578,7 +608,7 @@ namespace Console_MVVMTesting.Models
         /// </summary>
         private void InitConnectionItemList(int numberOfSets)
         {
-            System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::InitConnectionItemList(): Start of method");
+            MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::InitConnectionItemList(): Start of method");
 
             // _connectionItemList defined on top
             _connectionItemList = new List<Tuple<Socket, IPAddress, ConnectionItem>>();
@@ -601,7 +631,7 @@ namespace Console_MVVMTesting.Models
             ConnectionItem _connectionItem8 = new ConnectionItem { Name = "LC8", Port = 42026, Host = _LC8Host };
             _connectionItems.Add(_connectionItem8);
 
-            //System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::InitConnectionItemList(): _connectionItems.Count: {_connectionItems.Count}");
+            //MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::InitConnectionItemList(): _connectionItems.Count: {_connectionItems.Count}");
 
             switch (numberOfSets)
             {
@@ -637,7 +667,7 @@ namespace Console_MVVMTesting.Models
                     break;
             }
 
-            System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::InitConnectionItemList(): _connectionItems.Count: {_connectionItems.Count}");
+            MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::InitConnectionItemList(): _connectionItems.Count: {_connectionItems.Count}");
 
             bool rs;
             Socket mySocket;
@@ -645,7 +675,7 @@ namespace Console_MVVMTesting.Models
             foreach (ConnectionItem ci in _connectionItems)
             {
                 rs = IPAddress.TryParse(ci.Host, out IPAddress ipAddress);
-                //System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::InitConnectionItemList(): rs: {rs}");
+                //MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::InitConnectionItemList(): rs: {rs}");
                 if (!rs)
                     return;
 
@@ -685,24 +715,25 @@ namespace Console_MVVMTesting.Models
                 _connectionItemList.Add(new Tuple<Socket, IPAddress, ConnectionItem>(mySocket, ipAddress, ci));
             }
 
+
             // sprawdzenie
-            System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::InitConnectionItemList(): connectionItemList.Count: {_connectionItemList.Count}");
+            MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::InitConnectionItemList(): connectionItemList.Count: {_connectionItemList.Count}");
             foreach (Tuple<Socket, IPAddress, ConnectionItem> ci in _connectionItemList)
             {
-                System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::InitConnectionItemList(): ci.Item1.Handle: {ci.Item1.Handle}");
-                System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::InitConnectionItemList(): ci.Item2: {ci.Item2}");
-                System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::InitConnectionItemList(): ci.Item3.Name: {ci.Item3.Name}");
+                MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::InitConnectionItemList(): socket.Handle: {ci.Item1.Handle}");
+                MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::InitConnectionItemList(): ipAddress: {ci.Item2}");
+                MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::InitConnectionItemList(): connection name: {ci.Item3.Name}");
             }
 
-            System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::InitConnectionItemList():  End of method");
+            MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::InitConnectionItemList():  End of method");
         }
 
 
         public LCSocket(int numberSets)
         {
-            System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::InitConnectionItemList():  Start of constructor");
+            MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::InitConnectionItemList():  Start of constructor");
             this.InitConnectionItemList(numberSets);
-            System.Diagnostics.Debug.WriteLine(consoleColor, $"LCSocketViewModel::InitConnectionItemList():  End of constructor");
+            MyUtils.MyConsoleWriteLine(consoleColor, $"LCSocket::InitConnectionItemList():  End of constructor");
         }
 
 

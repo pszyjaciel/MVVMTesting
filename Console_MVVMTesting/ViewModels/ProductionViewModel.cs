@@ -191,13 +191,22 @@ namespace Console_MVVMTesting.ViewModels
             _log.Log(consoleColor, "ProductionViewModel::InitLCSocketsTaskAsync(): Start of Task");
             bool rs = true;
 
+            IntPtr mySocketHandle;
+
             // Run init of sockets in the LCSocketViewModule and request result
-            LCSocketStateMessage trmsm = await _messenger.Send<LCSocketInitRequestMessage>();
-            foreach (KeyValuePair<IntPtr, Tuple<int, string>> entry in trmsm.SocketInitDict)
+            LCSocketStateMessage lcssm = await _messenger.Send<LCSocketInitRequestMessage>();
+            foreach (KeyValuePair<IntPtr, Tuple<int, string>> entry in lcssm.SocketInitDict)
             {
-                _log.Log(consoleColor, $"ProductionViewModel::InitLCSocketsTaskAsync(): socket {entry.Key}: {entry.Value}");
-                if (entry.Value.Item1 != 0) { rs = false; }
-                else { rs = true; }
+                mySocketHandle = entry.Key;
+                _log.Log(consoleColor, $"ProductionViewModel::InitLCSocketsTaskAsync(): socket {mySocketHandle}: {entry.Value}");
+                if (entry.Value.Item1 != 0)
+                {
+                    rs = false;
+                }
+                else
+                {
+                    rs = true;
+                }
             }
             _log.Log(consoleColor, "ProductionViewModel::InitLCSocketsTaskAsync(): End of Task");
             return rs;

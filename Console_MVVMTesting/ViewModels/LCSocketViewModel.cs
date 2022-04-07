@@ -32,8 +32,7 @@ namespace Console_MVVMTesting.ViewModels
         private readonly ILoggingService _log;
         private readonly IMessenger _messenger;
 
-        private readonly EastTesterViewModel _eastTesterViewModel;
-        private const string consoleColor = "DGREEN";
+        private const string consoleColor = "LMAGENTA";
 
 
         private const string _connectionItem_Name = "LC-connection";
@@ -157,16 +156,13 @@ namespace Console_MVVMTesting.ViewModels
 
 
 
-
-
-
         #region LCSocketInitAsync
         //this method should not return any value until all sockets have been initialized
         private async Task<LCSocketStateMessage> LCSocketInitAsync()
         {
             _log.Log(consoleColor, $"LCSocketViewModel::LCSocketInitAsync() - start of method");
 
-            LCSocketStateMessage lcssm = await Task.Run(lcs.RunLCInitCommandMessage);
+            LCSocketStateMessage lcssm = await Task.Run(lcs.RunLCInitCommand);
             
             //return new LCSocketStateMessage { MyStateName = "LCSocketViewModel", lcStatus = rs ? LCStatus.Success : LCStatus.Error };
             _log.Log(consoleColor, $"LCSocketViewModel::LCSocketInitAsync() - end of method");
@@ -304,16 +300,16 @@ namespace Console_MVVMTesting.ViewModels
         {
             _log.Log(consoleColor, $"LCSocketViewModel::LCSocketCheckBatteryCommand(): Start of method  ({this.GetHashCode():x8})");
 
-            Socket mySocket = new Socket(lcs.ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            //Socket mySocket = new Socket(lcs.ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
-            List<Socket> myListOfSockets = new List<Socket> { mySocket };
-            _log.Log(consoleColor, $"LCSocketViewModel::LCSocketCheckBatteryCommand(): myListOfSockets.Count: {myListOfSockets.Count}");
+            //List<Socket> myListOfSockets = new List<Socket> { mySocket };
+            //_log.Log(consoleColor, $"LCSocketViewModel::LCSocketCheckBatteryCommand(): myListOfSockets.Count: {myListOfSockets.Count}");
 
             Tuple<UInt16, UInt16> myTuple = new Tuple<UInt16, UInt16>(0xffff, 0xffff);
             LCSocketStateMessage lcssm = new LCSocketStateMessage();
             Dictionary<IntPtr, Tuple<UInt16, UInt16>> myBatteryStatusDict = new Dictionary<IntPtr, Tuple<ushort, ushort>>
             {
-                { mySocket.Handle, myTuple }
+                //{ mySocket.Handle, myTuple }
             };
 
             lcssm.BatteryStatusDict = myBatteryStatusDict;
@@ -334,13 +330,6 @@ namespace Console_MVVMTesting.ViewModels
 
             lcs = new LCSocket(1);      // w nawiasie jest ilosc setuf
 
-            //_connectionItem = new ConnectionItem();
-            //_connectionItem.Name = _connectionItem_Name;
-            //_connectionItem.Port = _connectionItem_Port;
-            //_connectionItem.Host = _connectionItem_Host;
-
-            //_ipAddress = new IPAddress(0);
-            commandQueue = new ConcurrentQueue<string>();
 
             _messenger.Register<LCSocketViewModel, LCSocketInitRequestMessage>(this, (myReceiver, myMessenger) =>
             {
